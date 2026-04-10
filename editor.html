@@ -1,0 +1,315 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>花卉資料編輯器</title>
+  <style>
+    :root {
+      --pink: #e91e8c; --pink-light: #fce4ec; --pink-mid: #f48fb1;
+      --pink-dark: #c2185b; --bg: #fff5f8; --border: #f8bbd0;
+      --radius: 10px; --shadow: 0 2px 10px rgba(233,30,140,0.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Microsoft JhengHei', sans-serif; background: var(--bg); color: #3d1a2e; padding: 24px 16px 60px; }
+
+    h1 { text-align: center; color: var(--pink-dark); font-size: 1.3rem; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: #9e6b7e; font-size: 0.85rem; margin-bottom: 24px; }
+
+    .table-wrap { overflow-x: auto; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    thead tr { background: linear-gradient(135deg, #c2185b, #e91e8c); color: #fff; }
+    th { padding: 11px 12px; font-size: 0.88rem; white-space: nowrap; text-align: left; }
+    td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--pink-light); }
+
+    .thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: #fce4ec; display: block; }
+    .flower-name { font-weight: 600; font-size: 0.9rem; color: var(--pink-dark); }
+
+    /* 一般 select（競賽分、取得方式） */
+    select {
+      padding: 6px 8px; border: 1.5px solid var(--pink-mid); border-radius: 7px;
+      font-size: 0.88rem; background: var(--bg); color: #3d1a2e;
+      outline: none; width: 100%; cursor: pointer;
+    }
+    select:focus { border-color: var(--pink); }
+
+    /* ── 自製品質下拉 ── */
+    .custom-select { position: relative; width: 90px; user-select: none; }
+
+    .cs-trigger {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 10px; border-radius: 7px; cursor: pointer;
+      font-size: 0.9rem; font-weight: 700; color: #fff;
+      border: none; width: 100%;
+    }
+    .cs-trigger::after { content: '▾'; font-size: 0.75rem; margin-left: 4px; }
+
+    .cs-dropdown {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0;
+      background: #fff; border: 1.5px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      z-index: 50; min-width: 100%;
+    }
+    .cs-dropdown.open { display: block; }
+
+    .cs-option {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 12px; cursor: pointer; font-size: 0.88rem; font-weight: 600;
+      transition: filter 0.15s;
+    }
+    .cs-option:hover { filter: brightness(0.92); }
+
+    .cs-dot {
+      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* 品質顏色定義 */
+    .q-仙 { background: linear-gradient(135deg,#ff4e8a,#ff8c42); }
+    .q-華 { background: linear-gradient(135deg,#ff8c00,#ffb347); }
+    .q-珍 { background: linear-gradient(135deg,#9b59b6,#c39bd3); }
+    .q-普 { background: linear-gradient(135deg,#4a90d9,#74b9ff); }
+    .q-凡 { background: linear-gradient(135deg,#7f8c6e,#a8b89a); }
+
+    .cs-option.q-仙 { background: linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
+    .cs-option.q-華 { background: linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
+    .cs-option.q-珍 { background: linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .cs-option.q-普 { background: linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
+    .cs-option.q-凡 { background: linear-gradient(135deg,#7f8c6e,#a8b89a); color:#fff; }
+
+    /* bottom bar */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; border-top: 1px solid var(--border);
+      padding: 12px 20px; display: flex; gap: 10px; justify-content: center;
+      box-shadow: 0 -2px 10px rgba(233,30,140,0.08);
+    }
+    .btn { padding: 9px 22px; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--pink); color: #fff; }
+    .btn-secondary { background: var(--pink-light); color: var(--pink-dark); border: 1.5px solid var(--pink-mid); }
+
+    /* modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: var(--radius); padding: 24px; width: min(90vw, 700px); max-height: 80vh; display: flex; flex-direction: column; gap: 12px; }
+    .modal h2 { color: var(--pink-dark); font-size: 1rem; }
+    .modal p { font-size: 0.82rem; color: #9e6b7e; }
+    textarea { flex: 1; min-height: 300px; font-family: monospace; font-size: 0.82rem; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px; resize: vertical; outline: none; color: #3d1a2e; }
+    .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+  </style>
+  <script src="flowers.js?v=3"></script>
+</head>
+<body>
+
+<h1>🌸 花卉資料編輯器</h1>
+<p class="subtitle">填寫每朵花的品質、競賽分、取得方式</p>
+
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+  <label style="font-size:0.9rem;font-weight:600;color:var(--pink-dark);">品質：</label>
+  <select id="qualityFilter" onchange="renderTable()" style="padding:7px 12px;border:1.5px solid var(--pink-mid);border-radius:8px;font-size:0.9rem;background:var(--bg);color:#3d1a2e;outline:none;cursor:pointer;width:auto;">
+    <option value="">全部</option>
+    <option value="仙">仙</option>
+    <option value="華">華</option>
+    <option value="珍">珍</option>
+    <option value="普">普</option>
+    <option value="凡">凡</option>
+  </select>
+  <label style="font-size:0.9rem;font-weight:600;color:var(--pink-dark);">取得方式：</label>
+  <select id="obtainFilter" onchange="renderTable()" style="padding:7px 12px;border:1.5px solid var(--pink-mid);border-radius:8px;font-size:0.9rem;background:var(--bg);color:#3d1a2e;outline:none;cursor:pointer;width:auto;">
+    <option value="">全部</option>
+    <option value="等級">等級</option>
+    <option value="活動">活動</option>
+    <option value="花圃">花圃</option>
+    <option value="花坊">花坊</option>
+    <option value="VIP">VIP</option>
+    <option value="週花">週花</option>
+    <option value="星河映蕊">星河映蕊</option>
+    <option value="花靈商店">花靈商店</option>
+    <option value="精靈花">精靈花</option>
+    <option value="卡冊">卡冊</option>
+    <option value="心聯盟">心聯盟</option>
+    <option value="累積儲值">累積儲值</option>
+  </select>
+  <span id="filterCount" style="font-size:0.85rem;color:#9e6b7e;"></span>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>縮圖</th>
+        <th>花名</th>
+        <th>品質</th>
+        <th>競賽分</th>
+        <th>取得方式</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" onclick="loadSaved()">↩ 還原上次儲存</button>
+  <button class="btn btn-secondary" onclick="saveData()">💾 儲存進度</button>
+  <button class="btn btn-primary" onclick="generateCode()">📋 產生程式碼</button>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalLabel">📋 複製以下內容</h2>
+    <p id="modalHint">全選後複製，覆蓋專案根目錄的 flowers.json 檔案即可。</p>
+    <textarea id="outputCode" readonly></textarea>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="copyCode()">複製</button>
+      <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FLOWER_LIST = (window.FLOWERS || []).map(f => f.name);
+
+const QUALITY_LIST = ["仙","華","珍","普","凡"];
+const SCORE_LIST   = [14, 21, 23, 25, 28, 30];
+const OBTAIN_LIST  = ["等級","活動","花圃","花坊","VIP","週花","星河映蕊","花靈商店","精靈花","卡冊","心聯盟","累積儲值"];
+
+let data = [];
+
+function initData() {
+  const saved = localStorage.getItem('flowerEditorData');
+  if (saved) {
+    data = JSON.parse(saved);
+    // 若存檔筆數少於 window.FLOWERS，代表有新花加入，補上缺少的
+    const savedIds = new Set(data.map(f => f.id));
+    (window.FLOWERS || []).forEach(f => {
+      if (!savedIds.has(f.id)) data.push(JSON.parse(JSON.stringify(f)));
+    });
+    // 依 id 排序
+    data.sort((a, b) => a.id - b.id);
+  } else {
+    data = JSON.parse(JSON.stringify(window.FLOWERS || []));
+  }
+}
+
+// ── 自製品質下拉 ──
+function buildQualitySelect(idx, current) {
+  const id = `qs-${idx}`;
+  const options = QUALITY_LIST.map(q => `
+    <div class="cs-option q-${q}" onclick="pickQuality(${idx},'${q}')">${q}</div>
+  `).join('');
+
+  return `
+    <div class="custom-select" id="${id}">
+      <button type="button" class="cs-trigger q-${current}" onclick="toggleQuality('${id}')">${current}</button>
+      <div class="cs-dropdown" id="${id}-dd">${options}</div>
+    </div>`;
+}
+
+function toggleQuality(id) {
+  // 關閉其他所有開著的
+  document.querySelectorAll('.cs-dropdown.open').forEach(dd => {
+    if (dd.id !== `${id}-dd`) dd.classList.remove('open');
+  });
+  document.getElementById(`${id}-dd`).classList.toggle('open');
+}
+
+function pickQuality(idx, value) {
+  data[idx].quality = value;
+  const id = `qs-${idx}`;
+  // 更新 trigger 文字與顏色
+  const trigger = document.querySelector(`#${id} .cs-trigger`);
+  trigger.textContent = value;
+  trigger.className = `cs-trigger q-${value}`;
+  // 關閉下拉
+  document.getElementById(`${id}-dd`).classList.remove('open');
+}
+
+// 點其他地方關閉所有下拉
+document.addEventListener('click', e => {
+  if (!e.target.closest('.custom-select')) {
+    document.querySelectorAll('.cs-dropdown.open').forEach(dd => dd.classList.remove('open'));
+  }
+});
+
+function renderTable() {
+  const qFilter = document.getElementById('qualityFilter').value;
+  const oFilter = document.getElementById('obtainFilter').value;
+  const filtered = data.reduce((acc, f, idx) => {
+    if ((!qFilter || f.quality === qFilter) && (!oFilter || f.obtain === oFilter))
+      acc.push({ f, idx });
+    return acc;
+  }, []);
+
+  document.getElementById('filterCount').textContent = `顯示 ${filtered.length} / ${data.length} 筆`;
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = filtered.map(({ f, idx }) => `
+    <tr>
+      <td><img class="thumb" src="${f.img}" alt="${f.name}" onerror="this.style.opacity=0.3"></td>
+      <td><div class="flower-name">${f.name}</div></td>
+      <td>${buildQualitySelect(idx, f.quality)}</td>
+      <td>
+        <select onchange="update(${idx},'score',Number(this.value))">
+          ${SCORE_LIST.map(s => `<option value="${s}" ${f.score===s?'selected':''}>${s} 分</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select onchange="update(${idx},'obtain',this.value)">
+          ${OBTAIN_LIST.map(o => `<option value="${o}" ${f.obtain===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function update(idx, field, value) {
+  data[idx][field] = value;
+}
+
+function saveData() {
+  localStorage.setItem('flowerEditorData', JSON.stringify(data));
+  alert('✅ 已儲存進度！');
+}
+
+function loadSaved() {
+  const saved = localStorage.getItem('flowerEditorData');
+  if (!saved) { alert('找不到儲存的資料'); return; }
+  data = JSON.parse(saved);
+  renderTable();
+}
+
+function generateCode() {
+  // 產生時把 owners 從 window.FLOWERS 原始資料補回來，避免被清空
+  const flowerMap = {};
+  (window.FLOWERS || []).forEach(f => { flowerMap[f.id] = f.owners || []; });
+  const output = data.map(f => ({ ...f, owners: flowerMap[f.id] ?? f.owners ?? [] }));
+  const json = JSON.stringify(output, null, 2);
+  document.getElementById('outputCode').value = `window.FLOWERS = ${json};`;
+  document.getElementById('modalLabel').textContent = '📋 複製以下內容，存成 flowers.js';
+  document.getElementById('modalHint').textContent = '全選複製後，將資料提供給yoyo做更新。';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function copyCode() {
+  const ta = document.getElementById('outputCode');
+  ta.select();
+  document.execCommand('copy');
+  alert('✅ 已複製！');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+initData();
+renderTable();
+</script>
+</body>
+</html>
