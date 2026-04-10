@@ -6,7 +6,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "花靈商店",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 2,
@@ -16,7 +18,8 @@
     "score": 28,
     "obtain": "活動",
     "owners": [
-      "gt02q9a9f05"
+      "gt02q9a9f05",
+      "gt01amfe756"
     ]
   },
   {
@@ -35,7 +38,9 @@
     "quality": "仙",
     "score": 30,
     "obtain": "花靈商店",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 5,
@@ -44,7 +49,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 6,
@@ -53,7 +60,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "星河映蕊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 7,
@@ -71,7 +80,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 9,
@@ -80,7 +91,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 10,
@@ -89,7 +102,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 11,
@@ -108,7 +123,8 @@
     "score": 28,
     "obtain": "活動",
     "owners": [
-      "gt02q9a9f05"
+      "gt02q9a9f05",
+      "gt01amfe756"
     ]
   },
   {
@@ -118,7 +134,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "卡冊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 14,
@@ -127,7 +145,9 @@
     "quality": "仙",
     "score": 30,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 15,
@@ -146,7 +166,8 @@
     "score": 28,
     "obtain": "活動",
     "owners": [
-      "gt02q9a9f05"
+      "gt02q9a9f05",
+      "gt01amfe756"
     ]
   },
   {
@@ -156,7 +177,9 @@
     "quality": "仙",
     "score": 30,
     "obtain": "花靈商店",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 18,
@@ -165,7 +188,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "卡冊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 19,
@@ -174,7 +199,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 20,
@@ -184,7 +211,8 @@
     "score": 28,
     "obtain": "活動",
     "owners": [
-      "gt02q9a9f05"
+      "gt02q9a9f05",
+      "gt01amfe756"
     ]
   },
   {
@@ -194,7 +222,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "卡冊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 22,
@@ -203,16 +233,19 @@
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 23,
-    "name": "葭月·棲舟泛漪",
-    "img": "../FlowerImage/仙/葭月·棲舟泛漪.jpg",
+    "name": "葭月·棲舟泛漪","img": "../FlowerImage/仙/葭月·棲舟泛漪.jpg",
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 24,
@@ -221,7 +254,9 @@
     "quality": "仙",
     "score": 30,
     "obtain": "累積儲值",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 25,
@@ -230,7 +265,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 26,
@@ -266,7 +303,9 @@
     "img": "../FlowerImage/華/夜藍香息.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 30,
@@ -275,7 +314,9 @@
     "img": "../FlowerImage/華/夢蝶花章.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 31,
@@ -284,7 +325,9 @@
     "img": "../FlowerImage/華/姑蘇雨蒙.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 32,
@@ -293,7 +336,9 @@
     "img": "../FlowerImage/華/寶珠玉蘭.jpg",
     "score": 25,
     "obtain": "星河映蕊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 33,
@@ -311,7 +356,9 @@
     "img": "../FlowerImage/華/幽藍逐影.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 35,
@@ -329,7 +376,9 @@
     "img": "../FlowerImage/華/搗蛋幽幽.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 37,
@@ -338,7 +387,9 @@
     "img": "../FlowerImage/華/星槎仙舟.jpg",
     "score": 25,
     "obtain": "累積儲值",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 38,
@@ -356,7 +407,9 @@
     "img": "../FlowerImage/華/映粉雲光月季.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 40,
@@ -374,7 +427,9 @@
     "img": "../FlowerImage/華/杏色春衫.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 42,
@@ -383,7 +438,9 @@
     "img": "../FlowerImage/華/杮杮如意.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 43,
@@ -392,7 +449,9 @@
     "img": "../FlowerImage/華/桃影浮瀾.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 44,
@@ -410,16 +469,19 @@
     "img": "../FlowerImage/華/歡鬧南瓜.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 46,
     "name": "沐光映黃月季",
     "quality": "華",
-    "img": "../FlowerImage/華/沐光映黃月季.jpg",
-    "score": 25,
+    "img": "../FlowerImage/華/沐光映黃月季.jpg","score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 47,
@@ -437,7 +499,9 @@
     "img": "../FlowerImage/華/火耀金丹.jpg",
     "score": 25,
     "obtain": "卡冊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 49,
@@ -446,7 +510,9 @@
     "img": "../FlowerImage/華/玉兔攬輝.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 50,
@@ -455,7 +521,9 @@
     "img": "../FlowerImage/華/玉玲瓏臘梅.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 51,
@@ -464,7 +532,9 @@
     "img": "../FlowerImage/華/玉蘭棲香.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 52,
@@ -473,7 +543,9 @@
     "img": "../FlowerImage/華/玫瑰小熊.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 53,
@@ -482,7 +554,9 @@
     "img": "../FlowerImage/華/珠匣橘芙蓉.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 54,
@@ -491,7 +565,9 @@
     "img": "../FlowerImage/華/珠匣粉芙蓉.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 55,
@@ -545,7 +621,9 @@
     "img": "../FlowerImage/華/瓊臺玉露.jpg",
     "score": 25,
     "obtain": "卡冊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 61,
@@ -554,7 +632,9 @@
     "img": "../FlowerImage/華/甜絨羊羊.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 62,
@@ -563,7 +643,9 @@
     "img": "../FlowerImage/華/白靈逐浪.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 63,
@@ -572,7 +654,9 @@
     "img": "../FlowerImage/華/竹映金輝.jpg",
     "score": 25,
     "obtain": "花靈商店",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 64,
@@ -599,7 +683,9 @@
     "img": "../FlowerImage/華/紙鳶探春.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 67,
@@ -608,7 +694,9 @@
     "img": "../FlowerImage/華/紫曜牡丹.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 68,
@@ -617,7 +705,9 @@
     "img": "../FlowerImage/華/紫靈福祿.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 69,
@@ -626,9 +716,10 @@
     "img": "../FlowerImage/華/花籠星語.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
-  },
-  {
+    "owners": [
+      "gt01amfe756"
+    ]
+  },{
     "id": 70,
     "name": "花籠流芳",
     "quality": "華",
@@ -644,7 +735,9 @@
     "img": "../FlowerImage/華/花籠瓊光.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 72,
@@ -653,7 +746,9 @@
     "img": "../FlowerImage/華/花露甜粥.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 73,
@@ -662,7 +757,9 @@
     "img": "../FlowerImage/華/芳蕊瓊漿.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 74,
@@ -689,7 +786,9 @@
     "img": "../FlowerImage/華/蝶影梅書.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 77,
@@ -698,7 +797,9 @@
     "img": "../FlowerImage/華/金纏腰.jpg",
     "score": 25,
     "obtain": "卡冊",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 78,
@@ -707,7 +808,9 @@
     "img": "../FlowerImage/華/霓光映樹.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 79,
@@ -725,7 +828,9 @@
     "img": "../FlowerImage/華/霽瀾牡丹.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 81,
@@ -743,7 +848,9 @@
     "img": "../FlowerImage/華/靈瑞仙桃.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 83,
@@ -752,7 +859,9 @@
     "img": "../FlowerImage/華/馥香花餅.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 84,
@@ -761,7 +870,9 @@
     "img": "../FlowerImage/華/馬上有福.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 85,
@@ -770,7 +881,9 @@
     "img": "../FlowerImage/華/馬上有財.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 86,
@@ -779,7 +892,9 @@
     "img": "../FlowerImage/華/馬上杮橙.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 87,
@@ -788,7 +903,9 @@
     "img": "../FlowerImage/華/魚燈映歲.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 88,
@@ -797,7 +914,9 @@
     "img": "../FlowerImage/華/鳶花芳集.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   },
   {
     "id": 89,
@@ -806,6 +925,8 @@
     "img": "../FlowerImage/華/鶴寄星河.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt01amfe756"
+    ]
   }
 ];
