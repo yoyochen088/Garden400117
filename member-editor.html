@@ -13,7 +13,7 @@
       --radius:10px; --shadow:0 2px 10px rgba(233,30,140,0.10);
     }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Microsoft JhengHei',sans-serif; background:var(--bg); color:#3d1a2e; padding:24px 16px 80px; }
+    body { font-family:'Microsoft JhengHei',sans-serif; background:var(--bg); color:#3d1a2e; padding:24px 16px 140px; }
 
     h1 { text-align:center; color:var(--pink-dark); font-size:1.3rem; margin-bottom:4px; }
     .subtitle { text-align:center; color:#9e6b7e; font-size:0.85rem; margin-bottom:20px; }
@@ -108,10 +108,11 @@
     /* ── bottom bar ── */
     .bottom-bar {
       position:fixed; bottom:0; left:0; right:0; background:#fff;
-      border-top:1px solid var(--border); padding:12px 20px;
-      display:flex; gap:10px; justify-content:center;
+      border-top:1px solid var(--border); padding:10px 12px;
+      display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
       box-shadow:0 -2px 10px rgba(233,30,140,0.08);
     }
+    .bottom-bar .btn { flex-shrink:0; padding:8px 14px; font-size:0.85rem; }
     .btn { padding:9px 22px; border-radius:8px; font-size:0.92rem; font-weight:600; cursor:pointer; border:none; transition:opacity 0.2s; }
     .btn:hover { opacity:0.85; }
     .btn-primary { background:var(--pink); color:#fff; }
@@ -181,7 +182,7 @@
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2>📋 複製並提供資料</h2>
-    <p>分別複製以下兩段內容，將資料提供給yoyo做更新。</p>
+    <p>分別複製以下兩段內容，將資料提供給蜜桃香檳做更新。</p>
     <div class="modal-files">
       <div class="modal-file-block">
         <label>members.js</label>
