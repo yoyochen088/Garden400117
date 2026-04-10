@@ -76,7 +76,9 @@ window.FLOWERS = [
     "quality": "仙",
     "score": 30,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt02q9a9f05"
+    ]
   },
   {
     "id": 8,
