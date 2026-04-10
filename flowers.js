@@ -29,7 +29,9 @@ window.FLOWERS = [
     "quality": "仙",
     "score": 28,
     "obtain": "心聯盟",
-    "owners": []
+    "owners": [
+      "gt02q9a9f05"
+    ]
   },
   {
     "id": 4,
@@ -39,6 +41,7 @@ window.FLOWERS = [
     "score": 30,
     "obtain": "花靈商店",
     "owners": [
+      "gt02q9a9f05",
       "gt01amfe756"
     ]
   },
@@ -50,6 +53,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt01amfe756"
     ]
   },
@@ -61,6 +65,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "星河映蕊",
     "owners": [
+      "gt02q9a9f05",
       "gt01amfe756"
     ]
   },
