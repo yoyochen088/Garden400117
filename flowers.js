@@ -1,4 +1,4 @@
-﻿window.FLOWERS = [
+window.FLOWERS = [
   {
     "id": 1,
     "name": "仙魅靈狐",
@@ -29,7 +29,9 @@
     "quality": "仙",
     "score": 28,
     "obtain": "心聯盟",
-    "owners": []
+    "owners": [
+      "gt02q9a9f05"
+    ]
   },
   {
     "id": 4,
@@ -239,7 +241,8 @@
   },
   {
     "id": 23,
-    "name": "葭月·棲舟泛漪","img": "../FlowerImage/仙/葭月·棲舟泛漪.jpg",
+    "name": "葭月·棲舟泛漪",
+    "img": "../FlowerImage/仙/葭月·棲舟泛漪.jpg",
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
@@ -477,7 +480,8 @@
     "id": 46,
     "name": "沐光映黃月季",
     "quality": "華",
-    "img": "../FlowerImage/華/沐光映黃月季.jpg","score": 25,
+    "img": "../FlowerImage/華/沐光映黃月季.jpg",
+    "score": 25,
     "obtain": "花圃",
     "owners": [
       "gt01amfe756"
@@ -719,7 +723,8 @@
     "owners": [
       "gt01amfe756"
     ]
-  },{
+  },
+  {
     "id": 70,
     "name": "花籠流芳",
     "quality": "華",
