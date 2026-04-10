@@ -182,20 +182,9 @@
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2>📋 複製並提供資料</h2>
-    <p>分別複製以下兩段內容，將資料提供給蜜桃香檳做更新。</p>
-    <div class="modal-files">
-      <div class="modal-file-block">
-        <label>members.js</label>
-        <textarea id="outMembers" readonly></textarea>
-      </div>
-      <div class="modal-file-block">
-        <label>flowers.js（owners 已更新）</label>
-        <textarea id="outFlowers" readonly></textarea>
-      </div>
-    </div>
+    <p>請將以下資料複製後傳給管理員更新。每段可單獨複製。</p>
+    <div class="modal-files" id="diffSections"></div>
     <div class="modal-btns">
-      <button class="btn btn-secondary" onclick="copyTA('outMembers')">複製 members.js</button>
-      <button class="btn btn-secondary" onclick="copyTA('outFlowers')">複製 flowers.js</button>
       <button class="btn btn-primary" onclick="closeModal()">關閉</button>
     </div>
   </div>
@@ -453,31 +442,64 @@ function loadSaved() {
   renderFlowerOwnership();
 }
 
-// ── 產生程式碼 ──
+// ── 產生程式碼（差異模式）──
 function generateCode() {
-  const activeMembers = members.filter(m => !m.left);
-  const managedGameIds = new Set(members.map(m => m.gameId)); // 所有人（含離開）的 gameId
+  const managedGameIds = new Set(members.map(m => m.gameId));
 
   const updatedFlowers = flowers.map(f => {
-    // 只有在職成員勾選的才加入
     const ownedByActive = members
       .filter((m, mi) => !m.left && ownership[mi] && ownership[mi].has(f.id))
       .map(m => m.gameId);
-
-    // 原始 owners 裡不屬於任何已知成員（含離開）的保留
-    // 屬於已知成員的：在職且勾選 → 保留；離開或未勾選 → 移除
     const originalOwners = (window.FLOWERS.find(wf => wf.id === f.id)?.owners) || [];
     const keptOwners = originalOwners.filter(o => !managedGameIds.has(o));
-
-    const merged = [...new Set([...keptOwners, ...ownedByActive])];
-    return { ...f, owners: merged };
+    return { ...f, owners: [...new Set([...keptOwners, ...ownedByActive])] };
   });
 
-  document.getElementById('outMembers').value =
-    `window.MEMBERS = ${JSON.stringify(members, null, 2)};`;
-  document.getElementById('outFlowers').value =
-    `window.FLOWERS = ${JSON.stringify(updatedFlowers, null, 2)};`;
+  // 找出有變動的花
+  const changed = updatedFlowers.filter(f => {
+    const orig = window.FLOWERS.find(wf => wf.id === f.id);
+    if (!orig) return true;
+    return JSON.stringify([...f.owners].sort()) !== JSON.stringify([...(orig.owners||[])].sort());
+  });
+
+  const membersChanged = JSON.stringify(members) !== JSON.stringify(window.MEMBERS || []);
+
+  const sections = document.getElementById('diffSections');
+  sections.innerHTML = '';
+
+  if (changed.length === 0 && !membersChanged) {
+    sections.innerHTML = '<p style="color:#9e6b7e;padding:12px;">✅ 沒有任何變動</p>';
+    document.getElementById('modalOverlay').classList.add('show');
+    return;
+  }
+
+  if (membersChanged) {
+    addDiffSection(sections, 'members 變動', `window.MEMBERS = ${JSON.stringify(members, null, 2)};`);
+  }
+
+  const CHUNK = 20;
+  for (let i = 0; i < changed.length; i += CHUNK) {
+    const chunk = changed.slice(i, i + CHUNK);
+    const label = changed.length <= CHUNK
+      ? `flowers 變動（${changed.length} 筆）`
+      : `flowers 變動 ${i+1}～${Math.min(i+CHUNK, changed.length)}／${changed.length} 筆`;
+    addDiffSection(sections, label, JSON.stringify(chunk, null, 2));
+  }
+
   document.getElementById('modalOverlay').classList.add('show');
+}
+
+function addDiffSection(container, label, content) {
+  const id = 'diff_' + Math.random().toString(36).slice(2);
+  const div = document.createElement('div');
+  div.className = 'modal-file-block';
+  div.innerHTML = `
+    <label style="display:flex;justify-content:space-between;align-items:center;">
+      <span>${label}</span>
+      <button class="btn btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="copyTA('${id}')">複製</button>
+    </label>
+    <textarea id="${id}" readonly style="min-height:100px;">${content}</textarea>`;
+  container.appendChild(div);
 }
 
 function copyTA(id) {
