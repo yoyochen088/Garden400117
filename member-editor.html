@@ -8,9 +8,9 @@
   <script src="members.js?v=3"></script>
   <style>
     :root {
-      --pink:#e91e8c; --pink-light:#fce4ec; --pink-mid:#f48fb1;
-      --pink-dark:#c2185b; --bg:#fff5f8; --border:#f8bbd0;
-      --radius:10px; --shadow:0 2px 10px rgba(233,30,140,0.10);
+      --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
+      --pink-dark:#c2510b; --bg:#fff8f5; --border:#f8d5b0;
+      --radius:10px; --shadow:0 2px 10px rgba(233,106,30,0.10);
     }
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:'Microsoft JhengHei',sans-serif; background:var(--bg); color:#3d1a2e; padding:24px 16px 140px; }
@@ -46,11 +46,11 @@
     .member-row .label { font-size:0.75rem; color:#9e6b7e; margin-bottom:3px; }
 
     .btn-del {
-      background:#fce4ec; color:#c2185b; border:1.5px solid var(--pink-mid);
+      background:#fef0e7; color:#c2510b; border:1.5px solid var(--pink-mid);
       border-radius:7px; padding:7px 12px; cursor:pointer; font-size:0.85rem;
       font-weight:600; white-space:nowrap; transition:background 0.2s;
     }
-    .btn-del:hover { background:#f48fb1; color:#fff; }
+    .btn-del:hover { background:#f4a46a; color:#fff; }
 
     .btn-add {
       display:flex; align-items:center; gap:6px;
@@ -87,7 +87,7 @@
 
     .flower-thumb {
       width:40px; height:40px; object-fit:cover; border-radius:6px;
-      border:1px solid var(--border); background:#fce4ec; flex-shrink:0;
+      border:1px solid var(--border); background:#fef0e7; flex-shrink:0;
     }
     .flower-info { flex:1; min-width:0; }
     .flower-info .fname { font-size:0.82rem; font-weight:600; color:#3d1a2e; line-height:1.3; }
@@ -110,7 +110,7 @@
       position:fixed; bottom:0; left:0; right:0; background:#fff;
       border-top:1px solid var(--border); padding:10px 12px;
       display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
-      box-shadow:0 -2px 10px rgba(233,30,140,0.08);
+      box-shadow:0 -2px 10px rgba(233,106,30,0.08);
     }
     .bottom-bar .btn { flex-shrink:0; padding:8px 14px; font-size:0.85rem; }
     .btn { padding:9px 22px; border-radius:8px; font-size:0.92rem; font-weight:600; cursor:pointer; border:none; transition:opacity 0.2s; }
@@ -270,7 +270,7 @@ function renderMemberList() {
           <input value="${m.gameId}" oninput="updateMember(${i},'gameId',this.value)" placeholder="遊戲 ID" ${isLeft?'disabled':''} style="${inputStyle}" />
         </div>
         <div>
-          <div class="label">暱稱 ${isLeft ? '<span style="color:#e91e8c;font-size:0.7rem;">（已離開）</span>' : ''}</div>
+          <div class="label">暱稱 ${isLeft ? '<span style="color:#e96a1e;font-size:0.7rem;">（已離開）</span>' : ''}</div>
           <input value="${m.nickname}" oninput="updateMember(${i},'nickname',this.value)" placeholder="暱稱" ${isLeft?'disabled':''} style="${inputStyle}" />
         </div>
         <div>
@@ -474,7 +474,22 @@ function generateCode() {
   }
 
   if (membersChanged) {
-    addDiffSection(sections, 'members 變動', `window.MEMBERS = ${JSON.stringify(members, null, 2)};`);
+    // members 差異：只輸出有變動的成員（新增、修改、離開標記）
+    const origMap = {};
+    (window.MEMBERS || []).forEach(m => { origMap[m.gameId] = m; });
+    const changedMembers = members.filter(m => {
+      const orig = origMap[m.gameId];
+      return !orig || JSON.stringify(orig) !== JSON.stringify(m);
+    });
+    // 也包含被刪除的（在原始裡有但現在沒有的）
+    const currentGameIds = new Set(members.map(m => m.gameId));
+    const removedMembers = (window.MEMBERS || [])
+      .filter(m => !currentGameIds.has(m.gameId))
+      .map(m => ({ ...m, _removed: true }));
+    const allMemberDiff = [...changedMembers, ...removedMembers];
+    if (allMemberDiff.length > 0) {
+      addDiffSection(sections, `members 變動（${allMemberDiff.length} 筆）`, JSON.stringify(allMemberDiff, null, 2));
+    }
   }
 
   const CHUNK = 20;
