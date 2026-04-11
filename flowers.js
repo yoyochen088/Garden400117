@@ -7,8 +7,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "花靈商店",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -138,8 +137,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "卡冊",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -193,8 +191,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "卡冊",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -250,8 +247,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "精靈花",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -273,8 +269,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "精靈花",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -284,7 +279,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/仙女散花.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt05v5cx0y4"
+    ]
   },
   {
     "id": 27,
@@ -542,7 +539,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt05v5cx0y4"
     ]
   },
   {
@@ -594,7 +592,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/珠寶之心.jpg",
     "score": 25,
     "obtain": "心聯盟",
-    "owners": []
+    "owners": [
+      "gt05v5cx0y4"
+    ]
   },
   {
     "id": 57,
@@ -642,7 +642,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt05v5cx0y4"
     ]
   },
   {
@@ -797,7 +798,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "週花",
     "owners": [
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt05v5cx0y4"
     ]
   },
   {
@@ -808,7 +810,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "卡冊",
     "owners": [
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt05v5cx0y4"
     ]
   },
   {
@@ -914,7 +917,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt05v5cx0y4"
     ]
   },
   {
