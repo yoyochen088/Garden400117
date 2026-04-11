@@ -7,8 +7,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "花靈商店",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -30,7 +29,9 @@ window.FLOWERS = [
     "quality": "仙",
     "score": 28,
     "obtain": "心聯盟",
-    "owners": []
+    "owners": [
+      "gt05v5cx0y4"
+    ]
   },
   {
     "id": 4,
@@ -136,8 +137,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "卡冊",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -191,8 +191,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "卡冊",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -248,8 +247,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "精靈花",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
@@ -271,8 +269,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "精靈花",
     "owners": [
-      "gt01amfe756",
-      "gt03v41hdry"
+      "gt01amfe756"
     ]
   },
   {
