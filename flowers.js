@@ -357,7 +357,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/尋蜜之心.jpg",
     "score": 25,
     "obtain": "心聯盟",
-    "owners": []
+    "owners": [
+      "gt05v5cx0y4"
+    ]
   },
   {
     "id": 34,
