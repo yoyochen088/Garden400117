@@ -619,7 +619,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/瑤光牡丹.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 59,
@@ -638,6 +640,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "卡冊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -649,6 +652,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756",
       "gt05v5cx0y4"
     ]
@@ -661,6 +665,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -672,6 +677,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花靈商店",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -682,7 +688,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/粉櫻蝶舞玫瑰.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 65,
@@ -691,7 +699,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/紅香妃臘梅.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 66,
@@ -701,6 +711,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -712,6 +723,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -734,6 +746,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "週花",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -744,7 +757,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/花籠流芳.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 71,
