@@ -390,7 +390,8 @@ window.FLOWERS = [
     "obtain": "心聯盟",
     "owners": [
       "gt036u0jwe0",
-      "gt05v5cx0y4"
+      "gt05v5cx0y4",
+      "gt05x36l4zx"
     ]
   },
   {
