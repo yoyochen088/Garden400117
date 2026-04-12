@@ -265,16 +265,9 @@ window.MEMBERS = [
     "left": false
   },
   {
-    "id": 39,
-    "gameId": "gt06njwwiab",
-    "nickname": "祥裗",
-    "note": "成員",
-    "left": false
-  },
-  {
-    "id": 40,
-    "gameId": "gt06jr5r51u",
-    "nickname": "MOMO餒",
+    "id": 41,
+    "gameId": "gt04szmr8cl",
+    "nickname": "吉梨蘿柚",
     "note": "成員",
     "left": false
   }
