@@ -556,6 +556,11 @@ function applyFilters() {
   if (sort === 'name_desc')  list.sort((a,b) => b.name.localeCompare(a.name, 'zh-TW'));
   if (sort === 'score_asc')  list.sort((a,b) => a.score - b.score);
   if (sort === 'score_desc') list.sort((a,b) => b.score - a.score);
+  const QUALITY_ORDER = {'\u4ed9':0,'\u83ef':1,'\u73cd':2,'\u666e':3,'\u51e1':4};
+  if (!sort) list.sort((a,b) => {
+    const qd = (QUALITY_ORDER[a.quality]??9) - (QUALITY_ORDER[b.quality]??9);
+    return qd !== 0 ? qd : (a.order??999) - (b.order??999);
+  });
 
   renderFlowers(list, ownerDisplay);
 }
@@ -613,10 +618,15 @@ function renderFlowers(list, ownerDisplay) {
 //  ID LIST
 // ════════════════════════════════════════════
 function renderIdTable() {
+  const ROLE_ORDER = { '會長':0, '副會長':1, '理事':2, '菁英':3, '成員':4 };
   const tbody = document.getElementById('idTableBody');
-  tbody.innerHTML = (window.MEMBERS || [])
+  const sorted = (window.MEMBERS || [])
     .filter(m => !m.left)
-    .map((m, i) => `
+    .sort((a, b) => {
+      const ro = (ROLE_ORDER[a.note] ?? 9) - (ROLE_ORDER[b.note] ?? 9);
+      return ro !== 0 ? ro : a.id - b.id;
+    });
+  tbody.innerHTML = sorted.map((m, i) => `
     <tr>
       <td>${i + 1}</td>
       <td>${m.nickname}</td>

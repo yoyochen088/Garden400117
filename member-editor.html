@@ -46,11 +46,11 @@
     .member-row .label { font-size:0.75rem; color:#9e6b7e; margin-bottom:3px; }
 
     .btn-del {
-      background:#fef0e7; color:#c2510b; border:1.5px solid var(--pink-mid);
+      background:#fce4ec; color:#c2185b; border:1.5px solid var(--pink-mid);
       border-radius:7px; padding:7px 12px; cursor:pointer; font-size:0.85rem;
       font-weight:600; white-space:nowrap; transition:background 0.2s;
     }
-    .btn-del:hover { background:#f4a46a; color:#fff; }
+    .btn-del:hover { background:#f48fb1; color:#fff; }
 
     .btn-add {
       display:flex; align-items:center; gap:6px;
@@ -87,7 +87,7 @@
 
     .flower-thumb {
       width:40px; height:40px; object-fit:cover; border-radius:6px;
-      border:1px solid var(--border); background:#fef0e7; flex-shrink:0;
+      border:1px solid var(--border); background:#fce4ec; flex-shrink:0;
     }
     .flower-info { flex:1; min-width:0; }
     .flower-info .fname { font-size:0.82rem; font-weight:600; color:#3d1a2e; line-height:1.3; }
@@ -166,6 +166,8 @@
       <option value="普">普</option>
       <option value="凡">凡</option>
     </select>
+    <input id="flowerSearch" type="text" placeholder="🔍 搜尋花名..." oninput="renderFlowerOwnership()"
+      style="padding:7px 12px;border:1.5px solid var(--pink-mid);border-radius:8px;font-size:0.9rem;background:var(--bg);color:#3d1a2e;outline:none;width:140px;">
     <span id="ownedCount" style="font-size:0.85rem;color:#9e6b7e;margin-left:8px;"></span>
   </div>
   <div class="flower-grid" id="flowerOwnerGrid"></div>
@@ -270,7 +272,7 @@ function renderMemberList() {
           <input value="${m.gameId}" oninput="updateMember(${i},'gameId',this.value)" placeholder="遊戲 ID" ${isLeft?'disabled':''} style="${inputStyle}" />
         </div>
         <div>
-          <div class="label">暱稱 ${isLeft ? '<span style="color:#e96a1e;font-size:0.7rem;">（已離開）</span>' : ''}</div>
+          <div class="label">暱稱 ${isLeft ? '<span style="color:#e91e8c;font-size:0.7rem;">（已離開）</span>' : ''}</div>
           <input value="${m.nickname}" oninput="updateMember(${i},'nickname',this.value)" placeholder="暱稱" ${isLeft?'disabled':''} style="${inputStyle}" />
         </div>
         <div>
@@ -361,8 +363,15 @@ function renderFlowerOwnership() {
   if (isNaN(mi) || !members[mi]) return;
   const owned = ownership[mi] || new Set();
   const qFilter = document.getElementById('qualityFilter').value;
+  const searchQ = (document.getElementById('flowerSearch')?.value || '').trim().toLowerCase();
 
-  const filtered = flowers.filter(f => !qFilter || f.quality === qFilter);
+  const filtered = flowers
+    .slice().sort((a,b) => {
+      const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
+      const qd = (QUALITY_ORDER[a.quality]??9) - (QUALITY_ORDER[b.quality]??9);
+      return qd !== 0 ? qd : (a.order??999) - (b.order??999);
+    })
+    .filter(f => (!qFilter || f.quality === qFilter) && (!searchQ || f.name.toLowerCase().includes(searchQ)));
 
   // 已擁有數跟著篩選品質計算
   const displayOwned = filtered.filter(f => owned.has(f.id)).length;

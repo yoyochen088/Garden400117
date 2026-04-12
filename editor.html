@@ -142,6 +142,7 @@
       <tr>
         <th>縮圖</th>
         <th>花名</th>
+        <th>顯示順序</th>
         <th>品質</th>
         <th>競賽分</th>
         <th>取得方式</th>
@@ -250,6 +251,11 @@ function renderTable() {
     <tr>
       <td><img class="thumb" src="${f.img}" alt="${f.name}" onerror="this.style.opacity=0.3"></td>
       <td><div class="flower-name">${f.name}</div></td>
+      <td>
+        <input type="number" min="1" value="${f.order ?? idx+1}"
+          onchange="update(${idx},'order',Number(this.value))"
+          style="width:60px;padding:6px 8px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:0.88rem;background:var(--bg);color:#3d1a2e;outline:none;">
+      </td>
       <td>${buildQualitySelect(idx, f.quality)}</td>
       <td>
         <select onchange="update(${idx},'score',Number(this.value))">
@@ -289,7 +295,7 @@ function generateCode() {
   const json = JSON.stringify(output, null, 2);
   document.getElementById('outputCode').value = `window.FLOWERS = ${json};`;
   document.getElementById('modalLabel').textContent = '📋 複製以下內容，存成 flowers.js';
-  document.getElementById('modalHint').textContent = '全選複製後，將資料提供給yoyo做更新。';
+  document.getElementById('modalHint').textContent = '全選複製後，將資料提供給蜜桃香檳做更新。';
   document.getElementById('modalOverlay').classList.add('show');
 }
 
