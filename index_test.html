@@ -252,6 +252,13 @@ async function loadFromSheets() {
       }
     });
 
+    // debug
+    console.log('flowers:', FLOWERS.length);
+    console.log('members:', MEMBERS.length);
+    console.log('ownership rows:', OWNERSHIP.length);
+    console.log('ownership sample:', OWNERSHIP.slice(0,3));
+    console.log('flower 1 owners:', FLOWERS[0]?.owners);
+
     dataLoaded = true;
     return true;
   } catch(e) {
