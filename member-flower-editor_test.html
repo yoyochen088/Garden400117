@@ -151,11 +151,8 @@ async function saveToSheet() {
   const btn = document.getElementById('saveBtn');
   btn.textContent = '⏳ 儲存中...'; btn.disabled = true;
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify({ action: 'updateOwnership', gameId: m.gameId, flowerIds: [...owned] })
-    });
+    const params = encodeURIComponent(JSON.stringify({ action: 'updateOwnership', gameId: m.gameId, flowerIds: [...owned] }));
+    await fetch(`${APPS_SCRIPT_URL}?data=${params}`, { mode: 'no-cors' });
     alert(`✅ ${m.nickname} 的花單已儲存！`);
   } catch(e) {
     alert('❌ 儲存失敗：' + e.message);
