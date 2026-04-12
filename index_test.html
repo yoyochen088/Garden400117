@@ -256,8 +256,9 @@ async function loadFromSheets() {
     console.log('flowers:', FLOWERS.length);
     console.log('members:', MEMBERS.length);
     console.log('ownership rows:', OWNERSHIP.length);
-    console.log('ownership sample:', OWNERSHIP.slice(0,3));
+    console.log('ownership sample:', JSON.stringify(OWNERSHIP.slice(0,3)));
     console.log('flower 1 owners:', FLOWERS[0]?.owners);
+    console.log('flower 1 id type:', typeof FLOWERS[0]?.id, FLOWERS[0]?.id);
 
     dataLoaded = true;
     return true;
