@@ -139,6 +139,7 @@ window.FLOWERS = [
     "owners": [
       "gt02q9a9f05",
       "gt01amfe756",
+      "gt02pm6iuwl",
       "gt02p08gn5g"
     ]
   },
@@ -403,7 +404,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt02pm6iuwl"
     ]
   },
   {
@@ -568,6 +570,7 @@ window.FLOWERS = [
       "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756",
+      "gt02pm6iuwl",
       "gt02p08gn5g",
       "gt02qrvgmyd"
     ]
@@ -709,7 +712,8 @@ window.FLOWERS = [
     "owners": [
       "gt02q9a9f05",
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt02pm6iuwl"
     ]
   },
   {
@@ -918,6 +922,7 @@ window.FLOWERS = [
       "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756",
+      "gt02pm6iuwl",
       "gt02p08gn5g",
       "gt05v5cx0y4",
       "gt05x36l4zx",
@@ -1004,6 +1009,7 @@ window.FLOWERS = [
       "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756",
+      "gt02pm6iuwl",
       "gt02p08gn5g"
     ]
   },
