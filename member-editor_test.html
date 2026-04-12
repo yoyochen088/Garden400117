@@ -66,10 +66,12 @@ async function loadMembers() {
     const res = await fetch(url);
     const data = await res.json();
     const rows = (data.values || []).slice(1);
+    console.log('rows from sheet:', rows.length, rows.slice(0,2));
     // 只顯示在職（left 欄為空或不存在）
     members = rows
       .filter(r => r[3] !== 'true')
       .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
+    console.log('active members:', members.length);
     renderList();
   } catch(e) {
     document.getElementById('memberList').innerHTML = `<div class="empty">❌ 載入失敗：${e.message}</div>`;
