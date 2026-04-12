@@ -7,7 +7,7 @@
   <script>
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFNC3q4JJFdxLnlQ2M2OgD8qVTIXrN1tZ6Y6rZQiUs2ku-Es9DkbWrlr-XT_3Rsgfu4Q/exec';
   const SHEET_ID = '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg';
-  const API_KEY  = 'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg';
+  const API_KEY  = 'YOUR_API_KEY_HERE';
   </script>
   <style>
     :root {
@@ -19,20 +19,13 @@
     body { font-family:'Microsoft JhengHei',sans-serif; background:var(--bg); color:#3d1a2e; padding:24px 16px 100px; }
     h1 { text-align:center; color:var(--pink-dark); font-size:1.3rem; margin-bottom:4px; }
     .subtitle { text-align:center; color:#9e6b7e; font-size:0.85rem; margin-bottom:16px; }
-    .tabs { display:flex; gap:8px; margin-bottom:16px; }
-    .tab { padding:8px 22px; border-radius:20px; font-size:0.92rem; font-weight:600; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--pink-light); color:var(--pink-dark); transition:all 0.2s; }
-    .tab.active { background:var(--pink); color:#fff; border-color:var(--pink); }
-    .panel { display:none; }
-    .panel.active { display:block; }
     .card { background:#fff; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:14px 16px; margin-bottom:10px; }
     .member-row { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:center; }
     .label { font-size:0.75rem; color:#9e6b7e; margin-bottom:3px; }
     input, select { padding:7px 10px; border:1.5px solid var(--pink-mid); border-radius:7px; font-size:0.9rem; background:var(--bg); color:#3d1a2e; outline:none; width:100%; }
     input:focus, select:focus { border-color:var(--pink); }
-    .btn-action { border-radius:7px; padding:7px 12px; cursor:pointer; font-size:0.85rem; font-weight:600; white-space:nowrap; border:1.5px solid; transition:opacity 0.2s; }
-    .btn-action:hover { opacity:0.8; }
-    .btn-leave { background:#fff3e0; color:#e65100; border-color:#ffcc80; }
-    .btn-restore { background:#e8f5e9; color:#2e7d32; border-color:#a5d6a7; }
+    .btn-remove { background:#fff3e0; color:#e65100; border:1.5px solid #ffcc80; border-radius:7px; padding:7px 12px; cursor:pointer; font-size:0.85rem; font-weight:600; white-space:nowrap; }
+    .btn-remove:hover { background:#ffe0b2; }
     .btn-add { display:flex; align-items:center; gap:6px; padding:9px 18px; background:var(--pink-light); color:var(--pink-dark); border:1.5px dashed var(--pink-mid); border-radius:var(--radius); font-size:0.92rem; font-weight:600; cursor:pointer; width:100%; justify-content:center; transition:background 0.2s; margin-top:4px; }
     .btn-add:hover { background:var(--pink-mid); color:#fff; }
     .loading { text-align:center; padding:40px; color:#9e6b7e; }
@@ -48,176 +41,124 @@
 <h1>👥 成員管理</h1>
 <p class="subtitle">資料直接從 Google Sheet 讀取與更新</p>
 
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('tab-active',this)">在職成員</button>
-  <button class="tab" onclick="switchTab('tab-left',this)">已離開</button>
-</div>
-
-<div id="tab-active" class="panel active">
-  <div id="activeList"><div class="loading">載入中...</div></div>
-  <button class="btn-add" onclick="addMember()">＋ 新增成員</button>
-</div>
-
-<div id="tab-left" class="panel">
-  <div id="leftList"><div class="empty">尚無已離開成員</div></div>
-</div>
+<div id="memberList"><div class="loading">載入中...</div></div>
+<button class="btn-add" onclick="addMember()">＋ 新增成員</button>
 
 <div class="bottom-bar">
   <button class="btn" style="background:#e96a1e;color:#fff;" onclick="loadMembers()">🔄 重新載入</button>
-  <button class="btn" style="background:#34a853;color:#fff;" id="saveBtn" onclick="saveAll()">💾 儲存變更</button>
+  <button class="btn" style="background:#34a853;color:#fff;" id="saveBtn" onclick="saveAll()">💾 儲存</button>
 </div>
 
 <script>
-let members = [];      // 從 Sheet 讀取
-let newMembers = [];   // 新增但尚未儲存的
-
-function switchTab(id, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
+// members：從 Sheet 讀取的在職成員
+// removed：本次操作中被移除的（按儲存才寫入 Sheet）
+// added：本次新增的
+let members = [];
+let removed = [];
+let added = [];
 
 async function loadMembers() {
-  document.getElementById('activeList').innerHTML = '<div class="loading">載入中...</div>';
+  document.getElementById('memberList').innerHTML = '<div class="loading">載入中...</div>';
+  removed = [];
+  added = [];
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:D?key=${API_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
-    const rows = data.values || [];
-    const headers = rows[0] || [];
-    members = rows.slice(1).map(row => ({
-      gameId:   row[0] || '',
-      nickname: row[1] || '',
-      note:     row[2] || '成員',
-      left:     row[3] === 'true'
-    }));
-    newMembers = [];
-    renderLists();
+    const rows = (data.values || []).slice(1);
+    // 只顯示在職（left 欄為空或不存在）
+    members = rows
+      .filter(r => r[3] !== 'true')
+      .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
+    renderList();
   } catch(e) {
-    document.getElementById('activeList').innerHTML = `<div class="empty">❌ 載入失敗：${e.message}</div>`;
+    document.getElementById('memberList').innerHTML = `<div class="empty">❌ 載入失敗：${e.message}</div>`;
   }
 }
 
-function renderLists() {
-  const active = members.filter(m => !m.left);
-  const left   = members.filter(m => m.left);
-
-  // 在職
-  const activeEl = document.getElementById('activeList');
-  const allActive = [...active, ...newMembers];
-  if (allActive.length === 0) {
-    activeEl.innerHTML = '<div class="empty">尚無在職成員</div>';
-  } else {
-    activeEl.innerHTML = allActive.map((m, i) => {
-      const isNew = i >= active.length;
-      return `
-      <div class="card">
-        <div class="member-row">
-          <div><div class="label">遊戲 ID</div>
-            <input value="${m.gameId}" oninput="updateMember('${isNew?'new':m.gameId}',${isNew?i-active.length:-1},'gameId',this.value)" placeholder="遊戲 ID" />
-          </div>
-          <div><div class="label">暱稱</div>
-            <input value="${m.nickname}" oninput="updateMember('${isNew?'new':m.gameId}',${isNew?i-active.length:-1},'nickname',this.value)" placeholder="暱稱" />
-          </div>
-          <div><div class="label">職位</div>
-            <select onchange="updateMember('${isNew?'new':m.gameId}',${isNew?i-active.length:-1},'note',this.value)">
-              ${["會長","副會長","理事","菁英","成員"].map(r=>`<option ${m.note===r?'selected':''}>${r}</option>`).join('')}
-            </select>
-          </div>
-          <div>
-            ${isNew
-              ? `<button class="btn-action" style="background:#fce4ec;color:#c2185b;border-color:#f48fb1;" onclick="removeNew(${i-active.length})">取消</button>`
-              : `<button class="btn-action btn-leave" onclick="leaveConfirm('${m.gameId}','${m.nickname}')">移除</button>`
-            }
-          </div>
-        </div>
-      </div>`;
-    }).join('');
+function renderList() {
+  const all = [...members, ...added];
+  const el = document.getElementById('memberList');
+  if (all.length === 0) {
+    el.innerHTML = '<div class="empty">尚無成員</div>';
+    return;
   }
-
-  // 已離開
-  const leftEl = document.getElementById('leftList');
-  if (left.length === 0) {
-    leftEl.innerHTML = '<div class="empty">尚無已離開成員</div>';
-  } else {
-    leftEl.innerHTML = left.map(m => `
-      <div class="card" style="opacity:0.6;">
-        <div class="member-row">
-          <div><div class="label">遊戲 ID</div><input value="${m.gameId}" disabled style="background:#eee;color:#999;" /></div>
-          <div><div class="label">暱稱</div><input value="${m.nickname}" disabled style="background:#eee;color:#999;" /></div>
-          <div><div class="label">職位</div><input value="${m.note}" disabled style="background:#eee;color:#999;" /></div>
-          <div><button class="btn-action btn-restore" onclick="restoreConfirm('${m.gameId}','${m.nickname}')">還原</button></div>
+  el.innerHTML = all.map((m, i) => {
+    const isAdded = i >= members.length;
+    return `
+    <div class="card">
+      <div class="member-row">
+        <div><div class="label">遊戲 ID</div>
+          <input value="${m.gameId}" oninput="update(${isAdded?'a':'m'},${isAdded?i-members.length:i},'gameId',this.value)" placeholder="遊戲 ID" />
         </div>
-      </div>`).join('');
-  }
+        <div><div class="label">暱稱</div>
+          <input value="${m.nickname}" oninput="update(${isAdded?'a':'m'},${isAdded?i-members.length:i},'nickname',this.value)" placeholder="暱稱" />
+        </div>
+        <div><div class="label">職位</div>
+          <select onchange="update(${isAdded?'a':'m'},${isAdded?i-members.length:i},'note',this.value)">
+            ${["會長","副會長","理事","菁英","成員"].map(r=>`<option ${m.note===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <button class="btn-remove" onclick="removeMember(${isAdded?'a':'m'},${isAdded?i-members.length:i},'${m.nickname||m.gameId}')">移除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function updateMember(gameId, newIdx, field, value) {
-  if (gameId === 'new') {
-    newMembers[newIdx][field] = value;
-  } else {
-    const m = members.find(m => m.gameId === gameId);
-    if (m) m[field] = value;
-  }
+function update(type, i, field, value) {
+  if (type === 'a') added[i][field] = value;
+  else members[i][field] = value;
 }
 
 function addMember() {
-  newMembers.push({ gameId: '', nickname: '', note: '成員', left: false });
-  renderLists();
+  added.push({ gameId: '', nickname: '', note: '成員' });
+  renderList();
 }
 
-function removeNew(i) {
-  newMembers.splice(i, 1);
-  renderLists();
-}
-
-async function leaveConfirm(gameId, nickname) {
-  if (!confirm(`確定將「${nickname}」移除？資料將移至「已離開」。`)) return;
-  await callScript({ action: 'deleteMember', gameId });
-  await new Promise(r => setTimeout(r, 1500)); // 等 Sheet 寫入
-  await loadMembers();
-  switchTab('tab-left', document.querySelectorAll('.tab')[1]);
-}
-
-async function restoreConfirm(gameId, nickname) {
-  if (!confirm(`確定還原「${nickname}」為在職成員？`)) return;
-  await callScript({ action: 'restoreMember', gameId });
-  await new Promise(r => setTimeout(r, 1500));
-  await loadMembers();
-  switchTab('tab-active', document.querySelectorAll('.tab')[0]);
+function removeMember(type, i, name) {
+  if (!confirm(`確定移除「${name}」？按儲存後才會正式從 Sheet 移除。`)) return;
+  if (type === 'a') {
+    added.splice(i, 1);
+  } else {
+    const [m] = members.splice(i, 1);
+    removed.push(m);
+  }
+  renderList();
 }
 
 async function saveAll() {
   const btn = document.getElementById('saveBtn');
   btn.textContent = '⏳ 儲存中...'; btn.disabled = true;
   try {
-    // 儲存所有在職成員 + 新增的（有 gameId 才儲存）
-    const toSave = [
-      ...members.filter(m => !m.left),
-      ...newMembers.filter(m => m.gameId.trim())
-    ];
-    if (toSave.length === 0) {
-      alert('沒有可儲存的成員（請確認遊戲 ID 已填寫）');
-      return;
-    }
-    await Promise.all(toSave.map(m =>
-      callScript({ action: 'updateMember', gameId: m.gameId.trim(), nickname: m.nickname, note: m.note, left: false })
-    ));
-    alert(`✅ 儲存完成！共 ${toSave.length} 筆`);
+    const tasks = [];
+    // 新增的成員
+    added.filter(m => m.gameId.trim()).forEach(m =>
+      tasks.push(callScript({ action: 'updateMember', gameId: m.gameId.trim(), nickname: m.nickname, note: m.note, left: false }))
+    );
+    // 修改的在職成員
+    members.forEach(m =>
+      tasks.push(callScript({ action: 'updateMember', gameId: m.gameId, nickname: m.nickname, note: m.note, left: false }))
+    );
+    // 移除的成員（標記 left=true）
+    removed.forEach(m =>
+      tasks.push(callScript({ action: 'deleteMember', gameId: m.gameId }))
+    );
+    await Promise.all(tasks);
+    await new Promise(r => setTimeout(r, 1500));
+    alert(`✅ 儲存完成！`);
     loadMembers();
   } catch(e) {
     alert('❌ 儲存失敗：' + e.message);
   } finally {
-    btn.textContent = '💾 儲存變更'; btn.disabled = false;
+    btn.textContent = '💾 儲存'; btn.disabled = false;
   }
 }
 
 async function callScript(data) {
-  // Apps Script 不支援 CORS POST，改用 GET + URL 參數
   const params = encodeURIComponent(JSON.stringify(data));
-  const url = `${APPS_SCRIPT_URL}?data=${params}`;
-  await fetch(url, { mode: 'no-cors' });
+  await fetch(`${APPS_SCRIPT_URL}?data=${params}`, { mode: 'no-cors' });
   return { ok: true };
 }
 
