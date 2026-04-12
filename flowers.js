@@ -725,7 +725,6 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花靈商店",
     "owners": [
-      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
