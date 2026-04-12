@@ -20,6 +20,7 @@ window.FLOWERS = [
     "obtain": "活動",
     "owners": [
       "gt02q9a9f05",
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -31,6 +32,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "心聯盟",
     "owners": [
+      "gt036u0jwe0",
       "gt05v5cx0y4"
     ]
   },
@@ -64,6 +66,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "星河映蕊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -84,6 +87,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "精靈花",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -95,6 +99,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "精靈花",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -116,7 +121,9 @@ window.FLOWERS = [
     "quality": "仙",
     "score": 28,
     "obtain": "精靈花",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 12,
@@ -138,6 +145,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "卡冊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756",
       "gt03v41hdry"
     ]
@@ -171,6 +179,7 @@ window.FLOWERS = [
     "obtain": "活動",
     "owners": [
       "gt02q9a9f05",
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -193,6 +202,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "卡冊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756",
       "gt03v41hdry"
     ]
@@ -217,6 +227,7 @@ window.FLOWERS = [
     "obtain": "活動",
     "owners": [
       "gt02q9a9f05",
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -228,6 +239,7 @@ window.FLOWERS = [
     "score": 28,
     "obtain": "卡冊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -262,6 +274,7 @@ window.FLOWERS = [
     "score": 30,
     "obtain": "累積儲值",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -285,6 +298,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt05v5cx0y4"
     ]
   },
@@ -295,7 +309,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/元氣破蛋.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 28,
@@ -304,7 +320,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/冰藍蝶舞玫瑰.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 29,
@@ -314,6 +332,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -325,6 +344,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "週花",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -336,6 +356,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -347,6 +368,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "星河映蕊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -358,6 +380,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "心聯盟",
     "owners": [
+      "gt036u0jwe0",
       "gt05v5cx0y4"
     ]
   },
@@ -379,7 +402,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/恬夢聖鈴.jpg",
     "score": 25,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 36,
@@ -400,6 +425,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "累積儲值",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -410,7 +436,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/星澤幽曇.jpg",
     "score": 25,
     "obtain": "花靈商店",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 39,
@@ -420,6 +448,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -430,7 +459,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/曜緋帝王花.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 41,
@@ -440,6 +471,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -451,6 +483,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -462,6 +495,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -472,7 +506,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/橙光拂曉月季.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 45,
@@ -493,6 +529,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -513,6 +550,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "卡冊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -535,6 +573,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -546,6 +585,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756",
       "gt05v5cx0y4"
     ]
@@ -558,6 +598,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -569,6 +610,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -580,6 +622,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -590,7 +633,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/珠匣紫芙蓉.jpg",
     "score": 25,
     "obtain": "花圃",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 56,
@@ -600,6 +645,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "心聯盟",
     "owners": [
+      "gt036u0jwe0",
       "gt05v5cx0y4"
     ]
   },
@@ -610,7 +656,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/琉藍帝王花.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 58,
@@ -769,6 +817,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "週花",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -780,6 +829,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -801,7 +851,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/葡萄紫牡丹菊.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 75,
@@ -810,7 +862,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/虹霞仙芝.jpg",
     "score": 25,
     "obtain": "花靈商店",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 76,
@@ -820,6 +874,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "週花",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756",
       "gt05v5cx0y4"
     ]
@@ -832,6 +887,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "卡冊",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756",
       "gt05v5cx0y4"
     ]
@@ -854,7 +910,9 @@ window.FLOWERS = [
     "img": "../FlowerImage/華/霞暉帝王花.jpg",
     "score": 25,
     "obtain": "週花",
-    "owners": []
+    "owners": [
+      "gt036u0jwe0"
+    ]
   },
   {
     "id": 80,
@@ -864,6 +922,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -884,6 +943,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -895,6 +955,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -906,6 +967,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -917,6 +979,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
@@ -939,6 +1002,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756",
       "gt05v5cx0y4"
     ]
@@ -951,6 +1015,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt036u0jwe0",
       "gt01amfe756"
     ]
   },
