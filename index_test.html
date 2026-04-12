@@ -216,11 +216,11 @@ async function loadFromSheets() {
     const fHeaders = flowersSheet.values[0];
     FLOWERS = flowersSheet.values.slice(1).map(row => {
       const f = {};
-      fHeaders.forEach((h, i) => { f[h] = row[i] || ''; });
+      fHeaders.forEach((h, i) => { f[h.toLowerCase()] = row[i] || ''; });
       f.id = Number(f.id);
       f.score = Number(f.score);
       f.order = Number(f.order) || 999;
-      f.owners = []; // 之後從 ownership 填入
+      f.owners = [];
       return f;
     });
 
@@ -228,15 +228,19 @@ async function loadFromSheets() {
     const mHeaders = membersSheet.values[0];
     MEMBERS = membersSheet.values.slice(1).map(row => {
       const m = {};
-      mHeaders.forEach((h, i) => { m[h] = row[i] || ''; });
+      mHeaders.forEach((h, i) => { m[h.toLowerCase()] = row[i] || ''; });
+      // 統一欄位名稱
+      m.gameId = m.gameid || m.gameId || '';
+      m.nickname = m.nickname || '';
+      m.note = m.note || '成員';
       return m;
     });
 
-    // 解析 ownership，填入 flowers.owners
+    // 解析 ownership
     const oHeaders = ownershipSheet.values[0];
     OWNERSHIP = ownershipSheet.values.slice(1).map(row => {
       const o = {};
-      oHeaders.forEach((h, i) => { o[h] = row[i] || ''; });
+      oHeaders.forEach((h, i) => { o[h.toLowerCase()] = row[i] || ''; });
       return o;
     });
 
@@ -244,17 +248,16 @@ async function loadFromSheets() {
     const flowerMap = {};
     FLOWERS.forEach(f => { flowerMap[f.id] = f; });
 
-    // 填入 owners（用 gameId）— 相容欄位名稱大小寫和順序
+    // 填入 owners — flowername 欄是數字(id)，flowerid 欄是花名
     OWNERSHIP.forEach(o => {
-      const gameId = o.gameId || o.gameid || o.GameId || '';
-      const flowerIdRaw = o.flowerId || o.flowerid || o.FlowerId || o.flowername || o.flowerName || '';
-      const flowerNameRaw = o.flowerName || o.flowername || o.flowerid || o.flowerId || '';
-      // 判斷哪個欄位是數字（id）哪個是文字（name）
-      const fid = Number(flowerIdRaw);
-      const fidFromName = Number(flowerNameRaw);
-      const actualId = !isNaN(fid) && fid > 0 ? fid : (!isNaN(fidFromName) && fidFromName > 0 ? fidFromName : 0);
-      if (flowerMap[actualId] && gameId) {
-        flowerMap[actualId].owners.push(gameId);
+      const gameId = o.gameid || '';
+      // 找數字欄位當 id
+      const idCandidate1 = Number(o.flowername);
+      const idCandidate2 = Number(o.flowerid);
+      const fid = (!isNaN(idCandidate1) && idCandidate1 > 0) ? idCandidate1
+                : (!isNaN(idCandidate2) && idCandidate2 > 0) ? idCandidate2 : 0;
+      if (flowerMap[fid] && gameId) {
+        flowerMap[fid].owners.push(gameId);
       }
     });
 
@@ -277,7 +280,11 @@ async function loadFromSheets() {
 // ── gameId → nickname ──
 function buildGameIdMap() {
   const map = {};
-  MEMBERS.forEach(m => { map[m.gameId] = m.nickname || m.gameId; });
+  MEMBERS.forEach(m => {
+    const id = m.gameId || m.gameid || '';
+    const nick = m.nickname || id;
+    if (id) map[id] = nick;
+  });
   return map;
 }
 
