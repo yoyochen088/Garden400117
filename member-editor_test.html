@@ -91,18 +91,18 @@ function renderList() {
     <div class="card">
       <div class="member-row">
         <div><div class="label">遊戲 ID</div>
-          <input value="${m.gameId}" oninput="update(${isAdded?'a':'m'},${isAdded?i-members.length:i},'gameId',this.value)" placeholder="遊戲 ID" />
+          <input value="${m.gameId}" oninput="update(${isAdded?1:0},${isAdded?i-members.length:i},'gameId',this.value)" placeholder="遊戲 ID" />
         </div>
         <div><div class="label">暱稱</div>
-          <input value="${m.nickname}" oninput="update(${isAdded?'a':'m'},${isAdded?i-members.length:i},'nickname',this.value)" placeholder="暱稱" />
+          <input value="${m.nickname}" oninput="update(${isAdded?1:0},${isAdded?i-members.length:i},'nickname',this.value)" placeholder="暱稱" />
         </div>
         <div><div class="label">職位</div>
-          <select onchange="update(${isAdded?'a':'m'},${isAdded?i-members.length:i},'note',this.value)">
+          <select onchange="update(${isAdded?1:0},${isAdded?i-members.length:i},'note',this.value)">
             ${["會長","副會長","理事","菁英","成員"].map(r=>`<option ${m.note===r?'selected':''}>${r}</option>`).join('')}
           </select>
         </div>
         <div>
-          <button class="btn-remove" onclick="removeMember(${isAdded?'a':'m'},${isAdded?i-members.length:i},'${m.nickname||m.gameId}')">移除</button>
+          <button class="btn-remove" onclick="removeMember(${isAdded?1:0},${isAdded?i-members.length:i},'${m.nickname||m.gameId}')">移除</button>
         </div>
       </div>
     </div>`;
@@ -110,7 +110,7 @@ function renderList() {
 }
 
 function update(type, i, field, value) {
-  if (type === 'a') added[i][field] = value;
+  if (type === 1) added[i][field] = value;
   else members[i][field] = value;
 }
 
@@ -121,7 +121,7 @@ function addMember() {
 
 function removeMember(type, i, name) {
   if (!confirm(`確定移除「${name}」？按儲存後才會正式從 Sheet 移除。`)) return;
-  if (type === 'a') {
+  if (type === 1) {
     added.splice(i, 1);
   } else {
     const [m] = members.splice(i, 1);
