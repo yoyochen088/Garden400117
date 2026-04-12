@@ -1,0 +1,600 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>成員編輯器 [測試版]</title>
+  <script src="flowers.js?v=3"></script>
+  <script src="members.js?v=3"></script>
+  <script>
+  // ════════════════════════════════════════════
+  //  Google Apps Script 設定
+  // ════════════════════════════════════════════
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFNC3q4JJFdxLnlQ2M2OgD8qVTIXrN1tZ6Y6rZQiUs2ku-Es9DkbWrlr-XT_3Rsgfu4Q/exec';
+  </script>
+  <style>
+    :root {
+      --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
+      --pink-dark:#c2510b; --bg:#fff8f5; --border:#f8d5b0;
+      --radius:10px; --shadow:0 2px 10px rgba(233,106,30,0.10);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Microsoft JhengHei',sans-serif; background:var(--bg); color:#3d1a2e; padding:24px 16px 140px; }
+
+    h1 { text-align:center; color:var(--pink-dark); font-size:1.3rem; margin-bottom:4px; }
+    .subtitle { text-align:center; color:#9e6b7e; font-size:0.85rem; margin-bottom:20px; }
+
+    /* ── TAB ── */
+    .tabs { display:flex; gap:8px; margin-bottom:20px; }
+    .tab {
+      padding:8px 22px; border-radius:20px; font-size:0.92rem; font-weight:600;
+      cursor:pointer; border:1.5px solid var(--pink-mid);
+      background:var(--pink-light); color:var(--pink-dark); transition:all 0.2s;
+    }
+    .tab.active { background:var(--pink); color:#fff; border-color:var(--pink); }
+
+    .panel { display:none; }
+    .panel.active { display:block; }
+
+    /* ── 成員清單 ── */
+    .card {
+      background:#fff; border-radius:var(--radius); border:1px solid var(--border);
+      box-shadow:var(--shadow); padding:16px 18px; margin-bottom:12px;
+    }
+    .member-row {
+      display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:center;
+    }
+    .member-row input {
+      padding:7px 10px; border:1.5px solid var(--pink-mid); border-radius:7px;
+      font-size:0.9rem; background:var(--bg); color:#3d1a2e; outline:none; width:100%;
+    }
+    .member-row input:focus { border-color:var(--pink); }
+    .member-row .label { font-size:0.75rem; color:#9e6b7e; margin-bottom:3px; }
+
+    .btn-del {
+      background:#fce4ec; color:#c2185b; border:1.5px solid var(--pink-mid);
+      border-radius:7px; padding:7px 12px; cursor:pointer; font-size:0.85rem;
+      font-weight:600; white-space:nowrap; transition:background 0.2s;
+    }
+    .btn-del:hover { background:#f48fb1; color:#fff; }
+
+    .btn-add {
+      display:flex; align-items:center; gap:6px;
+      padding:9px 18px; background:var(--pink-light); color:var(--pink-dark);
+      border:1.5px dashed var(--pink-mid); border-radius:var(--radius);
+      font-size:0.92rem; font-weight:600; cursor:pointer; width:100%;
+      justify-content:center; transition:background 0.2s; margin-top:4px;
+    }
+    .btn-add:hover { background:var(--pink-mid); color:#fff; }
+
+    /* ── 花卉擁有 ── */
+    .member-select {
+      display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap;
+    }
+    .member-select label { font-size:0.9rem; font-weight:600; color:var(--pink-dark); }
+    .member-select select {
+      padding:7px 12px; border:1.5px solid var(--pink-mid); border-radius:8px;
+      font-size:0.9rem; background:var(--bg); color:#3d1a2e; outline:none; cursor:pointer;
+    }
+    .member-select select:focus { border-color:var(--pink); }
+
+    .flower-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px;
+    }
+    .flower-check {
+      background:#fff; border:1.5px solid var(--border); border-radius:10px;
+      padding:10px 12px; display:flex; align-items:center; gap:10px;
+      cursor:pointer; transition:border-color 0.2s, background 0.2s;
+    }
+    .flower-check:hover { border-color:var(--pink-mid); background:var(--pink-light); }
+    .flower-check.owned { border-color:var(--pink); background:var(--pink-light); }
+
+    .flower-check input[type=checkbox] { display:none; }
+
+    .flower-thumb {
+      width:40px; height:40px; object-fit:cover; border-radius:6px;
+      border:1px solid var(--border); background:#fce4ec; flex-shrink:0;
+    }
+    .flower-info { flex:1; min-width:0; }
+    .flower-info .fname { font-size:0.82rem; font-weight:600; color:#3d1a2e; line-height:1.3; }
+
+    .badge-q {
+      display:inline-block; padding:1px 7px; border-radius:8px;
+      font-size:0.7rem; font-weight:700; color:#fff; margin-top:2px;
+    }
+    .q-仙 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); }
+    .q-華 { background:linear-gradient(135deg,#ff8c00,#ffb347); }
+    .q-珍 { background:linear-gradient(135deg,#9b59b6,#c39bd3); }
+    .q-普 { background:linear-gradient(135deg,#4a90d9,#74b9ff); }
+    .q-凡 { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
+
+    .check-icon { font-size:1.1rem; flex-shrink:0; opacity:0; transition:opacity 0.15s; }
+    .flower-check.owned .check-icon { opacity:1; }
+
+    /* ── bottom bar ── */
+    .bottom-bar {
+      position:fixed; bottom:0; left:0; right:0; background:#fff;
+      border-top:1px solid var(--border); padding:10px 12px;
+      display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
+      box-shadow:0 -2px 10px rgba(233,106,30,0.08);
+    }
+    .bottom-bar .btn { flex-shrink:0; padding:8px 14px; font-size:0.85rem; }
+    .btn { padding:9px 22px; border-radius:8px; font-size:0.92rem; font-weight:600; cursor:pointer; border:none; transition:opacity 0.2s; }
+    .btn:hover { opacity:0.85; }
+    .btn-primary { background:var(--pink); color:#fff; }
+    .btn-secondary { background:var(--pink-light); color:var(--pink-dark); border:1.5px solid var(--pink-mid); }
+
+    /* ── modal ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal { background:#fff; border-radius:var(--radius); padding:24px; width:min(90vw,700px); max-height:80vh; display:flex; flex-direction:column; gap:12px; }
+    .modal h2 { color:var(--pink-dark); font-size:1rem; }
+    .modal p { font-size:0.82rem; color:#9e6b7e; }
+    .modal-files { display:flex; flex-direction:column; gap:10px; flex:1; overflow:auto; }
+    .modal-file-block { display:flex; flex-direction:column; gap:4px; }
+    .modal-file-block label { font-size:0.8rem; font-weight:700; color:var(--pink-dark); }
+    textarea { min-height:140px; font-family:monospace; font-size:0.78rem; border:1.5px solid var(--border); border-radius:8px; padding:10px; resize:vertical; outline:none; color:#3d1a2e; }
+    .modal-btns { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+
+    @media(max-width:600px) {
+      .member-row { grid-template-columns:1fr 1fr; }
+      .member-row .del-col { grid-column:span 2; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>🌸 成員編輯器</h1>
+<p class="subtitle">管理公會成員資料，並記錄每位成員擁有的花卉</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('tab-members', this)">👥 成員清單</button>
+  <button class="tab" onclick="switchTab('tab-flowers', this)">🌸 花卉擁有</button>
+</div>
+
+<!-- ══ 成員清單 ══ -->
+<div id="tab-members" class="panel active">
+  <div id="memberList"></div>
+  <button class="btn-add" onclick="addMember()">＋ 新增成員</button>
+</div>
+
+<!-- ══ 花卉擁有 ══ -->
+<div id="tab-flowers" class="panel">
+  <div class="member-select">
+    <label>選擇成員：</label>
+    <select id="memberPicker" onchange="renderFlowerOwnership()"></select>
+    <label style="margin-left:12px;">品質：</label>
+    <select id="qualityFilter" onchange="renderFlowerOwnership()">
+      <option value="">全部</option>
+      <option value="仙">仙</option>
+      <option value="華">華</option>
+      <option value="珍">珍</option>
+      <option value="普">普</option>
+      <option value="凡">凡</option>
+    </select>
+    <input id="flowerSearch" type="text" placeholder="🔍 搜尋花名..." oninput="renderFlowerOwnership()"
+      style="padding:7px 12px;border:1.5px solid var(--pink-mid);border-radius:8px;font-size:0.9rem;background:var(--bg);color:#3d1a2e;outline:none;width:140px;">
+    <span id="ownedCount" style="font-size:0.85rem;color:#9e6b7e;margin-left:8px;"></span>
+  </div>
+  <div class="flower-grid" id="flowerOwnerGrid"></div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn btn-secondary" onclick="resetData()">🔄 重置資料</button>
+  <button class="btn btn-secondary" onclick="loadSaved()">↩ 還原上次儲存</button>
+  <button class="btn btn-secondary" onclick="saveData()">💾 儲存進度</button>
+  <button class="btn btn-primary" onclick="generateCode()">📋 產生程式碼</button>
+  <button class="btn" style="background:#34a853;color:#fff;" onclick="saveToSheet()">📊 儲存到 Sheet</button>
+</div>
+
+<!-- modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>📋 複製並提供資料</h2>
+    <p>請將以下資料複製後傳給管理員更新。每段可單獨複製。</p>
+    <div class="modal-files" id="diffSections"></div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 資料 ──
+let members = [];   // { id, gameId, nickname, note }
+let flowers = [];   // 從 window.FLOWERS，含 owners
+// ownership[memberIdx] = Set of flower ids
+let ownership = {};
+
+function initData() {
+  // flowers 永遠從 flowers.js 取最新版
+  flowers = JSON.parse(JSON.stringify(window.FLOWERS || []));
+
+  const saved = localStorage.getItem('memberEditorData');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    // version < 3 代表舊格式，強制重建
+    if (!parsed.version || parsed.version < 3) {
+      localStorage.removeItem('memberEditorData');
+      initFromFlowers();
+      return;
+    }
+    members   = parsed.members;
+    ownership = {};
+    Object.keys(parsed.ownership).forEach(k => {
+      ownership[k] = new Set(parsed.ownership[k].map(Number));
+    });
+  } else {
+    initFromFlowers();
+  }
+}
+
+function initFromFlowers() {
+  members = JSON.parse(JSON.stringify(window.MEMBERS || []));
+  // 建立 gameId → memberIndex 和 nickname → memberIndex 的對應
+  const gameIdToIdx = {};
+  const nickToIdx = {};
+  members.forEach((m, mi) => {
+    gameIdToIdx[m.gameId] = mi;
+    nickToIdx[m.nickname] = mi;
+    ownership[mi] = new Set();
+  });
+  // owners 可能是 gameId 或舊暱稱，兩種都支援
+  flowers.forEach(f => {
+    (f.owners || []).forEach(o => {
+      const mi = gameIdToIdx[o] ?? nickToIdx[o];
+      if (mi !== undefined) ownership[mi].add(f.id);
+    });
+  });
+}
+
+// ── Tab ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'tab-flowers') {
+    refreshMemberPicker();
+    renderFlowerOwnership();
+  }
+}
+
+// ── 成員清單 ──
+function renderMemberList() {
+  const el = document.getElementById('memberList');
+  if (members.length === 0) {
+    el.innerHTML = '<p style="color:#9e6b7e;font-size:0.9rem;margin-bottom:12px;">尚無成員，請點下方新增。</p>';
+    return;
+  }
+  el.innerHTML = members.map((m, i) => {
+    const isLeft = !!m.left;
+    const cardStyle = isLeft ? 'opacity:0.5;background:#f5f5f5;' : '';
+    const inputStyle = isLeft ? 'background:#eee;color:#999;' : '';
+    return `
+    <div class="card" style="${cardStyle}">
+      <div class="member-row">
+        <div>
+          <div class="label">遊戲 ID</div>
+          <input value="${m.gameId}" oninput="updateMember(${i},'gameId',this.value)" placeholder="遊戲 ID" ${isLeft?'disabled':''} style="${inputStyle}" />
+        </div>
+        <div>
+          <div class="label">暱稱 ${isLeft ? '<span style="color:#e91e8c;font-size:0.7rem;">（已離開）</span>' : ''}</div>
+          <input value="${m.nickname}" oninput="updateMember(${i},'nickname',this.value)" placeholder="暱稱" ${isLeft?'disabled':''} style="${inputStyle}" />
+        </div>
+        <div>
+          <div class="label">職位</div>
+          <select onchange="updateMember(${i},'note',this.value)" ${isLeft?'disabled':''} style="padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:0.9rem;background:${isLeft?'#eee':'var(--bg)'};color:${isLeft?'#999':'#3d1a2e'};outline:none;width:100%;">
+            ${["會長","副會長","理事","菁英","成員"].map(r =>
+              `<option value="${r}" ${m.note===r?'selected':''}>${r}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="del-col" style="display:flex;gap:6px;">
+          ${isLeft
+            ? `<button class="btn-del" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;" onclick="restoreMember(${i})">還原</button>`
+            : `<button class="btn-del" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;" onclick="markLeft(${i})">離開</button>
+               <button class="btn-del" onclick="deleteMember(${i})">刪除</button>`
+          }
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markLeft(i) {
+  if (!confirm(`確定將「${members[i].nickname || members[i].gameId}」標記為已離開？\n此成員的花單資料將不再顯示，ID 永久保留。`)) return;
+  members[i].left = true;
+  renderMemberList();
+}
+
+function restoreMember(i) {
+  members[i].left = false;
+  renderMemberList();
+}
+
+function updateMember(i, field, value) {
+  members[i][field] = value;
+}
+
+function addMember() {
+  // ID 永遠取所有已存在 + 曾被刪除的最大值 +1，絕不重用
+  const usedIds = [
+    ...members.map(m => m.id),
+    ...(window._deletedIds ? [...window._deletedIds] : [])
+  ];
+  const newId = usedIds.length ? Math.max(...usedIds) + 1 : 1;
+  const newIdx = members.length;
+  members.push({ id: newId, gameId: '', nickname: '', note: '成員', left: false });
+  ownership[newIdx] = new Set();
+  renderMemberList();
+}
+
+function deleteMember(i) {
+  const m = members[i];
+  // 檢查這個成員是否有花單資料
+  const hasFlowers = ownership[i] && ownership[i].size > 0;
+  if (hasFlowers) {
+    alert(`「${m.nickname || m.gameId}」有花單資料，無法直接刪除。\n請改用「離開」按鈕標記為已離開。`);
+    return;
+  }
+  if (!confirm(`確定刪除「${m.nickname || m.gameId || '此成員'}」？\n此操作無法復原。`)) return;
+  // 記錄被刪除的 id，避免重用
+  if (!window._deletedIds) window._deletedIds = new Set();
+  window._deletedIds.add(m.id);
+
+  members.splice(i, 1);
+  const newOwnership = {};
+  members.forEach((_, ni) => {
+    const oldIdx = ni < i ? ni : ni + 1;
+    newOwnership[ni] = ownership[oldIdx] || new Set();
+  });
+  ownership = newOwnership;
+  renderMemberList();
+}
+
+// ── 花卉擁有 ──
+function refreshMemberPicker() {
+  const sel = document.getElementById('memberPicker');
+  const prev = sel.value;
+  sel.innerHTML = members
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => !m.left)
+    .map(({ m, i }) => `<option value="${i}">${m.nickname || m.gameId || `成員${i+1}`}</option>`)
+    .join('');
+  if (prev && members[prev] && !members[prev].left) sel.value = prev;
+}
+
+function renderFlowerOwnership() {
+  const mi = parseInt(document.getElementById('memberPicker').value);
+  if (isNaN(mi) || !members[mi]) return;
+  const owned = ownership[mi] || new Set();
+  const qFilter = document.getElementById('qualityFilter').value;
+  const searchQ = (document.getElementById('flowerSearch')?.value || '').trim().toLowerCase();
+
+  const filtered = flowers
+    .slice().sort((a,b) => {
+      const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
+      const qd = (QUALITY_ORDER[a.quality]??9) - (QUALITY_ORDER[b.quality]??9);
+      return qd !== 0 ? qd : (a.order??999) - (b.order??999);
+    })
+    .filter(f => (!qFilter || f.quality === qFilter) && (!searchQ || f.name.toLowerCase().includes(searchQ)));
+
+  // 已擁有數跟著篩選品質計算
+  const displayOwned = filtered.filter(f => owned.has(f.id)).length;
+  document.getElementById('ownedCount').textContent =
+    qFilter
+      ? `已擁有 ${displayOwned} / ${filtered.length} 種${qFilter}品`
+      : `已擁有 ${displayOwned} / ${filtered.length} 種`;
+
+  const grid = document.getElementById('flowerOwnerGrid');
+  grid.innerHTML = filtered.map(f => {
+    const isOwned = owned.has(f.id);
+    const thumb = f.img
+      ? `<img class="flower-thumb" src="${f.img}" alt="${f.name}" onerror="this.style.opacity=0.3">`
+      : `<div class="flower-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🌸</div>`;
+    return `
+      <label class="flower-check ${isOwned ? 'owned' : ''}">
+        <input type="checkbox" ${isOwned ? 'checked' : ''} onchange="toggleOwn(${mi},${f.id},this)">
+        ${thumb}
+        <div class="flower-info">
+          <div class="fname">${f.name}</div>
+          <span class="badge-q q-${f.quality}">${f.quality}</span>
+        </div>
+        <span class="check-icon">✓</span>
+      </label>`;
+  }).join('');
+}
+
+function toggleOwn(mi, flowerID, checkbox) {
+  const el = checkbox.closest('.flower-check');
+  if (!ownership[mi]) ownership[mi] = new Set();
+  if (ownership[mi].has(flowerID)) {
+    ownership[mi].delete(flowerID);
+    el.classList.remove('owned');
+  } else {
+    ownership[mi].add(flowerID);
+    el.classList.add('owned');
+  }
+  const qFilter = document.getElementById('qualityFilter').value;
+  const filtered = flowers.filter(f => !qFilter || f.quality === qFilter);
+  const displayOwned = filtered.filter(f => ownership[mi].has(f.id)).length;
+  document.getElementById('ownedCount').textContent =
+    qFilter
+      ? `已擁有 ${displayOwned} / ${filtered.length} 種${qFilter}品`
+      : `已擁有 ${displayOwned} / ${filtered.length} 種`;
+}
+
+// ── 儲存 / 還原 ──
+function resetData() {
+  if (!confirm('確定重置？將清除所有暫存資料，從 flowers.js / members.js 重新讀取。')) return;
+  localStorage.removeItem('memberEditorData');
+  ownership = {};
+  initFromFlowers();
+  renderMemberList();
+  refreshMemberPicker();
+  renderFlowerOwnership();
+  alert('✅ 已重置！');
+}
+
+function saveData() {
+  const serialOwnership = {};
+  Object.keys(ownership).forEach(k => { serialOwnership[k] = [...ownership[k]]; });
+  localStorage.setItem('memberEditorData', JSON.stringify({ version: 3, members, ownership: serialOwnership }));
+  alert('✅ 已儲存進度！');
+}
+
+function loadSaved() {
+  const saved = localStorage.getItem('memberEditorData');
+  if (!saved) { alert('找不到儲存的資料'); return; }
+  const parsed = JSON.parse(saved);
+  members   = parsed.members;
+  // flowers 永遠從 window.FLOWERS 取最新
+  flowers   = JSON.parse(JSON.stringify(window.FLOWERS || []));
+  ownership = {};
+  Object.keys(parsed.ownership).forEach(k => { ownership[k] = new Set(parsed.ownership[k]); });
+  renderMemberList();
+  refreshMemberPicker();
+  renderFlowerOwnership();
+}
+
+// ── 產生程式碼（差異模式）──
+function generateCode() {
+  const managedGameIds = new Set(members.map(m => m.gameId));
+
+  const updatedFlowers = flowers.map(f => {
+    const ownedByActive = members
+      .filter((m, mi) => !m.left && ownership[mi] && ownership[mi].has(f.id))
+      .map(m => m.gameId);
+    const originalOwners = (window.FLOWERS.find(wf => wf.id === f.id)?.owners) || [];
+    const keptOwners = originalOwners.filter(o => !managedGameIds.has(o));
+    return { ...f, owners: [...new Set([...keptOwners, ...ownedByActive])] };
+  });
+
+  // 找出有變動的花
+  const changed = updatedFlowers.filter(f => {
+    const orig = window.FLOWERS.find(wf => wf.id === f.id);
+    if (!orig) return true;
+    return JSON.stringify([...f.owners].sort()) !== JSON.stringify([...(orig.owners||[])].sort());
+  });
+
+  const membersChanged = JSON.stringify(members) !== JSON.stringify(window.MEMBERS || []);
+
+  const sections = document.getElementById('diffSections');
+  sections.innerHTML = '';
+
+  if (changed.length === 0 && !membersChanged) {
+    sections.innerHTML = '<p style="color:#9e6b7e;padding:12px;">✅ 沒有任何變動</p>';
+    document.getElementById('modalOverlay').classList.add('show');
+    return;
+  }
+
+  if (membersChanged) {
+    // members 差異：只輸出有變動的成員（新增、修改、離開標記）
+    const origMap = {};
+    (window.MEMBERS || []).forEach(m => { origMap[m.gameId] = m; });
+    const changedMembers = members.filter(m => {
+      const orig = origMap[m.gameId];
+      return !orig || JSON.stringify(orig) !== JSON.stringify(m);
+    });
+    // 也包含被刪除的（在原始裡有但現在沒有的）
+    const currentGameIds = new Set(members.map(m => m.gameId));
+    const removedMembers = (window.MEMBERS || [])
+      .filter(m => !currentGameIds.has(m.gameId))
+      .map(m => ({ ...m, _removed: true }));
+    const allMemberDiff = [...changedMembers, ...removedMembers];
+    if (allMemberDiff.length > 0) {
+      addDiffSection(sections, `members 變動（${allMemberDiff.length} 筆）`, JSON.stringify(allMemberDiff, null, 2));
+    }
+  }
+
+  const CHUNK = 20;
+  for (let i = 0; i < changed.length; i += CHUNK) {
+    const chunk = changed.slice(i, i + CHUNK);
+    const label = changed.length <= CHUNK
+      ? `flowers 變動（${changed.length} 筆）`
+      : `flowers 變動 ${i+1}～${Math.min(i+CHUNK, changed.length)}／${changed.length} 筆`;
+    addDiffSection(sections, label, JSON.stringify(chunk, null, 2));
+  }
+
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function addDiffSection(container, label, content) {
+  const id = 'diff_' + Math.random().toString(36).slice(2);
+  const div = document.createElement('div');
+  div.className = 'modal-file-block';
+  div.innerHTML = `
+    <label style="display:flex;justify-content:space-between;align-items:center;">
+      <span>${label}</span>
+      <button class="btn btn-secondary" style="padding:3px 10px;font-size:0.78rem;" onclick="copyTA('${id}')">複製</button>
+    </label>
+    <textarea id="${id}" readonly style="min-height:100px;">${content}</textarea>`;
+  container.appendChild(div);
+}
+
+function copyTA(id) {
+  const ta = document.getElementById(id);
+  ta.select();
+  document.execCommand('copy');
+  alert('✅ 已複製！');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ── 儲存到 Google Sheet ──
+async function saveToSheet() {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    alert('請先在 member-editor_test.html 頂部填入 APPS_SCRIPT_URL');
+    return;
+  }
+
+  const mi = parseInt(document.getElementById('memberPicker').value);
+  if (isNaN(mi) || !members[mi]) {
+    alert('請先在「花卉擁有」頁面選擇成員');
+    return;
+  }
+
+  const m = members[mi];
+  const owned = ownership[mi] || new Set();
+  const flowerIds = [...owned]; // 這個成員擁有的所有 flower id
+
+  const btn = document.querySelector('[onclick="saveToSheet()"]');
+  btn.textContent = '⏳ 儲存中...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'updateOwnership',
+        gameId: m.gameId,
+        flowerIds
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert(`✅ ${m.nickname} 的花單已儲存到 Google Sheet！`);
+    } else {
+      throw new Error(data.error || '未知錯誤');
+    }
+  } catch(e) {
+    alert('❌ 儲存失敗：' + e.message);
+  } finally {
+    btn.textContent = '📊 儲存到 Sheet';
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── 初始化 ──
+initData();
+renderMemberList();
+</script>
+</body>
+</html>
