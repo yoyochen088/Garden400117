@@ -191,20 +191,22 @@ function restoreConfirm(gameId, nickname) {
 }
 
 async function saveAll() {
-  if (newMembers.length === 0 && !members.some(m => m._dirty)) {
-    // 檢查有沒有修改過的成員
-    alert('沒有需要儲存的變更');
-    return;
-  }
   const btn = document.getElementById('saveBtn');
   btn.textContent = '⏳ 儲存中...'; btn.disabled = true;
   try {
-    // 儲存所有在職成員（含修改）
-    const toSave = [...members.filter(m => !m.left), ...newMembers.filter(m => m.gameId)];
+    // 儲存所有在職成員 + 新增的（有 gameId 才儲存）
+    const toSave = [
+      ...members.filter(m => !m.left),
+      ...newMembers.filter(m => m.gameId.trim())
+    ];
+    if (toSave.length === 0) {
+      alert('沒有可儲存的成員（請確認遊戲 ID 已填寫）');
+      return;
+    }
     await Promise.all(toSave.map(m =>
-      callScript({ action: 'updateMember', gameId: m.gameId, nickname: m.nickname, note: m.note, left: false })
+      callScript({ action: 'updateMember', gameId: m.gameId.trim(), nickname: m.nickname, note: m.note, left: false })
     ));
-    alert('✅ 儲存完成！');
+    alert(`✅ 儲存完成！共 ${toSave.length} 筆`);
     loadMembers();
   } catch(e) {
     alert('❌ 儲存失敗：' + e.message);
