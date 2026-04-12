@@ -172,22 +172,20 @@ function removeNew(i) {
   renderLists();
 }
 
-function leaveConfirm(gameId, nickname) {
+async function leaveConfirm(gameId, nickname) {
   if (!confirm(`確定將「${nickname}」移除？資料將移至「已離開」。`)) return;
-  callScript({ action: 'deleteMember', gameId }).then(() => {
-    const m = members.find(m => m.gameId === gameId);
-    if (m) m.left = true;
-    renderLists();
-  });
+  await callScript({ action: 'deleteMember', gameId });
+  await new Promise(r => setTimeout(r, 1500)); // 等 Sheet 寫入
+  await loadMembers();
+  switchTab('tab-left', document.querySelectorAll('.tab')[1]);
 }
 
-function restoreConfirm(gameId, nickname) {
+async function restoreConfirm(gameId, nickname) {
   if (!confirm(`確定還原「${nickname}」為在職成員？`)) return;
-  callScript({ action: 'restoreMember', gameId }).then(() => {
-    const m = members.find(m => m.gameId === gameId);
-    if (m) m.left = false;
-    renderLists();
-  });
+  await callScript({ action: 'restoreMember', gameId });
+  await new Promise(r => setTimeout(r, 1500));
+  await loadMembers();
+  switchTab('tab-active', document.querySelectorAll('.tab')[0]);
 }
 
 async function saveAll() {
