@@ -120,7 +120,6 @@ function addMember() {
 }
 
 function removeMember(type, i, name) {
-  if (!confirm(`確定移除「${name}」？按儲存後才會正式從 Sheet 移除。`)) return;
   if (type === 1) {
     added.splice(i, 1);
   } else {
@@ -144,6 +143,7 @@ async function saveAll() {
       tasks.push(callScript({ action: 'updateMember', gameId: m.gameId, nickname: m.nickname, note: m.note, left: false }))
     );
     // 移除的成員（標記 left=true）
+    console.log('removed:', removed.map(m => m.gameId));
     removed.forEach(m =>
       tasks.push(callScript({ action: 'deleteMember', gameId: m.gameId }))
     );
@@ -159,8 +159,16 @@ async function saveAll() {
 }
 
 async function callScript(data) {
-  const params = encodeURIComponent(JSON.stringify(data));
-  await fetch(`${APPS_SCRIPT_URL}?data=${params}`, { mode: 'no-cors' });
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  } catch(e) {
+    // CORS 錯誤時 fallback 到 GET
+    const params = encodeURIComponent(JSON.stringify(data));
+    await fetch(`${APPS_SCRIPT_URL}?data=${params}`, { mode: 'no-cors' });
+  }
   return { ok: true };
 }
 
