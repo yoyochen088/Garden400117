@@ -80,7 +80,9 @@ window.FLOWERS = [
     "quality": "仙",
     "score": 30,
     "obtain": "活動",
-    "owners": []
+    "owners": [
+      "gt05x36l4zx"
+    ]
   },
   {
     "id": 8,
@@ -329,6 +331,7 @@ window.FLOWERS = [
     "obtain": "花圃",
     "owners": [
       "gt036u0jwe0",
+      "gt05x36l4zx",
       "gt05hxdgb7v"
     ]
   },
@@ -902,7 +905,8 @@ window.FLOWERS = [
     "owners": [
       "gt036u0jwe0",
       "gt01amfe756",
-      "gt05v5cx0y4"
+      "gt05v5cx0y4",
+      "gt05x36l4zx"
     ]
   },
   {
@@ -918,6 +922,7 @@ window.FLOWERS = [
       "gt01amfe756",
       "gt02p08gn5g",
       "gt05v5cx0y4",
+      "gt05x36l4zx",
       "gt02qrvgmyd"
     ]
   },
