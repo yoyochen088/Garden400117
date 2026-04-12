@@ -8,7 +8,8 @@ window.FLOWERS = [
     "obtain": "花靈商店",
     "owners": [
       "gt01amfe756",
-      "gt03v41hdry"
+      "gt03v41hdry",
+      "gt010gro5yg"
     ]
   },
   {
@@ -33,7 +34,8 @@ window.FLOWERS = [
     "obtain": "心聯盟",
     "owners": [
       "gt036u0jwe0",
-      "gt05v5cx0y4"
+      "gt05v5cx0y4",
+      "gt05hxdgb7v"
     ]
   },
   {
@@ -67,7 +69,8 @@ window.FLOWERS = [
     "obtain": "星河映蕊",
     "owners": [
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt010gro5yg"
     ]
   },
   {
@@ -134,7 +137,8 @@ window.FLOWERS = [
     "obtain": "活動",
     "owners": [
       "gt02q9a9f05",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt02p08gn5g"
     ]
   },
   {
@@ -228,7 +232,8 @@ window.FLOWERS = [
     "owners": [
       "gt02q9a9f05",
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt02qrvgmyd"
     ]
   },
   {
@@ -310,6 +315,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0"
     ]
   },
@@ -321,7 +327,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
-      "gt036u0jwe0"
+      "gt036u0jwe0",
+      "gt05hxdgb7v"
     ]
   },
   {
@@ -332,6 +339,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756"
     ]
@@ -403,6 +411,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0"
     ]
   },
@@ -472,7 +481,8 @@ window.FLOWERS = [
     "obtain": "花圃",
     "owners": [
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt05hxdgb7v"
     ]
   },
   {
@@ -483,6 +493,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756"
     ]
@@ -496,7 +507,8 @@ window.FLOWERS = [
     "obtain": "花圃",
     "owners": [
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt05x36l4zx"
     ]
   },
   {
@@ -550,8 +562,11 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "卡冊",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt02p08gn5g",
+      "gt02qrvgmyd"
     ]
   },
   {
@@ -585,6 +600,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756",
       "gt05v5cx0y4"
@@ -688,6 +704,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "卡冊",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756"
     ]
@@ -700,6 +717,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756",
       "gt05v5cx0y4"
@@ -713,6 +731,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花圃",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756"
     ]
@@ -758,8 +777,10 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt02qrvgmyd"
     ]
   },
   {
@@ -828,6 +849,7 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756"
     ]
@@ -851,7 +873,9 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "週花",
     "owners": [
-      "gt036u0jwe0"
+      "gt036u0jwe0",
+      "gt12jbprn0q",
+      "gt1zw5u27co"
     ]
   },
   {
@@ -862,7 +886,8 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "花靈商店",
     "owners": [
-      "gt036u0jwe0"
+      "gt036u0jwe0",
+      "gt010gro5yg"
     ]
   },
   {
@@ -886,9 +911,12 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "卡冊",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
       "gt01amfe756",
-      "gt05v5cx0y4"
+      "gt02p08gn5g",
+      "gt05v5cx0y4",
+      "gt02qrvgmyd"
     ]
   },
   {
@@ -899,7 +927,9 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
-      "gt01amfe756"
+      "gt02q9a9f05",
+      "gt01amfe756",
+      "gt02p08gn5g"
     ]
   },
   {
@@ -966,8 +996,10 @@ window.FLOWERS = [
     "score": 25,
     "obtain": "活動",
     "owners": [
+      "gt02q9a9f05",
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt02p08gn5g"
     ]
   },
   {
