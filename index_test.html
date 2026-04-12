@@ -244,11 +244,17 @@ async function loadFromSheets() {
     const flowerMap = {};
     FLOWERS.forEach(f => { flowerMap[f.id] = f; });
 
-    // 填入 owners（用 gameId）
+    // 填入 owners（用 gameId）— 相容欄位名稱大小寫和順序
     OWNERSHIP.forEach(o => {
-      const fid = Number(o.flowerId);
-      if (flowerMap[fid] && o.gameId) {
-        flowerMap[fid].owners.push(o.gameId);
+      const gameId = o.gameId || o.gameid || o.GameId || '';
+      const flowerIdRaw = o.flowerId || o.flowerid || o.FlowerId || o.flowername || o.flowerName || '';
+      const flowerNameRaw = o.flowerName || o.flowername || o.flowerid || o.flowerId || '';
+      // 判斷哪個欄位是數字（id）哪個是文字（name）
+      const fid = Number(flowerIdRaw);
+      const fidFromName = Number(flowerNameRaw);
+      const actualId = !isNaN(fid) && fid > 0 ? fid : (!isNaN(fidFromName) && fidFromName > 0 ? fidFromName : 0);
+      if (flowerMap[actualId] && gameId) {
+        flowerMap[actualId].owners.push(gameId);
       }
     });
 
