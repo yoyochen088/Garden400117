@@ -103,7 +103,8 @@ window.FLOWERS = [
     "obtain": "精靈花",
     "owners": [
       "gt036u0jwe0",
-      "gt01amfe756"
+      "gt01amfe756",
+      "gt04t2hr805"
     ]
   },
   {
