@@ -228,6 +228,8 @@ async function initFromFlowers() {
       note:     row[2] || '成員',
       left:     row[3] === 'true'
     }));
+    console.log('left members:', members.filter(m=>m.left).map(m=>m.gameId));
+    console.log('sample row[3]:', mRows.slice(0,3).map(r=>JSON.stringify(r[3])));
     originalMembers = JSON.parse(JSON.stringify(members));
     console.log('members 從 Sheet 載入：', members.length, '筆');
   } catch(e) {
