@@ -11,6 +11,8 @@
   //  Google Apps Script 設定
   // ════════════════════════════════════════════
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFNC3q4JJFdxLnlQ2M2OgD8qVTIXrN1tZ6Y6rZQiUs2ku-Es9DkbWrlr-XT_3Rsgfu4Q/exec';
+  const SHEET_ID = '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg';
+  const API_KEY  = 'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg'; // 填入你的 Google Sheets API Key
   </script>
   <style>
     :root {
@@ -202,46 +204,44 @@ let flowers = [];   // 從 window.FLOWERS，含 owners
 // ownership[memberIdx] = Set of flower ids
 let ownership = {};
 
-function initData() {
+async function initData() {
   // flowers 永遠從 flowers.js 取最新版
   flowers = JSON.parse(JSON.stringify(window.FLOWERS || []));
-
-  const saved = localStorage.getItem('memberEditorData');
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    // version < 3 代表舊格式，強制重建
-    if (!parsed.version || parsed.version < 3) {
-      localStorage.removeItem('memberEditorData');
-      initFromFlowers();
-      return;
-    }
-    members   = parsed.members;
-    ownership = {};
-    Object.keys(parsed.ownership).forEach(k => {
-      ownership[k] = new Set(parsed.ownership[k].map(Number));
-    });
-  } else {
-    initFromFlowers();
-  }
+  // 永遠從 Sheet 讀取最新 ownership，不用 localStorage
+  await initFromFlowers();
 }
 
-function initFromFlowers() {
+async function initFromFlowers() {
   members = JSON.parse(JSON.stringify(window.MEMBERS || []));
-  // 建立 gameId → memberIndex 和 nickname → memberIndex 的對應
   const gameIdToIdx = {};
-  const nickToIdx = {};
   members.forEach((m, mi) => {
     gameIdToIdx[m.gameId] = mi;
-    nickToIdx[m.nickname] = mi;
     ownership[mi] = new Set();
   });
-  // owners 可能是 gameId 或舊暱稱，兩種都支援
-  flowers.forEach(f => {
-    (f.owners || []).forEach(o => {
-      const mi = gameIdToIdx[o] ?? nickToIdx[o];
-      if (mi !== undefined) ownership[mi].add(f.id);
+
+  // 從 Sheet 讀取 ownership，覆蓋 flowers.js 的資料
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/ownership!A1:B?key=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const rows = (data.values || []).slice(1); // 跳過標題行
+    rows.forEach(row => {
+      const gameId = row[0] || '';
+      const fid = Number(row[1]);
+      const mi = gameIdToIdx[gameId];
+      if (mi !== undefined && fid) ownership[mi].add(fid);
     });
-  });
+    console.log('ownership 從 Sheet 載入：', rows.length, '筆');
+  } catch(e) {
+    // Sheet 讀取失敗，fallback 到 flowers.js 的 owners
+    console.warn('Sheet 讀取失敗，使用 flowers.js 資料：', e.message);
+    flowers.forEach(f => {
+      (f.owners || []).forEach(o => {
+        const mi = gameIdToIdx[o];
+        if (mi !== undefined) ownership[mi].add(f.id);
+      });
+    });
+  }
 }
 
 // ── Tab ──
@@ -587,8 +587,10 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 });
 
 // ── 初始化 ──
-initData();
-renderMemberList();
+(async () => {
+  await initData();
+  renderMemberList();
+})();
 </script>
 </body>
 </html>
