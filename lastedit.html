@@ -182,9 +182,8 @@
 </div>
 
 <div class="bottom-bar">
-  <button class="btn btn-secondary" onclick="resetData()">🔄 重新載入</button>
-  <button class="btn" style="background:#4a90d9;color:#fff;" id="saveMembersBtn" onclick="saveMembers()">💾 儲存成員</button>
-  <button class="btn" style="background:#34a853;color:#fff;" onclick="saveToSheet()">💾 儲存花單</button>
+  <button class="btn" style="background:#4a90d9;color:#fff;" id="saveMembersBtn" onclick="saveMembers()">� 儲存成員</button>
+  <button class="btn" style="background:#34a853;color:#fff;" id="saveFlowersBtn" style="display:none;" onclick="saveToSheet()">💾 儲存花單</button>
 </div>
 
 <!-- modal -->
@@ -276,6 +275,8 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
+  document.getElementById('saveMembersBtn').style.display = id === 'tab-members' ? '' : 'none';
+  document.getElementById('saveFlowersBtn').style.display = id === 'tab-flowers' ? '' : 'none';
   if (id === 'tab-flowers') {
     refreshMemberPicker();
     renderFlowerOwnership();
@@ -285,38 +286,34 @@ function switchTab(id, btn) {
 // ── 成員清單 ──
 function renderMemberList() {
   const el = document.getElementById('memberList');
-  if (members.length === 0) {
-    el.innerHTML = '<p style="color:#9e6b7e;font-size:0.9rem;margin-bottom:12px;">尚無成員，請點下方新增。</p>';
+  const active = members.filter(m => !m.left);
+  if (active.length === 0) {
+    el.innerHTML = '<p style="color:#9e6b7e;font-size:0.9rem;margin-bottom:12px;">尚無在職成員，請點下方新增。</p>';
     return;
   }
-  el.innerHTML = members.map((m, i) => {
-    const isLeft = !!m.left;
-    const cardStyle = isLeft ? 'opacity:0.5;background:#f5f5f5;' : '';
-    const inputStyle = isLeft ? 'background:#eee;color:#999;' : '';
+  el.innerHTML = active.map((m) => {
+    const i = members.indexOf(m);
     return `
-    <div class="card" style="${cardStyle}">
+    <div class="card">
       <div class="member-row">
         <div>
           <div class="label">遊戲 ID</div>
-          <input value="${m.gameId}" oninput="updateMember(${i},'gameId',this.value)" placeholder="遊戲 ID" ${isLeft?'disabled':''} style="${inputStyle}" />
+          <input value="${m.gameId}" oninput="updateMember(${i},'gameId',this.value)" placeholder="遊戲 ID" />
         </div>
         <div>
-          <div class="label">暱稱 ${isLeft ? '<span style="color:#e96a1e;font-size:0.7rem;">（已離開）</span>' : ''}</div>
-          <input value="${m.nickname}" oninput="updateMember(${i},'nickname',this.value)" placeholder="暱稱" ${isLeft?'disabled':''} style="${inputStyle}" />
+          <div class="label">暱稱</div>
+          <input value="${m.nickname}" oninput="updateMember(${i},'nickname',this.value)" placeholder="暱稱" />
         </div>
         <div>
           <div class="label">職位</div>
-          <select onchange="updateMember(${i},'note',this.value)" ${isLeft?'disabled':''} style="padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:0.9rem;background:${isLeft?'#eee':'var(--bg)'};color:${isLeft?'#999':'#3d1a2e'};outline:none;width:100%;">
+          <select onchange="updateMember(${i},'note',this.value)" style="padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:0.9rem;background:var(--bg);color:#3d1a2e;outline:none;width:100%;">
             ${["會長","副會長","理事","菁英","成員"].map(r =>
               `<option value="${r}" ${m.note===r?'selected':''}>${r}</option>`
             ).join('')}
           </select>
         </div>
-        <div class="del-col" style="display:flex;gap:6px;">
-          ${isLeft
-            ? `<button class="btn-del" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;" onclick="restoreMember(${i})">還原</button>`
-            : `<button class="btn-del" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;" onclick="removeMember(${i})">移除</button>`
-          }
+        <div class="del-col">
+          <button class="btn-del" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;" onclick="removeMember(${i})">移除</button>
         </div>
       </div>
     </div>`;
@@ -625,6 +622,8 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 (async () => {
   await initData();
   renderMemberList();
+  // 預設顯示成員清單的儲存按鈕
+  document.getElementById('saveFlowersBtn').style.display = 'none';
 })();
 </script>
 </body>
