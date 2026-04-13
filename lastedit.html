@@ -180,7 +180,7 @@
 </div>
 
 <div class="bottom-bar">
-  <button class="btn" style="background:#34a853;color:#fff;" onclick="saveToSheet()">儲存</button>
+  <button class="btn" style="background:#34a853;color:#fff;" onclick="saveToSheet()">💾 儲存</button>
 </div>
 
 <!-- modal -->
@@ -562,21 +562,22 @@ async function saveToSheet() {
   btn.disabled = true;
 
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
+    // 用 Image 方式繞過 CORS，Apps Script doGet 處理
+    await new Promise((resolve) => {
+      const params = encodeURIComponent(JSON.stringify({
         action: 'updateOwnership',
         gameId: m.gameId,
         flowerIds
-      })
+      }));
+      const img = new Image();
+      img.onload = img.onerror = () => resolve();
+      img.src = `${APPS_SCRIPT_URL}?data=${params}`;
     });
-    // Apps Script 有 CORS 限制，無法讀取回應，但請求已送出即視為成功
     alert(`✅ ${m.nickname} 的花單已儲存！`);
   } catch(e) {
-    // fetch 本身失敗才是真正的錯誤
     alert('❌ 儲存失敗：' + e.message);
   } finally {
-    btn.textContent = '儲存';
+    btn.textContent = '💾 儲存';
     btn.disabled = false;
   }
 }
