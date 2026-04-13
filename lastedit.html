@@ -218,7 +218,7 @@ async function initFromFlowers() {
 
   // 從 Sheet 讀取 members
   try {
-    const mUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:D?key=${API_KEY}`;
+    const mUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:E?key=${API_KEY}`;
     const mRes = await fetch(mUrl);
     const mData = await mRes.json();
     const mRows = (mData.values || []).slice(1);
@@ -226,7 +226,7 @@ async function initFromFlowers() {
       gameId:   row[0] || '',
       nickname: row[1] || '',
       note:     row[2] || '成員',
-      left:     row[3] === 'true'
+      left:     (row[3] || '').toString().toLowerCase() === 'true'
     }));
     console.log('left members:', members.filter(m=>m.left).map(m=>m.gameId));
     console.log('sample row[3]:', mRows.slice(0,3).map(r=>JSON.stringify(r[3])));
