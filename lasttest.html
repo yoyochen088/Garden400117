@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>花卉擁有管理</title>
+  <script src="flowers.js?v=3"></script>
+  <script src="members.js?v=3"></script>
+  <script>
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFNC3q4JJFdxLnlQ2M2OgD8qVTIXrN1tZ6Y6rZQiUs2ku-Es9DkbWrlr-XT_3Rsgfu4Q/exec';
+  const SHEET_ID = '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg';
+  const API_KEY  = 'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg';
+  </script>
+  <style>
+    :root {
+      --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
+      --pink-dark:#c2510b; --bg:#fff8f5; --border:#f8d5b0;
+      --radius:10px; --shadow:0 2px 10px rgba(233,106,30,0.10);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Microsoft JhengHei',sans-serif; background:var(--bg); color:#3d1a2e; padding:24px 16px 100px; }
+    h1 { text-align:center; color:var(--pink-dark); font-size:1.3rem; margin-bottom:4px; }
+    .subtitle { text-align:center; color:#9e6b7e; font-size:0.85rem; margin-bottom:20px; }
+    .member-select { display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; background:#fff; border-radius:var(--radius); padding:14px 16px; border:1px solid var(--border); box-shadow:var(--shadow); }
+    .member-select label { font-size:0.9rem; font-weight:600; color:var(--pink-dark); }
+    .member-select select, .member-select input { padding:7px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:#3d1a2e; outline:none; cursor:pointer; }
+    .flower-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; }
+    .flower-check { background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; cursor:pointer; transition:border-color 0.2s, background 0.2s; }
+    .flower-check:hover { border-color:var(--pink-mid); background:var(--pink-light); }
+    .flower-check.owned { border-color:var(--pink); background:var(--pink-light); }
+    .flower-check input[type=checkbox] { display:none; }
+    .flower-thumb { width:40px; height:40px; object-fit:cover; border-radius:6px; border:1px solid var(--border); background:#fce4ec; flex-shrink:0; }
+    .flower-info { flex:1; min-width:0; }
+    .flower-info .fname { font-size:0.82rem; font-weight:600; color:#3d1a2e; line-height:1.3; }
+    .badge-q { display:inline-block; padding:1px 7px; border-radius:8px; font-size:0.7rem; font-weight:700; color:#fff; margin-top:2px; }
+    .q-仙 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); }
+    .q-華 { background:linear-gradient(135deg,#ff8c00,#ffb347); }
+    .q-珍 { background:linear-gradient(135deg,#9b59b6,#c39bd3); }
+    .q-普 { background:linear-gradient(135deg,#4a90d9,#74b9ff); }
+    .q-凡 { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
+    .check-icon { font-size:1.1rem; flex-shrink:0; opacity:0; transition:opacity 0.15s; }
+    .flower-check.owned .check-icon { opacity:1; }
+    .loading { text-align:center; padding:40px; color:#9e6b7e; }
+    .bottom-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); padding:10px 12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; box-shadow:0 -2px 10px rgba(233,106,30,0.08); }
+    .btn { padding:9px 18px; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; transition:opacity 0.2s; }
+    .btn:hover { opacity:0.85; }
+    .btn:disabled { opacity:0.5; cursor:not-allowed; }
+  </style>
+</head>
+<body>
+<h1>🌸 花卉擁有管理</h1>
+<p class="subtitle">選擇成員後勾選擁有的花卉，按儲存更新</p>
+
+<div class="member-select">
+  <label>成員：</label>
+  <select id="memberPicker" onchange="loadOwned()"></select>
+  <label>品質：</label>
+  <select id="qualityFilter" onchange="renderFlowers()">
+    <option value="">全部</option>
+    <option value="仙">仙</option><option value="華">華</option>
+    <option value="珍">珍</option><option value="普">普</option><option value="凡">凡</option>
+  </select>
+  <input id="flowerSearch" type="text" placeholder="🔍 搜尋花名..." oninput="renderFlowers()" style="width:140px;">
+  <span id="ownedCount" style="font-size:0.85rem;color:#9e6b7e;"></span>
+</div>
+<div id="flowerGrid" class="flower-grid"><div class="loading">載入中...</div></div>
+
+<div class="bottom-bar">
+  <button class="btn" style="background:#34a853;color:#fff;" id="saveBtn" onclick="saveToSheet()">💾 儲存</button>
+</div>
+
+<script>
+const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
+let flowers = [];
+let members = [];
+let owned = new Set();
+let originalOwned = new Set();
+
+async function init() {
+  flowers = JSON.parse(JSON.stringify(window.FLOWERS || []));
+
+  // 從 Sheet 讀取 members（只顯示在職）
+  try {
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:E?key=${API_KEY}`);
+    const data = await res.json();
+    members = (data.values || []).slice(1)
+      .filter(r => (r[3] || '').toLowerCase() !== 'true')
+      .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
+  } catch(e) {
+    members = (window.MEMBERS || []).filter(m => !m.left);
+  }
+
+  const sel = document.getElementById('memberPicker');
+  sel.innerHTML = members.map((m, i) =>
+    `<option value="${i}">${m.nickname || m.gameId}</option>`
+  ).join('');
+
+  await loadOwned();
+}
+
+async function loadOwned() {
+  const mi = parseInt(document.getElementById('memberPicker').value);
+  if (isNaN(mi) || !members[mi]) return;
+  const m = members[mi];
+
+  // 從 Sheet 讀取該成員的 ownership
+  try {
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/ownership!A1:B?key=${API_KEY}`);
+    const data = await res.json();
+    const rows = (data.values || []).slice(1);
+    owned = new Set(rows.filter(r => r[0] === m.gameId).map(r => Number(r[1])));
+    originalOwned = new Set(owned);
+  } catch(e) {
+    owned = new Set();
+    originalOwned = new Set();
+  }
+
+  renderFlowers();
+}
+
+function renderFlowers() {
+  const qFilter = document.getElementById('qualityFilter').value;
+  const searchQ = document.getElementById('flowerSearch').value.trim().toLowerCase();
+  const filtered = flowers.slice()
+    .sort((a,b) => { const qd=(QUALITY_ORDER[a.quality]??9)-(QUALITY_ORDER[b.quality]??9); return qd||((a.order??999)-(b.order??999)); })
+    .filter(f => (!qFilter||f.quality===qFilter) && (!searchQ||f.name.toLowerCase().includes(searchQ)));
+
+  const displayOwned = filtered.filter(f => owned.has(f.id)).length;
+  document.getElementById('ownedCount').textContent = qFilter
+    ? `已擁有 ${displayOwned} / ${filtered.length} 種${qFilter}品`
+    : `已擁有 ${displayOwned} / ${filtered.length} 種`;
+
+  document.getElementById('flowerGrid').innerHTML = filtered.map(f => {
+    const isOwned = owned.has(f.id);
+    const thumb = f.img
+      ? `<img class="flower-thumb" src="${f.img}" alt="${f.name}" onerror="this.style.opacity=0.3">`
+      : `<div class="flower-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🌸</div>`;
+    return `<label class="flower-check ${isOwned?'owned':''}">
+      <input type="checkbox" ${isOwned?'checked':''} onchange="toggleOwn(${f.id},this)">
+      ${thumb}
+      <div class="flower-info"><div class="fname">${f.name}</div><span class="badge-q q-${f.quality}">${f.quality}</span></div>
+      <span class="check-icon">✓</span></label>`;
+  }).join('');
+}
+
+function toggleOwn(fid, cb) {
+  const el = cb.closest('.flower-check');
+  owned.has(fid) ? (owned.delete(fid), el.classList.remove('owned'))
+                 : (owned.add(fid),    el.classList.add('owned'));
+  const qFilter = document.getElementById('qualityFilter').value;
+  const filtered = flowers.filter(f => !qFilter || f.quality === qFilter);
+  const displayOwned = filtered.filter(f => owned.has(f.id)).length;
+  document.getElementById('ownedCount').textContent = qFilter
+    ? `已擁有 ${displayOwned} / ${filtered.length} 種${qFilter}品`
+    : `已擁有 ${displayOwned} / ${filtered.length} 種`;
+}
+
+async function saveToSheet() {
+  const mi = parseInt(document.getElementById('memberPicker').value);
+  if (isNaN(mi) || !members[mi]) { alert('請先選擇成員'); return; }
+  const m = members[mi];
+
+  const toAdd    = [...owned].filter(fid => !originalOwned.has(fid));
+  const toRemove = [...originalOwned].filter(fid => !owned.has(fid));
+
+  if (toAdd.length === 0 && toRemove.length === 0) { alert('沒有任何變動'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.innerHTML = '⏳ 儲存中...'; btn.disabled = true;
+  try {
+    await new Promise((resolve) => {
+      const params = encodeURIComponent(JSON.stringify({ action: 'updateOwnership', gameId: m.gameId, toAdd, toRemove }));
+      const img = new Image();
+      img.onload = img.onerror = () => resolve();
+      img.src = `${APPS_SCRIPT_URL}?data=${params}`;
+    });
+    alert(`✅ ${m.nickname} 的花單已儲存！（新增 ${toAdd.length} 筆，移除 ${toRemove.length} 筆）`);
+    originalOwned = new Set(owned);
+  } catch(e) {
+    alert('❌ 儲存失敗：' + e.message);
+  } finally {
+    btn.innerHTML = '💾 儲存'; btn.disabled = false;
+  }
+}
+
+document.getElementById('memberPicker').addEventListener('change', loadOwned);
+init();
+</script>
+</body>
+</html>
