@@ -203,6 +203,7 @@ let members = [];   // { id, gameId, nickname, note }
 let flowers = [];   // 從 window.FLOWERS，含 owners
 // ownership[memberIdx] = Set of flower ids
 let ownership = {};
+let originalOwnership = {}; // Sheet 讀取後的原始快照，用於計算差異
 
 async function initData() {
   // flowers 永遠從 flowers.js 取最新版
@@ -230,6 +231,11 @@ async function initFromFlowers() {
       const fid = Number(row[1]);
       const mi = gameIdToIdx[gameId];
       if (mi !== undefined && fid) ownership[mi].add(fid);
+    });
+    // 儲存原始快照
+    originalOwnership = {};
+    Object.keys(ownership).forEach(k => {
+      originalOwnership[k] = new Set(ownership[k]);
     });
     console.log('ownership 從 Sheet 載入：', rows.length, '筆');
   } catch(e) {
@@ -554,8 +560,17 @@ async function saveToSheet() {
   }
 
   const m = members[mi];
-  const owned = ownership[mi] || new Set();
-  const flowerIds = [...owned]; // 這個成員擁有的所有 flower id
+  const currentOwned = ownership[mi] || new Set();
+  const originalOwned = originalOwnership[mi] || new Set();
+
+  // 計算差異
+  const toAdd    = [...currentOwned].filter(fid => !originalOwned.has(fid));
+  const toRemove = [...originalOwned].filter(fid => !currentOwned.has(fid));
+
+  if (toAdd.length === 0 && toRemove.length === 0) {
+    alert('沒有任何變動');
+    return;
+  }
 
   const btn = document.querySelector('[onclick="saveToSheet()"]');
   btn.textContent = '⏳ 儲存中...';
@@ -567,13 +582,16 @@ async function saveToSheet() {
       const params = encodeURIComponent(JSON.stringify({
         action: 'updateOwnership',
         gameId: m.gameId,
-        flowerIds
+        toAdd,
+        toRemove
       }));
       const img = new Image();
       img.onload = img.onerror = () => resolve();
       img.src = `${APPS_SCRIPT_URL}?data=${params}`;
     });
-    alert(`✅ ${m.nickname} 的花單已儲存！`);
+    alert(`✅ ${m.nickname} 的花單已儲存！（新增 ${toAdd.length} 筆，移除 ${toRemove.length} 筆）`);
+    // 更新快照
+    originalOwnership[mi] = new Set(currentOwned);
   } catch(e) {
     alert('❌ 儲存失敗：' + e.message);
   } finally {
