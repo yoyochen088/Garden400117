@@ -182,7 +182,9 @@
 </div>
 
 <div class="bottom-bar">
-  <button class="btn" style="background:#34a853;color:#fff;" onclick="saveToSheet()">💾 儲存</button>
+  <button class="btn btn-secondary" onclick="resetData()">🔄 重新載入</button>
+  <button class="btn" style="background:#4a90d9;color:#fff;" id="saveMembersBtn" onclick="saveMembers()">💾 儲存成員</button>
+  <button class="btn" style="background:#34a853;color:#fff;" onclick="saveToSheet()">💾 儲存花單</button>
 </div>
 
 <!-- modal -->
@@ -199,11 +201,11 @@
 
 <script>
 // ── 資料 ──
-let members = [];   // { id, gameId, nickname, note }
-let flowers = [];   // 從 window.FLOWERS，含 owners
-// ownership[memberIdx] = Set of flower ids
+let members = [];
+let flowers = [];
 let ownership = {};
-let originalOwnership = {}; // Sheet 讀取後的原始快照，用於計算差異
+let originalOwnership = {};
+let originalMembers = []; // Sheet 讀取後的成員快照
 
 async function initData() {
   // flowers 永遠從 flowers.js 取最新版
@@ -213,34 +215,52 @@ async function initData() {
 }
 
 async function initFromFlowers() {
-  members = JSON.parse(JSON.stringify(window.MEMBERS || []));
   const gameIdToIdx = {};
+
+  // 從 Sheet 讀取 members
+  try {
+    const mUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:D?key=${API_KEY}`;
+    const mRes = await fetch(mUrl);
+    const mData = await mRes.json();
+    const mRows = (mData.values || []).slice(1);
+    members = mRows.map((row, i) => ({
+      gameId:   row[0] || '',
+      nickname: row[1] || '',
+      note:     row[2] || '成員',
+      left:     row[3] === 'true'
+    }));
+    originalMembers = JSON.parse(JSON.stringify(members));
+    console.log('members 從 Sheet 載入：', members.length, '筆');
+  } catch(e) {
+    console.warn('members Sheet 讀取失敗，使用 members.js：', e.message);
+    members = JSON.parse(JSON.stringify(window.MEMBERS || []));
+    originalMembers = JSON.parse(JSON.stringify(members));
+  }
+
   members.forEach((m, mi) => {
     gameIdToIdx[m.gameId] = mi;
     ownership[mi] = new Set();
   });
 
-  // 從 Sheet 讀取 ownership，覆蓋 flowers.js 的資料
+  // 從 Sheet 讀取 ownership
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/ownership!A1:B?key=${API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const rows = (data.values || []).slice(1); // 跳過標題行
-    rows.forEach(row => {
+    const oUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/ownership!A1:B?key=${API_KEY}`;
+    const oRes = await fetch(oUrl);
+    const oData = await oRes.json();
+    const oRows = (oData.values || []).slice(1);
+    oRows.forEach(row => {
       const gameId = row[0] || '';
       const fid = Number(row[1]);
       const mi = gameIdToIdx[gameId];
       if (mi !== undefined && fid) ownership[mi].add(fid);
     });
-    // 儲存原始快照
     originalOwnership = {};
     Object.keys(ownership).forEach(k => {
       originalOwnership[k] = new Set(ownership[k]);
     });
-    console.log('ownership 從 Sheet 載入：', rows.length, '筆');
+    console.log('ownership 從 Sheet 載入：', oRows.length, '筆');
   } catch(e) {
-    // Sheet 讀取失敗，fallback 到 flowers.js 的 owners
-    console.warn('Sheet 讀取失敗，使用 flowers.js 資料：', e.message);
+    console.warn('ownership Sheet 讀取失敗，使用 flowers.js：', e.message);
     flowers.forEach(f => {
       (f.owners || []).forEach(o => {
         const mi = gameIdToIdx[o];
@@ -281,7 +301,7 @@ function renderMemberList() {
           <input value="${m.gameId}" oninput="updateMember(${i},'gameId',this.value)" placeholder="遊戲 ID" ${isLeft?'disabled':''} style="${inputStyle}" />
         </div>
         <div>
-          <div class="label">暱稱 ${isLeft ? '<span style="color:#e91e8c;font-size:0.7rem;">（已離開）</span>' : ''}</div>
+          <div class="label">暱稱 ${isLeft ? '<span style="color:#e96a1e;font-size:0.7rem;">（已離開）</span>' : ''}</div>
           <input value="${m.nickname}" oninput="updateMember(${i},'nickname',this.value)" placeholder="暱稱" ${isLeft?'disabled':''} style="${inputStyle}" />
         </div>
         <div>
@@ -295,8 +315,7 @@ function renderMemberList() {
         <div class="del-col" style="display:flex;gap:6px;">
           ${isLeft
             ? `<button class="btn-del" style="background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;" onclick="restoreMember(${i})">還原</button>`
-            : `<button class="btn-del" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;" onclick="markLeft(${i})">離開</button>
-               <button class="btn-del" onclick="deleteMember(${i})">刪除</button>`
+            : `<button class="btn-del" style="background:#fff3e0;color:#e65100;border-color:#ffcc80;" onclick="removeMember(${i})">移除</button>`
           }
         </div>
       </div>
@@ -304,15 +323,17 @@ function renderMemberList() {
   }).join('');
 }
 
-function markLeft(i) {
-  if (!confirm(`確定將「${members[i].nickname || members[i].gameId}」標記為已離開？\n此成員的花單資料將不再顯示，ID 永久保留。`)) return;
+function removeMember(i) {
+  // 標記 left=true，按儲存後才寫入 Sheet
   members[i].left = true;
   renderMemberList();
+  refreshMemberPicker();
 }
 
 function restoreMember(i) {
   members[i].left = false;
   renderMemberList();
+  refreshMemberPicker();
 }
 
 function updateMember(i, field, value) {
@@ -320,38 +341,8 @@ function updateMember(i, field, value) {
 }
 
 function addMember() {
-  // ID 永遠取所有已存在 + 曾被刪除的最大值 +1，絕不重用
-  const usedIds = [
-    ...members.map(m => m.id),
-    ...(window._deletedIds ? [...window._deletedIds] : [])
-  ];
-  const newId = usedIds.length ? Math.max(...usedIds) + 1 : 1;
-  const newIdx = members.length;
-  members.push({ id: newId, gameId: '', nickname: '', note: '成員', left: false });
-  ownership[newIdx] = new Set();
-  renderMemberList();
-}
-
-function deleteMember(i) {
-  const m = members[i];
-  // 檢查這個成員是否有花單資料
-  const hasFlowers = ownership[i] && ownership[i].size > 0;
-  if (hasFlowers) {
-    alert(`「${m.nickname || m.gameId}」有花單資料，無法直接刪除。\n請改用「離開」按鈕標記為已離開。`);
-    return;
-  }
-  if (!confirm(`確定刪除「${m.nickname || m.gameId || '此成員'}」？\n此操作無法復原。`)) return;
-  // 記錄被刪除的 id，避免重用
-  if (!window._deletedIds) window._deletedIds = new Set();
-  window._deletedIds.add(m.id);
-
-  members.splice(i, 1);
-  const newOwnership = {};
-  members.forEach((_, ni) => {
-    const oldIdx = ni < i ? ni : ni + 1;
-    newOwnership[ni] = ownership[oldIdx] || new Set();
-  });
-  ownership = newOwnership;
+  members.push({ gameId: '', nickname: '', note: '成員', left: false });
+  ownership[members.length - 1] = new Set();
   renderMemberList();
 }
 
@@ -427,37 +418,63 @@ function toggleOwn(mi, flowerID, checkbox) {
       : `已擁有 ${displayOwned} / ${filtered.length} 種`;
 }
 
-// ── 儲存 / 還原 ──
-function resetData() {
-  if (!confirm('確定重置？將清除所有暫存資料，從 flowers.js / members.js 重新讀取。')) return;
-  localStorage.removeItem('memberEditorData');
+// ── 成員儲存到 Sheet（差異模式）──
+async function saveMembers() {
+  // 計算差異
+  const origMap = {};
+  originalMembers.forEach(m => { origMap[m.gameId] = m; });
+  const currentGameIds = new Set(members.filter(m => m.gameId).map(m => m.gameId));
+
+  const changed = members.filter(m => {
+    if (!m.gameId) return false;
+    const orig = origMap[m.gameId];
+    if (!orig) return true; // 新增
+    return orig.nickname !== m.nickname || orig.note !== m.note || !!orig.left !== !!m.left;
+  });
+
+  if (changed.length === 0) {
+    alert('成員資料沒有變動');
+    return;
+  }
+
+  const btn = document.getElementById('saveMembersBtn');
+  btn.textContent = '⏳ 儲存中...'; btn.disabled = true;
+
+  try {
+    for (const m of changed) {
+      await new Promise((resolve) => {
+        const params = encodeURIComponent(JSON.stringify({
+          action: 'updateMember',
+          gameId: m.gameId,
+          nickname: m.nickname,
+          note: m.note,
+          left: !!m.left
+        }));
+        const img = new Image();
+        img.onload = img.onerror = () => resolve();
+        img.src = `${APPS_SCRIPT_URL}?data=${params}`;
+      });
+    }
+    alert(`✅ 成員資料已儲存！（${changed.length} 筆變動）`);
+    originalMembers = JSON.parse(JSON.stringify(members));
+  } catch(e) {
+    alert('❌ 儲存失敗：' + e.message);
+  } finally {
+    btn.textContent = '💾 儲存成員';
+    btn.disabled = false;
+  }
+}
+
+// ── 重置（重新從 Sheet 讀取）──
+async function resetData() {
+  if (!confirm('確定重置？將重新從 Sheet 讀取最新資料。')) return;
   ownership = {};
-  initFromFlowers();
+  originalOwnership = {};
+  await initFromFlowers();
   renderMemberList();
   refreshMemberPicker();
   renderFlowerOwnership();
   alert('✅ 已重置！');
-}
-
-function saveData() {
-  const serialOwnership = {};
-  Object.keys(ownership).forEach(k => { serialOwnership[k] = [...ownership[k]]; });
-  localStorage.setItem('memberEditorData', JSON.stringify({ version: 3, members, ownership: serialOwnership }));
-  alert('✅ 已儲存進度！');
-}
-
-function loadSaved() {
-  const saved = localStorage.getItem('memberEditorData');
-  if (!saved) { alert('找不到儲存的資料'); return; }
-  const parsed = JSON.parse(saved);
-  members   = parsed.members;
-  // flowers 永遠從 window.FLOWERS 取最新
-  flowers   = JSON.parse(JSON.stringify(window.FLOWERS || []));
-  ownership = {};
-  Object.keys(parsed.ownership).forEach(k => { ownership[k] = new Set(parsed.ownership[k]); });
-  renderMemberList();
-  refreshMemberPicker();
-  renderFlowerOwnership();
 }
 
 // ── 產生程式碼（差異模式）──
