@@ -182,7 +182,7 @@
 </div>
 
 <div class="bottom-bar">
-  <button class="btn" style="background:#4a90d9;color:#fff;" id="saveMembersBtn" onclick="saveMembers()">� 儲存成員</button>
+  <button class="btn" style="background:#4a90d9;color:#fff;" id="saveMembersBtn" onclick="saveMembers()">💾 儲存成員</button>
   <button class="btn" style="background:#34a853;color:#fff;" id="saveFlowersBtn" style="display:none;" onclick="saveToSheet()">💾 儲存花單</button>
 </div>
 
@@ -427,6 +427,8 @@ async function saveMembers() {
   const changed = members.filter(m => {
     if (!m.gameId) return false;
     const orig = origMap[m.gameId];
+    // 新增且馬上移除（left=true）→ 不送出
+    if (!orig && m.left) return false;
     if (!orig) return true; // 新增
     return orig.nickname !== m.nickname || orig.note !== m.note || !!orig.left !== !!m.left;
   });
@@ -437,7 +439,7 @@ async function saveMembers() {
   }
 
   const btn = document.getElementById('saveMembersBtn');
-  btn.textContent = '⏳ 儲存中...'; btn.disabled = true;
+  btn.innerHTML = '⏳ 儲存中...'; btn.disabled = true;
 
   try {
     for (const m of changed) {
@@ -459,7 +461,7 @@ async function saveMembers() {
   } catch(e) {
     alert('❌ 儲存失敗：' + e.message);
   } finally {
-    btn.textContent = '💾 儲存成員';
+    btn.innerHTML = '💾 儲存成員';
     btn.disabled = false;
   }
 }
