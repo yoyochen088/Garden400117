@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>花卉擁有管理</title>
-  <script src="flowers.js?v=3"></script>
-  <script src="members.js?v=3"></script>
+  <script src="config.js"></script>
   <script>
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFNC3q4JJFdxLnlQ2M2OgD8qVTIXrN1tZ6Y6rZQiUs2ku-Es9DkbWrlr-XT_3Rsgfu4Q/exec';
   const SHEET_ID = '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg';
@@ -77,18 +76,27 @@ let owned = new Set();
 let originalOwned = new Set();
 
 async function init() {
-  flowers = JSON.parse(JSON.stringify(window.FLOWERS || []));
+  // 從 Sheet 讀取 flowers
+  const fRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/flowers!A1:Z?key=${API_KEY}`);
+  if (!fRes.ok) throw new Error('flowers 讀取失敗');
+  const fData = await fRes.json();
+  const fRows = fData.values || [];
+  const fHeaders = fRows[0] || [];
+  flowers = fRows.slice(1).map(row => {
+    const f = {};
+    fHeaders.forEach((h, i) => { f[h] = row[i] || ''; });
+    f.id = Number(f.id); f.score = Number(f.score); f.order = Number(f.order) || 999;
+    f.owners = [];
+    return f;
+  });
 
   // 從 Sheet 讀取 members（只顯示在職）
-  try {
-    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:E?key=${API_KEY}`);
-    const data = await res.json();
-    members = (data.values || []).slice(1)
-      .filter(r => (r[3] || '').toLowerCase() !== 'true')
-      .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
-  } catch(e) {
-    members = (window.MEMBERS || []).filter(m => !m.left);
-  }
+  const mRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:E?key=${API_KEY}`);
+  if (!mRes.ok) throw new Error('members 讀取失敗');
+  const mData = await mRes.json();
+  members = (mData.values || []).slice(1)
+    .filter(r => (r[3] || '').toLowerCase() !== 'true')
+    .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
 
   const sel = document.getElementById('memberPicker');
   sel.innerHTML = members.map((m, i) =>
@@ -184,7 +192,9 @@ async function saveToSheet() {
 }
 
 document.getElementById('memberPicker').addEventListener('change', loadOwned);
-init();
+init().catch(e => {
+  document.getElementById('flowerGrid').innerHTML = `<div style="text-align:center;padding:40px;color:#c2510b;">⚠️ 資料載入失敗：${e.message}</div>`;
+});
 </script>
 </body>
 </html>
