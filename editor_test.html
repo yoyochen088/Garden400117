@@ -186,8 +186,8 @@ async function loadF(){
 
 function buildQS(idx,cur){
   const id='qs'+idx;
-  return '<div class="cs" id="'+id+'"><button type="button" class="cst q-'+cur+'" onclick="tgQ(''+id+'')">'+cur+'</button>'
-    +'<div class="csd" id="'+id+'d">'+QL.map(q=>'<div class="cso q-'+q+'" onclick="pkQ('+idx+',''+q+'')">'+q+'</div>').join('')+'</div></div>';
+  return '<div class="cs" id="'+id+'"><button type="button" class="cst q-'+cur+'" onclick="tgQ(\''+id+'\')">'+cur+'</button>'
+    +'<div class="csd" id="'+id+'d">'+QL.map(q=>'<div class="cso q-'+q+'" onclick="pkQ('+idx+',\''+q+'\')">'+q+'</div>').join('')+'</div></div>';
 }
 function tgQ(id){
   document.querySelectorAll('.csd.open').forEach(d=>{if(d.id!==id+'d')d.classList.remove('open');});
