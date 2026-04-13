@@ -1,562 +1,322 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta property="og:title" content="璀璨♡400117 花卉圖鑑" />
+  <meta property="og:title" content="♡璀璨♡ 花卉圖鑑" />
   <meta property="og:description" content="璀璨工會花卉圖鑑，查詢花種競賽分、取得方式與擁有成員。" />
   <meta property="og:type" content="website" />
-  <title>璀璨♡400117 花卉圖鑑</title>
+  <title>♡璀璨♡ 花卉圖鑑 [400117]</title>
+  <script>
+  // ════════════════════════════════════════════
+  //  Google Sheets 設定
+  // ════════════════════════════════════════════
+  const SHEET_CONFIG = {
+    apiKey:  'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg',
+    sheetId: '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg',
+    ranges:  ['flowers!A1:Z', 'members!A1:Z', 'ownership!A1:Z']
+  };
+  </script>
   <style>
     :root {
-      --pink: #e96a1e;
-      --pink-light: #fef0e7;
-      --pink-mid: #f4a46a;
-      --pink-dark: #c2510b;
-      --bg: #fff8f5;
-      --card-bg: #ffffff;
-      --text: #3d1a2e;
-      --text-muted: #9e6b7e;
-      --border: #f8d5b0;
-      --shadow: 0 2px 12px rgba(233,106,30,0.10);
-      --radius: 12px;
+      --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
+      --pink-dark:#c2510b; --bg:#fff8f5; --card-bg:#ffffff;
+      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
+      --shadow:0 2px 12px rgba(233,106,30,0.10); --radius:12px;
     }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    /* ── HEADER ── */
     header {
-      background: linear-gradient(135deg, #c2510b 0%, #e96a1e 60%, #f06292 100%);
-      color: #fff;
-      padding: 0 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 60px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(194,81,11,0.3);
+      background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%);
+      color:#fff; padding:0 20px; display:flex; align-items:center;
+      justify-content:space-between; height:60px; position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 8px rgba(194,81,11,0.3);
     }
+    .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; }
+    nav { display:flex; gap:8px; }
+    nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
+    nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
 
-    .guild-name {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      white-space: nowrap;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    }
+    main { max-width:1100px; margin:0 auto; padding:24px 16px 48px; }
+    .page { display:none; }
+    .page.active { display:block; }
 
-    nav {
-      display: flex;
-      gap: 8px;
-    }
+    .loading { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:1rem; }
+    .loading-spinner { display:inline-block; width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--pink); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: background 0.2s;
-      border: 1.5px solid rgba(255,255,255,0.5);
-    }
+    .controls { background:var(--card-bg); border-radius:var(--radius); padding:18px 20px; margin-bottom:20px; box-shadow:var(--shadow); border:1px solid var(--border); }
+    .search-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+    .search-box { flex:1; min-width:200px; padding:9px 14px; border:1.5px solid var(--pink-mid); border-radius:24px; font-size:0.95rem; outline:none; transition:border-color 0.2s; background:var(--bg); color:var(--text); }
+    .search-box:focus { border-color:var(--pink); }
+    .filter-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .filter-group { display:flex; flex-direction:column; gap:4px; flex:1; min-width:140px; }
+    .filter-group label { font-size:0.78rem; color:var(--text-muted); font-weight:600; padding-left:4px; }
+    select { padding:8px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:var(--text); outline:none; cursor:pointer; }
+    select:focus { border-color:var(--pink); }
+    .btn-reset { padding:8px 18px; background:var(--pink-light); color:var(--pink-dark); border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:background 0.2s; align-self:flex-end; }
+    .btn-reset:hover { background:var(--pink-mid); color:#fff; }
 
-    nav a:hover, nav a.active {
-      background: rgba(255,255,255,0.25);
-    }
+    .result-count { font-size:0.9rem; color:var(--text-muted); margin-bottom:14px; padding-left:4px; }
+    .result-count span { color:var(--pink); font-weight:700; font-size:1rem; }
 
-    /* ── MAIN ── */
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px 16px 48px;
-    }
+    .flower-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+    .flower-card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden; transition:transform 0.2s,box-shadow 0.2s; display:flex; flex-direction:column; }
+    .flower-card:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(233,106,30,0.18); }
+    .card-thumb { width:100%; height:140px; background:linear-gradient(135deg,#fef0e7,#f8d5b0); display:flex; align-items:center; justify-content:center; font-size:3rem; color:var(--pink-mid); flex-shrink:0; }
+    .card-thumb img { width:100%; height:100%; object-fit:cover; }
+    .card-body { padding:14px 16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+    .card-title { font-size:1.05rem; font-weight:700; color:var(--pink-dark); display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
+    .owner-count { font-size:0.8rem; color:var(--text-muted); font-weight:400; }
+    .card-meta { display:flex; gap:6px; flex-wrap:wrap; }
+    .badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:600; }
+    .badge-score { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
+    .badge-obtain { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .badge-quality-仙 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; border:1.5px solid #ffb347; box-shadow:0 0 6px rgba(255,78,138,0.5); }
+    .badge-quality-華 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; border:1.5px solid #e67e00; }
+    .badge-quality-珍 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; border:1.5px solid #7d3c98; }
+    .badge-quality-普 { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; border:1.5px solid #2471a3; }
+    .badge-quality-凡 { background:linear-gradient(135deg,#7f8c6e,#a8b89a); color:#fff; border:1.5px solid #6b7a5c; }
+    .flower-card.quality-仙 { border-color:#ff6b9d; box-shadow:0 2px 14px rgba(255,78,138,0.22); }
+    .flower-card.quality-華 { border-color:#ffb347; box-shadow:0 2px 14px rgba(255,140,0,0.20); }
+    .flower-card.quality-珍 { border-color:#c39bd3; }
+    .flower-card.quality-普 { border-color:#74b9ff; }
+    .flower-card.quality-凡 { border-color:#a8b89a; }
+    .owners-list { display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
+    .owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:10px; padding:2px 9px; font-size:0.78rem; font-weight:500; border:1px solid var(--border); }
+    .no-owner { font-size:0.8rem; color:#bbb; font-style:italic; }
+    .no-result { text-align:center; padding:48px 20px; color:var(--text-muted); font-size:1rem; }
 
-    /* ── PAGES ── */
-    .page { display: none; }
-    .page.active { display: block; }
+    .role-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:0.8rem; font-weight:700; }
+    .role-會長   { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
+    .role-副會長 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
+    .role-理事   { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .role-菁英   { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
+    .role-成員   { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
 
-    /* ── CONTROLS ── */
-    .controls {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-    }
+    .id-table-wrap { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:0.92rem; }
+    thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
+    th { padding:12px 16px; text-align:left; font-weight:600; white-space:nowrap; }
+    td { padding:10px 16px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:var(--pink-light); }
 
-    .search-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .search-box {
-      flex: 1;
-      min-width: 200px;
-      padding: 9px 14px;
-      border: 1.5px solid var(--pink-mid);
-      border-radius: 24px;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .search-box:focus { border-color: var(--pink); }
-
-    .filter-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .filter-group label {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      padding-left: 4px;
-    }
-
-    select {
-      padding: 8px 12px;
-      border: 1.5px solid var(--pink-mid);
-      border-radius: 8px;
-      font-size: 0.9rem;
-      background: var(--bg);
-      color: var(--text);
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-
-    select:focus { border-color: var(--pink); }
-
-    .btn-reset {
-      padding: 8px 18px;
-      background: var(--pink-light);
-      color: var(--pink-dark);
-      border: 1.5px solid var(--pink-mid);
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      align-self: flex-end;
-    }
-
-    .btn-reset:hover { background: var(--pink-mid); color: #fff; }
-
-    /* ── RESULT COUNT ── */
-    .result-count {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-      padding-left: 4px;
-    }
-
-    .result-count span {
-      color: var(--pink);
-      font-weight: 700;
-      font-size: 1rem;
-    }
-
-    /* ── FLOWER GRID ── */
-    .flower-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-
-    .flower-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .flower-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(233,106,30,0.18);
-    }
-
-    .card-thumb {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      background: linear-gradient(135deg, #fef0e7, #f8d5b0);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      color: var(--pink-mid);
-      flex-shrink: 0;
-    }
-
-    .card-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card-body {
-      padding: 14px 16px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .card-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--pink-dark);
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .owner-count {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
-    .card-meta {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-
-    .badge-score {
-      background: #fff3e0;
-      color: #e65100;
-      border: 1px solid #ffcc80;
-    }
-
-    .badge-obtain {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 1px solid #a5d6a7;
-    }
-
-    /* 品質 badge — 顏色對應遊戲內圖示 */
-    /* 仙：紅粉漸層＋金邊，最高級 */
-    .badge-quality-仙 {
-      background: linear-gradient(135deg, #ff4e8a, #ff8c42);
-      color: #fff;
-      border: 1.5px solid #ffb347;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.25);
-      box-shadow: 0 0 6px rgba(255,78,138,0.5);
-    }
-    /* 華：橘色 */
-    .badge-quality-華 {
-      background: linear-gradient(135deg, #ff8c00, #ffb347);
-      color: #fff;
-      border: 1.5px solid #e67e00;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    /* 珍：紫色 */
-    .badge-quality-珍 {
-      background: linear-gradient(135deg, #9b59b6, #c39bd3);
-      color: #fff;
-      border: 1.5px solid #7d3c98;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    /* 普：藍色 */
-    .badge-quality-普 {
-      background: linear-gradient(135deg, #4a90d9, #74b9ff);
-      color: #fff;
-      border: 1.5px solid #2471a3;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    /* 凡：灰綠色 */
-    .badge-quality-凡 {
-      background: linear-gradient(135deg, #7f8c6e, #a8b89a);
-      color: #fff;
-      border: 1.5px solid #6b7a5c;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-
-    /* 品質卡片框線 */
-    .flower-card.quality-仙 { border-color: #ff6b9d; box-shadow: 0 2px 14px rgba(255,78,138,0.22); }
-    .flower-card.quality-華 { border-color: #ffb347; box-shadow: 0 2px 14px rgba(255,140,0,0.20); }
-    .flower-card.quality-珍 { border-color: #c39bd3; box-shadow: 0 2px 14px rgba(155,89,182,0.18); }
-    .flower-card.quality-普 { border-color: #74b9ff; box-shadow: 0 2px 12px rgba(74,144,217,0.15); }
-    .flower-card.quality-凡 { border-color: #a8b89a; }
-
-    .owners-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 2px;
-    }
-
-    .owner-tag {
-      background: var(--pink-light);
-      color: var(--pink-dark);
-      border-radius: 10px;
-      padding: 2px 9px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      border: 1px solid var(--border);
-    }
-
-    .no-owner {
-      font-size: 0.8rem;
-      color: #bbb;
-      font-style: italic;
-    }
-
-    /* ── ID LIST PAGE ── */
-    .id-table-wrap {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.92rem;
-    }
-
-    thead tr {
-      background: linear-gradient(135deg, #c2510b, #e96a1e);
-      color: #fff;
-    }
-
-    th {
-      padding: 12px 16px;
-      text-align: left;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-
-    tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: var(--pink-light); }
-
-    .role-badge {
-      display: inline-block; padding: 2px 10px; border-radius: 10px;
-      font-size: 0.8rem; font-weight: 700;
-    }
-    .role-會長   { background: linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
-    .role-副會長 { background: linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
-    .role-理事   { background: linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
-    .role-菁英   { background: linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
-    .role-成員   { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-
-    .no-result {
-      text-align: center;
-      padding: 48px 20px;
-      color: var(--text-muted);
-      font-size: 1rem;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
-      .guild-name { font-size: 1rem; }
-      nav a { padding: 5px 10px; font-size: 0.82rem; }
-      .flower-grid { grid-template-columns: 1fr; }
-      .filter-group { min-width: 100%; }
+    @media(max-width:600px) {
+      .guild-name { font-size:1rem; }
+      nav a { padding:5px 10px; font-size:0.82rem; }
+      .flower-grid { grid-template-columns:1fr; }
+      .filter-group { min-width:100%; }
     }
   </style>
-  <script src="flowers.js?v=3"></script>
-  <script src="members.js?v=3"></script>
 </head>
 <body>
 
 <header>
-  <div class="guild-name">♡璀璨♡</div>
+  <div class="guild-name">♡璀璨♡ <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
   <nav>
-    <a href="#" class="active" onclick="showPage('flower-page', this)">花卉圖鑑</a>
-    <a href="#" onclick="showPage('id-page', this)">公會成員</a>
+    <a href="#" class="active" onclick="showPage('flower-page',this)">花卉圖鑑</a>
+    <a href="#" onclick="showPage('id-page',this)">公會成員</a>
   </nav>
 </header>
 
 <main>
-
-  <!-- ══ 花卉圖鑑頁 ══ -->
   <div id="flower-page" class="page active">
-
-    <div class="controls">
-      <div class="search-row">
-        <input class="search-box" id="searchInput" type="text"
-          placeholder="🔍 搜尋花名 / 擁有者..." oninput="applyFilters()" />
-      </div>
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>競賽分</label>
-          <select id="filterScore" onchange="applyFilters()">
-            <option value="">全部</option>
-            <option value="14">14 分</option>
-            <option value="21">21 分</option>
-            <option value="23">23 分</option>
-            <option value="25">25 分</option>
-            <option value="28">28 分</option>
-            <option value="30">30 分</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>取得方式</label>
-          <select id="filterObtain" onchange="applyFilters()">
-            <option value="">全部</option>
-            <option value="等級">等級</option>
-            <option value="活動">活動</option>
-            <option value="花圃">花圃</option>
-            <option value="花坊">花坊</option>
-            <option value="VIP">VIP</option>
-            <option value="週花">週花</option>
-            <option value="星河映蕊">星河映蕊</option>
-            <option value="花靈商店">花靈商店</option>
-            <option value="精靈花">精靈花</option>
-            <option value="卡冊">卡冊</option>
-            <option value="心聯盟">心聯盟</option>
-            <option value="累積儲值">累積儲值</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>品質</label>
-          <select id="filterQuality" onchange="applyFilters()">
-            <option value="">全部</option>
-            <option value="仙">仙</option>
-            <option value="華">華</option>
-            <option value="珍">珍</option>
-            <option value="普">普</option>
-            <option value="凡">凡</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>排序</label>
-          <select id="sortBy" onchange="applyFilters()">
-            <option value="">預設</option>
-            <option value="name_asc">花名 A→Z</option>
-            <option value="name_desc">花名 Z→A</option>
-            <option value="score_asc">競賽分 低→高</option>
-            <option value="score_desc">競賽分 高→低</option>
-          </select>
-        </div>
-        <button class="btn-reset" onclick="resetFilters()">重置</button>
-      </div>
+    <div id="flowerLoading" class="loading">
+      <div class="loading-spinner"></div><br>載入花卉資料中...
     </div>
-
-    <div class="result-count" id="resultCount"></div>
-    <div class="flower-grid" id="flowerGrid"></div>
+    <div id="flowerContent" style="display:none;">
+      <div class="controls">
+        <div class="search-row">
+          <input class="search-box" id="searchInput" type="text" placeholder="🔍 搜尋花名 / 擁有者..." oninput="applyFilters()" />
+        </div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>品質</label>
+            <select id="filterQuality" onchange="applyFilters()">
+              <option value="">全部</option>
+              <option value="仙">仙</option><option value="華">華</option>
+              <option value="珍">珍</option><option value="普">普</option><option value="凡">凡</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>競賽分</label>
+            <select id="filterScore" onchange="applyFilters()">
+              <option value="">全部</option>
+              <option value="14">14</option><option value="21">21</option>
+              <option value="23">23</option><option value="25">25</option>
+              <option value="28">28</option><option value="30">30</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>取得方式</label>
+            <select id="filterObtain" onchange="applyFilters()">
+              <option value="">全部</option>
+              <option value="等級">等級</option><option value="活動">活動</option>
+              <option value="花圃">花圃</option><option value="花坊">花坊</option>
+              <option value="VIP">VIP</option><option value="週花">週花</option>
+              <option value="星河映蕊">星河映蕊</option><option value="花靈商店">花靈商店</option>
+              <option value="精靈花">精靈花</option><option value="卡冊">卡冊</option>
+              <option value="心聯盟">心聯盟</option><option value="累積儲值">累積儲值</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>排序</label>
+            <select id="sortBy" onchange="applyFilters()">
+              <option value="">預設</option>
+              <option value="name_asc">花名 A→Z</option><option value="name_desc">花名 Z→A</option>
+              <option value="score_asc">競賽分 低→高</option><option value="score_desc">競賽分 高→低</option>
+            </select>
+          </div>
+          <button class="btn-reset" onclick="resetFilters()">重置</button>
+        </div>
+      </div>
+      <div class="result-count" id="resultCount"></div>
+      <div class="flower-grid" id="flowerGrid"></div>
+    </div>
   </div>
 
-  <!-- ══ ID LIST 頁 ══ -->
   <div id="id-page" class="page">
-    <div class="id-table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>暱稱</th>
-            <th>遊戲 ID</th>
-            <th>職位</th>
-          </tr>
-        </thead>
-        <tbody id="idTableBody"></tbody>
-      </table>
+    <div id="memberLoading" class="loading">
+      <div class="loading-spinner"></div><br>載入成員資料中...
+    </div>
+    <div id="memberContent" style="display:none;">
+      <div class="id-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th></tr></thead>
+          <tbody id="idTableBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
-
 </main>
 
 <script>
-// 花卉資料從 flowers.js 載入（window.FLOWERS）
+const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
+const ROLE_ORDER = {'會長':0,'副會長':1,'理事':2,'菁英':3,'成員':4};
 
-// 成員資料從 members.js 載入（window.MEMBERS）
+let FLOWERS = [], MEMBERS = [], OWNERSHIP = [];
+let dataLoaded = false;
 
-// ════════════════════════════════════════════
-//  頁面切換
-// ════════════════════════════════════════════
+// ── 從 Google Sheets 載入資料 ──
+async function loadFromSheets() {
+  const { apiKey, sheetId, ranges } = SHEET_CONFIG;
+  const rangeParam = ranges.map(r => `ranges=${encodeURIComponent(r)}`).join('&');
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?${rangeParam}&key=${apiKey}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const [flowersSheet, membersSheet, ownershipSheet] = data.valueRanges;
+
+    // 解析 flowers
+    const fHeaders = flowersSheet.values[0];
+    FLOWERS = flowersSheet.values.slice(1).map(row => {
+      const f = {};
+      fHeaders.forEach((h, i) => { f[h.toLowerCase()] = row[i] || ''; });
+      f.id = Number(f.id);
+      f.score = Number(f.score);
+      f.order = Number(f.order) || 999;
+      f.owners = [];
+      return f;
+    });
+
+    // 解析 members
+    const mHeaders = membersSheet.values[0];
+    MEMBERS = membersSheet.values.slice(1).map(row => {
+      const m = {};
+      mHeaders.forEach((h, i) => { m[h.toLowerCase()] = row[i] || ''; });
+      // 統一欄位名稱
+      m.gameId = m.gameid || m.gameId || '';
+      m.nickname = m.nickname || '';
+      m.note = m.note || '成員';
+      return m;
+    });
+
+    // 解析 ownership
+    const oHeaders = ownershipSheet.values[0];
+    OWNERSHIP = ownershipSheet.values.slice(1).map(row => {
+      const o = {};
+      oHeaders.forEach((h, i) => { o[h.toLowerCase()] = row[i] || ''; });
+      return o;
+    });
+
+    // 建立 flowerId → flower 對應
+    const flowerMap = {};
+    FLOWERS.forEach(f => { flowerMap[f.id] = f; });
+
+    // 填入 owners — 只有 gameId 和 flowerId 兩欄
+    OWNERSHIP.forEach(o => {
+      const gameId = o.gameid || o.gameId || Object.values(o)[0] || '';
+      const fidRaw = o.flowerid || o.flowerId || Object.values(o)[1] || '';
+      const fid = Number(fidRaw);
+      if (flowerMap[fid] && gameId) {
+        flowerMap[fid].owners.push(gameId);
+      }
+    });
+
+    // debug
+    console.log('flowers:', FLOWERS.length);
+    console.log('members:', MEMBERS.length);
+    console.log('ownership rows:', OWNERSHIP.length);
+    console.log('ownership sample:', JSON.stringify(OWNERSHIP.slice(0,3)));
+    console.log('flower 1 owners:', FLOWERS[0]?.owners);
+    console.log('flower 1 id type:', typeof FLOWERS[0]?.id, FLOWERS[0]?.id);
+
+    dataLoaded = true;
+    return true;
+  } catch(e) {
+    console.error('載入失敗:', e);
+    return false;
+  }
+}
+
+// ── gameId → nickname ──
+function buildGameIdMap() {
+  const map = {};
+  MEMBERS.forEach(m => {
+    const id = m.gameId || m.gameid || '';
+    const nick = m.nickname || id;
+    if (id) map[id] = nick;
+  });
+  return map;
+}
+
+// ── 頁面切換 ──
 function showPage(pageId, link) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
   link.classList.add('active');
+  if (pageId === 'id-page') renderIdTable();
 }
 
-// ════════════════════════════════════════════
-//  花卉圖鑑
-// ════════════════════════════════════════════
-// 建立 gameId → nickname 對應表（支援 owners 存 gameId 的新格式）
-function buildGameIdMap() {
-  const map = {};
-  (window.MEMBERS || []).forEach(m => { map[m.gameId] = m.nickname || m.gameId; });
-  return map;
-}
-
+// ── 花卉圖鑑 ──
 function applyFilters() {
   const gameIdMap = buildGameIdMap();
+  const ownerDisplay = o => gameIdMap[o] || o;
   const q       = document.getElementById('searchInput').value.trim().toLowerCase();
+  const quality = document.getElementById('filterQuality').value;
   const score   = document.getElementById('filterScore').value;
   const obtain  = document.getElementById('filterObtain').value;
-  const quality = document.getElementById('filterQuality').value;
   const sort    = document.getElementById('sortBy').value;
 
-  // owner 顯示名稱（gameId 轉 nickname，或直接用原值）
-  const ownerDisplay = o => gameIdMap[o] || o;
-
-  let list = (window.FLOWERS || []).filter(f => {
+  let list = FLOWERS.filter(f => {
     const ownerNames = f.owners.map(ownerDisplay);
-    const matchQ = !q ||
-      f.name.toLowerCase().includes(q) ||
-      ownerNames.some(o => o.toLowerCase().includes(q));
-    const matchScore   = !score   || String(f.score) === score;
-    const matchObtain  = !obtain  || f.obtain === obtain;
-    const matchQuality = !quality || f.quality === quality;
-    return matchQ && matchScore && matchObtain && matchQuality;
+    const matchQ = !q || f.name.toLowerCase().includes(q) || ownerNames.some(o => o.toLowerCase().includes(q));
+    return matchQ
+      && (!quality || f.quality === quality)
+      && (!score   || String(f.score) === score)
+      && (!obtain  || f.obtain === obtain);
   });
 
-  if (sort === 'name_asc')   list.sort((a,b) => a.name.localeCompare(b.name, 'zh-TW'));
-  if (sort === 'name_desc')  list.sort((a,b) => b.name.localeCompare(a.name, 'zh-TW'));
+  if (sort === 'name_asc')   list.sort((a,b) => a.name.localeCompare(b.name,'zh-TW'));
+  if (sort === 'name_desc')  list.sort((a,b) => b.name.localeCompare(a.name,'zh-TW'));
   if (sort === 'score_asc')  list.sort((a,b) => a.score - b.score);
   if (sort === 'score_desc') list.sort((a,b) => b.score - a.score);
-  const QUALITY_ORDER = {'\u4ed9':0,'\u83ef':1,'\u73cd':2,'\u666e':3,'\u51e1':4};
   if (!sort) list.sort((a,b) => {
     const qd = (QUALITY_ORDER[a.quality]??9) - (QUALITY_ORDER[b.quality]??9);
     return qd !== 0 ? qd : (a.order??999) - (b.order??999);
@@ -566,43 +326,32 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  document.getElementById('searchInput').value = '';
-  document.getElementById('filterScore').value = '';
-  document.getElementById('filterObtain').value = '';
-  document.getElementById('filterQuality').value = '';
-  document.getElementById('sortBy').value = '';
+  ['searchInput','filterQuality','filterScore','filterObtain','sortBy'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
   applyFilters();
 }
 
 function renderFlowers(list, ownerDisplay) {
   ownerDisplay = ownerDisplay || (o => o);
-  const grid = document.getElementById('flowerGrid');
-  const count = document.getElementById('resultCount');
-  count.innerHTML = `共找到 <span>${list.length}</span> 種花`;
-
+  document.getElementById('resultCount').innerHTML = `共找到 <span>${list.length}</span> 種花`;
   if (list.length === 0) {
-    grid.innerHTML = '<div class="no-result">🌸 找不到符合條件的花卉</div>';
+    document.getElementById('flowerGrid').innerHTML = '<div class="no-result">🌸 找不到符合條件的花卉</div>';
     return;
   }
-
-  grid.innerHTML = list.map(f => {
+  document.getElementById('flowerGrid').innerHTML = list.map(f => {
     const ownerNames = f.owners.map(ownerDisplay);
     const ownerTags = ownerNames.length
       ? ownerNames.map(o => `<span class="owner-tag">${o}</span>`).join('')
       : '<span class="no-owner">尚無人擁有</span>';
-
     const thumb = f.img
       ? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='🌸'">`
       : '🌸';
-
     return `
       <div class="flower-card quality-${f.quality}">
         <div class="card-thumb">${thumb}</div>
         <div class="card-body">
-          <div class="card-title">
-            ${f.name}
-            <span class="owner-count">(${ownerNames.length} 人擁有)</span>
-          </div>
+          <div class="card-title">${f.name}<span class="owner-count">(${ownerNames.length} 人擁有)</span></div>
           <div class="card-meta">
             <span class="badge badge-quality-${f.quality}">${f.quality}</span>
             <span class="badge badge-score">競賽分 ${f.score}</span>
@@ -614,32 +363,38 @@ function renderFlowers(list, ownerDisplay) {
   }).join('');
 }
 
-// ════════════════════════════════════════════
-//  ID LIST
-// ════════════════════════════════════════════
+// ── 公會成員 ──
 function renderIdTable() {
-  const ROLE_ORDER = { '會長':0, '副會長':1, '理事':2, '菁英':3, '成員':4 };
-  const tbody = document.getElementById('idTableBody');
-  const sorted = (window.MEMBERS || [])
-    .filter(m => !m.left)
-    .sort((a, b) => {
-      const ro = (ROLE_ORDER[a.note] ?? 9) - (ROLE_ORDER[b.note] ?? 9);
-      return ro !== 0 ? ro : a.id - b.id;
+  const sorted = MEMBERS
+    .slice()
+    .sort((a,b) => {
+      const rd = (ROLE_ORDER[a.note]??9) - (ROLE_ORDER[b.note]??9);
+      return rd !== 0 ? rd : 0;
     });
-  tbody.innerHTML = sorted.map((m, i) => `
+  document.getElementById('idTableBody').innerHTML = sorted.map((m,i) => `
     <tr>
-      <td>${i + 1}</td>
+      <td>${i+1}</td>
       <td>${m.nickname}</td>
       <td>${m.gameId}</td>
-      <td><span class="role-badge role-${m.note || '成員'}">${m.note || '成員'}</span></td>
+      <td><span class="role-badge role-${m.note||'成員'}">${m.note||'成員'}</span></td>
     </tr>`).join('');
+  document.getElementById('memberLoading').style.display = 'none';
+  document.getElementById('memberContent').style.display = 'block';
 }
 
-// ════════════════════════════════════════════
-//  初始化
-// ════════════════════════════════════════════
-applyFilters();
-renderIdTable();
+// ── 初始化 ──
+(async () => {
+  const ok = await loadFromSheets();
+  document.getElementById('flowerLoading').style.display = 'none';
+  if (ok) {
+    document.getElementById('flowerContent').style.display = 'block';
+    applyFilters();
+  } else {
+    document.getElementById('flowerGrid').innerHTML =
+      '<div class="no-result">⚠️ 無法載入資料，請確認 API Key 和 Sheet 設定</div>';
+    document.getElementById('flowerContent').style.display = 'block';
+  }
+})();
 </script>
 </body>
 </html>
