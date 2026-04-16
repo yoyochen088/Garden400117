@@ -188,7 +188,7 @@ function searchSelected() {
   selectedMember = null;
 }
 
-// ── 圖片預載（解決 iOS 跨域問題）──
+// ── 圖片預載（非 iOS 用，解決跨域）──
 async function preloadImages(container) {
   const imgs = container.querySelectorAll('img');
   await Promise.all([...imgs].map(img => new Promise(resolve => {
@@ -201,7 +201,7 @@ async function preloadImages(container) {
       reader.onload = e => { img.src = e.target.result; resolve(); };
       reader.readAsDataURL(xhr.response);
     };
-    xhr.onerror = () => resolve(); // 失敗也繼續
+    xhr.onerror = () => resolve();
     xhr.send();
   })));
 }
@@ -210,38 +210,57 @@ async function preloadImages(container) {
 async function downloadImage() {
   const btn = document.getElementById('downloadBtn');
   const card = document.getElementById('showcase-card');
+  const name = document.getElementById('user-name').textContent || '花展';
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   btn.textContent = '⏳ 生成中...';
   btn.disabled = true;
 
+  // 設定 15 秒 timeout 防卡住
+  let done = false;
+  const timeoutId = setTimeout(() => {
+    if (!done) {
+      btn.textContent = '📥 下載圖片';
+      btn.disabled = false;
+      alert('生成超時，請重試。');
+    }
+  }, 15000);
+
   try {
-    // 預載圖片轉 base64，解決跨域
-    await preloadImages(card);
-
-    const canvas = await html2canvas(card, {
-      scale: 2,
-      useCORS: false,
-      allowTaint: true,
-      backgroundColor: '#fff8f5',
-      logging: false,
-      imageTimeout: 0
-    });
-
-    const dataUrl = canvas.toDataURL('image/png');
+    let dataUrl;
 
     if (isIOS) {
-      // iOS：另開視窗顯示圖片，長按儲存
+      // iOS 用 dom-to-image（對 Safari 支援較好）
+      dataUrl = await domtoimage.toPng(card, { scale: 2 });
+    } else {
+      // 其他裝置用 html2canvas
+      await preloadImages(card);
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: false,
+        allowTaint: true,
+        backgroundColor: '#fff8f5',
+        logging: false,
+        imageTimeout: 0
+      });
+      dataUrl = canvas.toDataURL('image/png');
+    }
+
+    done = true;
+    clearTimeout(timeoutId);
+
+    if (isIOS) {
+      // iOS 另開視窗顯示圖片，長按儲存
       const w = window.open('', '_blank');
       if (w) {
         w.document.write(`<!DOCTYPE html><html><head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>個人花展</title>
+          <title>${name} 的花展</title>
           <style>
             body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:16px;min-height:100vh;}
             img{max-width:100%;border-radius:12px;display:block;}
-            .tip{color:#fff;font-size:15px;margin-top:14px;text-align:center;line-height:1.6;background:rgba(255,255,255,0.1);padding:10px 16px;border-radius:8px;}
+            .tip{color:#fff;font-size:15px;margin-top:14px;text-align:center;line-height:1.8;background:rgba(255,255,255,0.1);padding:12px 20px;border-radius:10px;}
           </style>
           </head><body>
           <img src="${dataUrl}">
@@ -249,16 +268,17 @@ async function downloadImage() {
           </body></html>`);
         w.document.close();
       } else {
-        alert('請允許彈出視窗，或長按花展頁面截圖儲存。');
+        alert('請允許彈出視窗後再試。\n設定 → Safari → 封鎖彈出式視窗 → 關閉');
       }
     } else {
-      const name = document.getElementById('user-name').textContent || '花展';
       const link = document.createElement('a');
       link.download = `${name}_花展.png`;
       link.href = dataUrl;
       link.click();
     }
   } catch(e) {
+    done = true;
+    clearTimeout(timeoutId);
     alert('生成失敗：' + e.message);
   } finally {
     btn.textContent = '📥 下載圖片';
