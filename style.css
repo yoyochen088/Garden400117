@@ -116,6 +116,34 @@ body {
 /* ── 品質區塊 ── */
 .quality-section {
   margin-bottom: 20px;
+  border-radius: 16px;
+  padding: 16px 14px;
+}
+
+/* 仙品：粉紅漸層背景 */
+.quality-section.q-仙 {
+  background: linear-gradient(135deg, rgba(255,78,138,0.08) 0%, rgba(255,140,66,0.08) 100%);
+  border: 2px solid rgba(255,78,138,0.35);
+}
+/* 華品：橘金漸層背景 */
+.quality-section.q-華 {
+  background: linear-gradient(135deg, rgba(255,140,0,0.08) 0%, rgba(255,179,71,0.08) 100%);
+  border: 2px solid rgba(255,140,0,0.35);
+}
+/* 珍品：紫色背景 */
+.quality-section.q-珍 {
+  background: linear-gradient(135deg, rgba(155,89,182,0.08) 0%, rgba(195,155,211,0.08) 100%);
+  border: 2px solid rgba(155,89,182,0.3);
+}
+/* 普品：藍色背景 */
+.quality-section.q-普 {
+  background: linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(116,185,255,0.08) 100%);
+  border: 2px solid rgba(74,144,217,0.3);
+}
+/* 凡品：灰綠背景 */
+.quality-section.q-凡 {
+  background: linear-gradient(135deg, rgba(127,140,110,0.08) 0%, rgba(168,184,154,0.08) 100%);
+  border: 2px solid rgba(127,140,110,0.3);
 }
 
 .quality-title {
@@ -143,18 +171,16 @@ body {
 
 /* ── 花卉網格 ── */
 .flower-grid-showcase {
-  background: rgba(255,255,255,0.7);
-  border-radius: 14px;
-  padding: 14px 10px;
-  border: 2px solid;
+  border-radius: 10px;
+  padding: 8px 4px;
 }
-.quality-section:nth-child(1) .flower-grid-showcase { border-color: rgba(255,78,138,0.3); }
-.quality-section:nth-child(2) .flower-grid-showcase { border-color: rgba(255,140,0,0.3); }
 
 .flower-items {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 8px;
+  /* 防止最後一欄爆框 */
+  width: 100%;
 }
 
 .flower-item {
@@ -162,6 +188,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  min-width: 0; /* 防爆框關鍵 */
 }
 
 .flower-circle {
@@ -176,11 +203,15 @@ body {
 }
 .q-仙 .flower-circle { border-color: #ff6b9d; }
 .q-華 .flower-circle { border-color: #ffb347; }
+.q-珍 .flower-circle { border-color: #c39bd3; }
+.q-普 .flower-circle { border-color: #74b9ff; }
+.q-凡 .flower-circle { border-color: #a8b89a; }
 
 .flower-circle img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center; /* 擷取中間區塊 */
 }
 
 .flower-label {
@@ -231,17 +262,15 @@ body {
 }
 
 /* ── RWD ── */
-/* 桌機：花卉較大，6欄 */
 @media (min-width: 768px) {
   body { padding: 32px 24px 80px; }
   #showcase-card { padding: 32px 28px 36px; }
-  .flower-items { grid-template-columns: repeat(8, 1fr); gap: 10px; }
+  .flower-items { grid-template-columns: repeat(7, 1fr); gap: 10px; }
   .flower-circle { width: 68px; height: 68px; }
   .flower-label { font-size: 0.65rem; max-width: 72px; }
   .user-name { font-size: 1.5rem; }
 }
 
-/* 手機：4欄 */
 @media (max-width: 480px) {
   .flower-items { grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .flower-circle { width: 52px; height: 52px; }

@@ -120,17 +120,64 @@ function renderShowcase(member, flowers) {
   card.style.display = 'block';
 }
 
-// ── 搜尋 ──
-async function search() {
-  const query = document.getElementById('searchInput').value.trim();
-  if (!query) { alert('請輸入成員暱稱或遊戲 ID'); return; }
+// ── 模糊搜尋 ──
+let selectedMember = null;
 
-  const member = findMember(query);
-  if (!member) { alert(`找不到成員「${query}」`); return; }
+function onSearchInput() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const list = document.getElementById('suggestList');
+  if (!q) { list.style.display = 'none'; return; }
 
-  const flowers = getMemberFlowers(member.gameId);
+  const matches = allMembers.filter(m =>
+    m.nickname.toLowerCase().includes(q) ||
+    (m.gameid || '').toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if (matches.length === 0) { list.style.display = 'none'; return; }
+
+  list.innerHTML = matches.map(m => `
+    <div class="suggest-item" onclick="selectMember('${m.gameId || m.gameid}')">
+      <span class="suggest-nick">${m.nickname}</span>
+      <span class="suggest-id">${m.gameId || m.gameid}</span>
+      <span class="suggest-role">${m.note || '成員'}</span>
+    </div>`).join('');
+  list.style.display = 'block';
+}
+
+function selectMember(gameId) {
+  selectedMember = allMembers.find(m => (m.gameId || m.gameid) === gameId);
+  if (selectedMember) {
+    document.getElementById('searchInput').value = selectedMember.nickname;
+    document.getElementById('suggestList').style.display = 'none';
+  }
+}
+
+function onSearchKey(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('suggestList').style.display = 'none';
+  }
+  if (e.key === 'Enter') searchSelected();
+}
+
+// 點外面關閉下拉
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrapper')) {
+    document.getElementById('suggestList').style.display = 'none';
+  }
+});
+
+function searchSelected() {
+  const member = selectedMember || (() => {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    return allMembers.find(m =>
+      m.nickname.toLowerCase() === q || (m.gameid || '').toLowerCase() === q
+    );
+  })();
+  if (!member) { alert('請從下拉選單選擇成員'); return; }
+  const flowers = getMemberFlowers(member.gameId || member.gameid);
   renderShowcase(member, flowers);
   document.getElementById('downloadBtn').style.display = '';
+  selectedMember = null;
 }
 
 // ── 下載成圖 ──
@@ -173,7 +220,8 @@ async function downloadImage() {
     const userParam = params.get('user');
     if (userParam) {
       document.getElementById('searchInput').value = userParam;
-      await search();
+      selectedMember = findMember(userParam);
+      if (selectedMember) searchSelected();
     }
   } catch(e) {
     loadingEl.innerHTML = `<div style="color:#c2185b;">⚠️ 資料載入失敗：${e.message}</div>`;
