@@ -120,6 +120,14 @@ function renderShowcase(member, flowers) {
   card.style.display = 'block';
 }
 
+function quickSelect(gameId) {
+  selectedMember = allMembers.find(m => (m.gameId || m.gameid) === gameId);
+  if (selectedMember) {
+    document.getElementById('searchInput').value = selectedMember.nickname;
+    searchSelected();
+  }
+}
+
 // ── 模糊搜尋 ──
 let selectedMember = null;
 
@@ -191,28 +199,42 @@ async function downloadImage() {
     const canvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       backgroundColor: '#fff8f5',
-      logging: false
+      logging: false,
+      imageTimeout: 15000
     });
 
     const dataUrl = canvas.toDataURL('image/png');
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     if (isIOS) {
-      // iOS：在新分頁開啟圖片，讓用戶長按儲存
-      const win = window.open();
-      win.document.write(`
-        <html><head><title>長按圖片儲存</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <style>body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:16px;}
-        img{max-width:100%;border-radius:12px;}
-        p{color:#fff;font-size:14px;margin-top:12px;text-align:center;}</style>
-        </head><body>
-        <img src="${dataUrl}">
-        <p>長按圖片 → 儲存至相片</p>
-        </body></html>`);
+      // iOS：在新分頁開啟，長按儲存
+      const img = new Image();
+      img.src = dataUrl;
+      const w = window.open('', '_blank');
+      if (w) {
+        w.document.write(`<!DOCTYPE html><html><head>
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>長按儲存</title>
+          <style>body{margin:0;background:#111;text-align:center;padding:16px;}
+          img{max-width:100%;border-radius:8px;}
+          p{color:#fff;font-size:14px;margin-top:10px;}</style>
+          </head><body>
+          <img src="${dataUrl}">
+          <p>📱 長按圖片 → 儲存至相片</p>
+          </body></html>`);
+        w.document.close();
+      } else {
+        // popup 被擋，直接在當前頁顯示
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;';
+        overlay.innerHTML = `<img src="${dataUrl}" style="max-width:100%;max-height:80vh;border-radius:8px;">
+          <p style="color:#fff;margin-top:12px;font-size:14px;">長按圖片 → 儲存至相片</p>
+          <button onclick="this.parentElement.remove()" style="margin-top:12px;padding:8px 20px;border-radius:8px;border:none;background:#e96a1e;color:#fff;font-size:14px;cursor:pointer;">關閉</button>`;
+        document.body.appendChild(overlay);
+      }
     } else {
-      // 其他裝置：直接下載
       const name = document.getElementById('user-name').textContent || '花展';
       const link = document.createElement('a');
       link.download = `${name}_花展.png`;
@@ -220,7 +242,7 @@ async function downloadImage() {
       link.click();
     }
   } catch(e) {
-    alert('生成失敗：' + e.message);
+    alert('生成失敗，請截圖儲存。\n錯誤：' + e.message);
   } finally {
     btn.textContent = '📥 下載圖片';
     btn.disabled = false;
@@ -233,7 +255,12 @@ async function downloadImage() {
   try {
     await loadData();
     loadingEl.style.display = 'none';
-    document.getElementById('search-area').style.display = '';
+    // ── 成員快速按鈕 ──
+  const btns = document.getElementById('memberBtns');
+  btns.innerHTML = allMembers.map(m => `
+    <button class="member-btn" onclick="quickSelect('${m.gameId || m.gameid}')">${m.nickname}</button>
+  `).join('');
+  document.getElementById('search-area').style.display = '';
 
     // 支援 URL 參數 ?user=暱稱
     const params = new URLSearchParams(location.search);
