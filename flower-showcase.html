@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>個人花展</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="config.js"></script>
+  <!-- html2canvas：截圖下載用 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<!-- 載入中 -->
+<div id="loading" class="loading">
+  <div class="loading-spinner"></div><br>載入資料中...
+</div>
+
+<!-- 搜尋列 -->
+<div id="search-area" style="display:none;">
+  <div class="search-bar">
+    <input id="searchInput" type="text" placeholder="輸入成員暱稱或遊戲 ID..."
+      onkeydown="if(event.key==='Enter') search()" />
+    <button class="btn btn-primary" onclick="search()">🔍 查詢</button>
+  </div>
+</div>
+
+<!-- 花展卡片（截圖區域）-->
+<div id="showcase-card" style="display:none;">
+
+  <!-- 用戶資訊 -->
+  <div class="user-header">
+    <div class="user-avatar" id="user-initial">?</div>
+    <div class="user-info">
+      <div class="user-name" id="user-name"></div>
+      <div class="user-stats">
+        <span id="user-gameid" style="color:#9e6b7e;font-size:0.78rem;"></span>
+        &nbsp;·&nbsp;
+        <span id="user-total"></span>
+      </div>
+    </div>
+    <div class="guild-badge">♡璀璨♡</div>
+  </div>
+
+  <!-- 品質區塊 -->
+  <div id="quality-sections"></div>
+
+</div>
+
+<!-- 底部浮動按鈕 -->
+<div class="fab-bar">
+  <button class="btn btn-secondary" onclick="history.back()">← 返回</button>
+  <button class="btn btn-primary" id="downloadBtn" style="display:none;" onclick="downloadImage()">📥 下載圖片</button>
+</div>
+
+<script src="flower-showcase.js"></script>
+</body>
+</html>
