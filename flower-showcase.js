@@ -188,51 +188,76 @@ function searchSelected() {
   selectedMember = null;
 }
 
+// ── 圖片預載（解決 iOS 跨域問題）──
+async function preloadImages(container) {
+  const imgs = container.querySelectorAll('img');
+  await Promise.all([...imgs].map(img => new Promise(resolve => {
+    if (img.complete && img.naturalWidth > 0) { resolve(); return; }
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', img.src, true);
+    xhr.responseType = 'blob';
+    xhr.onload = () => {
+      const reader = new FileReader();
+      reader.onload = e => { img.src = e.target.result; resolve(); };
+      reader.readAsDataURL(xhr.response);
+    };
+    xhr.onerror = () => resolve(); // 失敗也繼續
+    xhr.send();
+  })));
+}
+
 // ── 下載成圖 ──
 async function downloadImage() {
   const btn = document.getElementById('downloadBtn');
+  const card = document.getElementById('showcase-card');
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-  if (isIOS) {
-    // iOS 無法程式下載，直接提示截圖
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;';
-    overlay.innerHTML = `
-      <div style="background:#fff;border-radius:16px;padding:24px;max-width:320px;text-align:center;">
-        <div style="font-size:2rem;margin-bottom:12px;">📱</div>
-        <div style="font-weight:700;font-size:1rem;color:#c2510b;margin-bottom:8px;">iOS 儲存方式</div>
-        <div style="font-size:0.9rem;color:#555;line-height:1.6;">
-          請使用 iPhone/iPad 的<br>
-          <strong>截圖功能</strong>（側鍵 + 音量鍵）<br>
-          儲存花展圖片
-        </div>
-        <button onclick="this.closest('div').parentElement.remove()"
-          style="margin-top:16px;padding:10px 24px;border-radius:8px;border:none;background:#e96a1e;color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;">
-          了解
-        </button>
-      </div>`;
-    document.body.appendChild(overlay);
-    return;
-  }
-
-  // 非 iOS：用 html2canvas 下載
   btn.textContent = '⏳ 生成中...';
   btn.disabled = true;
+
   try {
-    const card = document.getElementById('showcase-card');
+    // 預載圖片轉 base64，解決跨域
+    await preloadImages(card);
+
     const canvas = await html2canvas(card, {
       scale: 2,
-      useCORS: true,
+      useCORS: false,
       allowTaint: true,
       backgroundColor: '#fff8f5',
       logging: false,
-      imageTimeout: 15000
+      imageTimeout: 0
     });
-    const name = document.getElementById('user-name').textContent || '花展';
-    const link = document.createElement('a');
-    link.download = `${name}_花展.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+
+    const dataUrl = canvas.toDataURL('image/png');
+
+    if (isIOS) {
+      // iOS：另開視窗顯示圖片，長按儲存
+      const w = window.open('', '_blank');
+      if (w) {
+        w.document.write(`<!DOCTYPE html><html><head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>個人花展</title>
+          <style>
+            body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:16px;min-height:100vh;}
+            img{max-width:100%;border-radius:12px;display:block;}
+            .tip{color:#fff;font-size:15px;margin-top:14px;text-align:center;line-height:1.6;background:rgba(255,255,255,0.1);padding:10px 16px;border-radius:8px;}
+          </style>
+          </head><body>
+          <img src="${dataUrl}">
+          <div class="tip">📱 長按圖片 → 儲存至相片</div>
+          </body></html>`);
+        w.document.close();
+      } else {
+        alert('請允許彈出視窗，或長按花展頁面截圖儲存。');
+      }
+    } else {
+      const name = document.getElementById('user-name').textContent || '花展';
+      const link = document.createElement('a');
+      link.download = `${name}_花展.png`;
+      link.href = dataUrl;
+      link.click();
+    }
   } catch(e) {
     alert('生成失敗：' + e.message);
   } finally {
