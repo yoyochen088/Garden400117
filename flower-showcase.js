@@ -191,16 +191,36 @@ async function downloadImage() {
     const canvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
-      backgroundColor: '#fff9fb',
+      backgroundColor: '#fff8f5',
       logging: false
     });
-    const link = document.createElement('a');
-    const name = document.getElementById('user-name').textContent || '花展';
-    link.download = `${name}_花展.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if (isIOS) {
+      // iOS：在新分頁開啟圖片，讓用戶長按儲存
+      const win = window.open();
+      win.document.write(`
+        <html><head><title>長按圖片儲存</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <style>body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:16px;}
+        img{max-width:100%;border-radius:12px;}
+        p{color:#fff;font-size:14px;margin-top:12px;text-align:center;}</style>
+        </head><body>
+        <img src="${dataUrl}">
+        <p>長按圖片 → 儲存至相片</p>
+        </body></html>`);
+    } else {
+      // 其他裝置：直接下載
+      const name = document.getElementById('user-name').textContent || '花展';
+      const link = document.createElement('a');
+      link.download = `${name}_花展.png`;
+      link.href = dataUrl;
+      link.click();
+    }
   } catch(e) {
-    alert('下載失敗：' + e.message);
+    alert('生成失敗：' + e.message);
   } finally {
     btn.textContent = '📥 下載圖片';
     btn.disabled = false;
