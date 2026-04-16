@@ -190,12 +190,36 @@ function searchSelected() {
 
 // ── 下載成圖 ──
 async function downloadImage() {
-  const card = document.getElementById('showcase-card');
   const btn = document.getElementById('downloadBtn');
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  if (isIOS) {
+    // iOS 無法程式下載，直接提示截圖
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:24px;max-width:320px;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:12px;">📱</div>
+        <div style="font-weight:700;font-size:1rem;color:#c2510b;margin-bottom:8px;">iOS 儲存方式</div>
+        <div style="font-size:0.9rem;color:#555;line-height:1.6;">
+          請使用 iPhone/iPad 的<br>
+          <strong>截圖功能</strong>（側鍵 + 音量鍵）<br>
+          儲存花展圖片
+        </div>
+        <button onclick="this.closest('div').parentElement.remove()"
+          style="margin-top:16px;padding:10px 24px;border-radius:8px;border:none;background:#e96a1e;color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;">
+          了解
+        </button>
+      </div>`;
+    document.body.appendChild(overlay);
+    return;
+  }
+
+  // 非 iOS：用 html2canvas 下載
   btn.textContent = '⏳ 生成中...';
   btn.disabled = true;
-
   try {
+    const card = document.getElementById('showcase-card');
     const canvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
@@ -204,45 +228,13 @@ async function downloadImage() {
       logging: false,
       imageTimeout: 15000
     });
-
-    const dataUrl = canvas.toDataURL('image/png');
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-    if (isIOS) {
-      // iOS：在新分頁開啟，長按儲存
-      const img = new Image();
-      img.src = dataUrl;
-      const w = window.open('', '_blank');
-      if (w) {
-        w.document.write(`<!DOCTYPE html><html><head>
-          <meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>長按儲存</title>
-          <style>body{margin:0;background:#111;text-align:center;padding:16px;}
-          img{max-width:100%;border-radius:8px;}
-          p{color:#fff;font-size:14px;margin-top:10px;}</style>
-          </head><body>
-          <img src="${dataUrl}">
-          <p>📱 長按圖片 → 儲存至相片</p>
-          </body></html>`);
-        w.document.close();
-      } else {
-        // popup 被擋，直接在當前頁顯示
-        const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;';
-        overlay.innerHTML = `<img src="${dataUrl}" style="max-width:100%;max-height:80vh;border-radius:8px;">
-          <p style="color:#fff;margin-top:12px;font-size:14px;">長按圖片 → 儲存至相片</p>
-          <button onclick="this.parentElement.remove()" style="margin-top:12px;padding:8px 20px;border-radius:8px;border:none;background:#e96a1e;color:#fff;font-size:14px;cursor:pointer;">關閉</button>`;
-        document.body.appendChild(overlay);
-      }
-    } else {
-      const name = document.getElementById('user-name').textContent || '花展';
-      const link = document.createElement('a');
-      link.download = `${name}_花展.png`;
-      link.href = dataUrl;
-      link.click();
-    }
+    const name = document.getElementById('user-name').textContent || '花展';
+    const link = document.createElement('a');
+    link.download = `${name}_花展.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   } catch(e) {
-    alert('生成失敗，請截圖儲存。\n錯誤：' + e.message);
+    alert('生成失敗：' + e.message);
   } finally {
     btn.textContent = '📥 下載圖片';
     btn.disabled = false;

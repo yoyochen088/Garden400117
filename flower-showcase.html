@@ -10,22 +10,28 @@
   <style>
     /* 成員快速按鈕 */
     .member-btn {
-      padding: 5px 14px;
-      border-radius: 16px;
+      padding: 6px 16px;
+      border-radius: 20px;
       border: 1.5px solid var(--pink-mid);
-      background: var(--pink-light);
+      background: #fff;
       color: var(--pink-dark);
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
+      box-shadow: 0 1px 4px rgba(233,106,30,0.1);
     }
-    .member-btn:hover { background: var(--pink); color: #fff; border-color: var(--pink); }
+    .member-btn:hover, .member-btn.active {
+      background: var(--pink);
+      color: #fff;
+      border-color: var(--pink);
+      box-shadow: 0 2px 8px rgba(233,106,30,0.25);
+    }
 
     /* PC 橫向版面（FB 封面比例 1200x628 ≈ 1.91:1） */
     @media (min-width: 768px) {
       #showcase-card {
-        max-width: 960px;
+        max-width: 1200px;
         aspect-ratio: 1.91 / 1;
         display: flex;
         flex-direction: column;
