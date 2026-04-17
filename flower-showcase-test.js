@@ -74,8 +74,6 @@ async function renderShowcase(member, flowers) {
   currentMember = member;
   currentFlowers = flowers;
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
   // 用戶資訊
   const initial = (member.nickname || member.gameId || '?')[0];
   document.getElementById('user-initial').textContent = initial;
@@ -83,39 +81,7 @@ async function renderShowcase(member, flowers) {
   document.getElementById('user-gameid').textContent = member.gameId;
   document.getElementById('user-total').textContent = `共擁有 ${flowers.length} 種花`;
 
-  if (isIOS) {
-    // iOS：直接用 Canvas 繪製成圖片顯示在頁面，長按儲存
-    document.getElementById('showcase-card').style.display = 'none';
-    document.getElementById('downloadBtn').style.display = 'none'; // iOS 不顯示下載按鈕
-
-    let imgContainer = document.getElementById('ios-canvas-img');
-    if (!imgContainer) {
-      imgContainer = document.createElement('div');
-      imgContainer.id = 'ios-canvas-img';
-      imgContainer.style.cssText = 'max-width:680px;margin:0 auto;text-align:center;padding:0 16px;';
-      document.querySelector('main').appendChild(imgContainer);
-    }
-    imgContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><br>圖片生成中，請稍後...</div>';
-
-    // 稍微延遲讓 loading 先顯示
-    await new Promise(r => setTimeout(r, 50));
-
-    try {
-      const cardWidth = Math.min(window.innerWidth - 32, 680);
-      const canvas = await drawShowcaseToCanvas(member, flowers, cardWidth);
-      const dataUrl = canvas.toDataURL('image/png');
-      imgContainer.innerHTML = `
-        <img src="${dataUrl}" style="max-width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
-        <div style="margin-top:12px;color:#9e6b7e;font-size:13px;padding:10px;background:rgba(233,106,30,0.08);border-radius:8px;">
-          📱 長按圖片 → 儲存至相片
-        </div>`;
-    } catch(e) {
-      imgContainer.innerHTML = `<div style="color:#c2510b;padding:20px;">生成失敗：${e.message}</div>`;
-    }
-    return;
-  }
-
-  // 非 iOS：顯示 HTML 版本
+  // 顯示 HTML 版本（iOS 和非 iOS 都一樣）
   document.getElementById('showcase-card').style.display = 'block';
 
   const groups = {};
@@ -155,6 +121,12 @@ async function renderShowcase(member, flowers) {
   if (flowers.length === 0) {
     container.innerHTML = '<div class="empty-state">🌸 此成員尚無花卉資料</div>';
   }
+
+  // 顯示按鈕，iOS 改文字
+  const btn = document.getElementById('downloadBtn');
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  btn.textContent = isIOS ? '🖼 生成圖片' : '📥 下載圖片';
+  btn.style.display = '';
 }
 
 async function quickSelect(gameId) {
@@ -425,7 +397,7 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// ── 下載成圖（Canvas 版）──
+// ── 下載/生成圖片 ──
 async function downloadImage() {
   const btn = document.getElementById('downloadBtn');
   const name = document.getElementById('user-name').textContent || '花展';
@@ -435,36 +407,52 @@ async function downloadImage() {
   btn.disabled = true;
 
   try {
-    const canvas = await drawShowcaseToCanvas(currentMember, currentFlowers);
-    const dataUrl = canvas.toDataURL('image/png');
-
     if (isIOS) {
-      const w = window.open('', '_blank');
-      if (w) {
-        w.document.write(`<!DOCTYPE html><html><head>
-          <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>${name} 的花展</title>
-          <style>body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:16px;}
-          img{max-width:100%;border-radius:8px;}
-          .tip{color:#fff;font-size:14px;margin-top:12px;text-align:center;}</style>
-          </head><body>
-          <img src="${dataUrl}">
-          <div class="tip">📱 長按圖片 → 儲存至相片</div>
-          </body></html>`);
-        w.document.close();
-      } else {
-        alert('請允許彈出視窗後再試。\n設定 → Safari → 封鎖彈出式視窗 → 關閉');
+      // iOS：用 Canvas 繪製，取代頁面上的 HTML 花展
+      const cardWidth = Math.min(window.innerWidth - 32, 680);
+      const canvas = await drawShowcaseToCanvas(currentMember, currentFlowers, cardWidth);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // 取代 showcase-card 為圖片
+      const card = document.getElementById('showcase-card');
+      card.style.display = 'none';
+
+      let imgContainer = document.getElementById('ios-canvas-img');
+      if (!imgContainer) {
+        imgContainer = document.createElement('div');
+        imgContainer.id = 'ios-canvas-img';
+        imgContainer.style.cssText = 'max-width:680px;margin:0 auto;text-align:center;padding:0 16px;';
+        card.parentNode.insertBefore(imgContainer, card.nextSibling);
       }
+      imgContainer.innerHTML = `
+        <img src="${dataUrl}" style="max-width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
+        <div style="margin-top:12px;color:#9e6b7e;font-size:13px;padding:10px;background:rgba(233,106,30,0.08);border-radius:8px;">
+          📱 長按圖片 → 儲存至相片
+        </div>`;
+      btn.textContent = '🔄 重新生成';
     } else {
+      // 非 iOS：html2canvas 下載
+      const card = document.getElementById('showcase-card');
+      await preloadImages(card);
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: false,
+        allowTaint: true,
+        backgroundColor: '#fff8f5',
+        logging: false,
+        imageTimeout: 0
+      });
       const link = document.createElement('a');
       link.download = `${name}_花展.png`;
-      link.href = dataUrl;
+      link.href = canvas.toDataURL('image/png');
       link.click();
+      btn.textContent = '📥 下載圖片';
     }
   } catch(e) {
     alert('生成失敗：' + e.message);
+    const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    btn.textContent = isIOS2 ? '🖼 生成圖片' : '📥 下載圖片';
   } finally {
-    btn.textContent = '📥 下載圖片';
     btn.disabled = false;
   }
 }
