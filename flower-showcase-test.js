@@ -86,7 +86,7 @@ async function renderShowcase(member, flowers) {
   if (isIOS) {
     // iOS：直接用 Canvas 繪製成圖片顯示在頁面，長按儲存
     document.getElementById('showcase-card').style.display = 'none';
-    document.getElementById('downloadBtn').style.display = 'none';
+    document.getElementById('downloadBtn').style.display = 'none'; // iOS 不顯示下載按鈕
 
     let imgContainer = document.getElementById('ios-canvas-img');
     if (!imgContainer) {
@@ -95,10 +95,14 @@ async function renderShowcase(member, flowers) {
       imgContainer.style.cssText = 'max-width:680px;margin:0 auto;text-align:center;padding:0 16px;';
       document.querySelector('main').appendChild(imgContainer);
     }
-    imgContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><br>繪製中...</div>';
+    imgContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><br>圖片生成中，請稍後...</div>';
+
+    // 稍微延遲讓 loading 先顯示
+    await new Promise(r => setTimeout(r, 50));
 
     try {
-      const canvas = await drawShowcaseToCanvas(member, flowers);
+      const cardWidth = Math.min(window.innerWidth - 32, 680);
+      const canvas = await drawShowcaseToCanvas(member, flowers, cardWidth);
       const dataUrl = canvas.toDataURL('image/png');
       imgContainer.innerHTML = `
         <img src="${dataUrl}" style="max-width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
@@ -237,7 +241,7 @@ async function loadImageBitmap(src) {
 }
 
 // ── Canvas 繪製花展 ──
-async function drawShowcaseToCanvas(member, flowers) {
+async function drawShowcaseToCanvas(member, flowers, cardWidth) {
   const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
   const QC = {
     '仙': { bg: 'rgba(255,78,138,0.08)', border: 'rgba(255,78,138,0.4)', badge: '#ff6b9d' },
@@ -273,7 +277,7 @@ async function drawShowcaseToCanvas(member, flowers) {
     totalH += BADGE_H + rows * ITEM_H + SECTION_PAD * 2 + 12 + PAD;
   });
 
-  const W = COLS * ITEM_W + PAD * 2;
+  const W = cardWidth || (COLS * ITEM_W + PAD * 2);
   const canvas = document.createElement('canvas');
   canvas.width = W * 2;
   canvas.height = totalH * 2;
