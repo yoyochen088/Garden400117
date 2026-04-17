@@ -70,10 +70,11 @@ function getMemberFlowers(gameId) {
 }
 
 // ── 渲染花展 ──
-function renderShowcase(member, flowers) {
+async function renderShowcase(member, flowers) {
   currentMember = member;
   currentFlowers = flowers;
-  const card = document.getElementById('showcase-card');
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   // 用戶資訊
   const initial = (member.nickname || member.gameId || '?')[0];
@@ -82,7 +83,37 @@ function renderShowcase(member, flowers) {
   document.getElementById('user-gameid').textContent = member.gameId;
   document.getElementById('user-total').textContent = `共擁有 ${flowers.length} 種花`;
 
-  // 按品質分組
+  if (isIOS) {
+    // iOS：直接用 Canvas 繪製成圖片顯示在頁面，長按儲存
+    document.getElementById('showcase-card').style.display = 'none';
+    document.getElementById('downloadBtn').style.display = 'none';
+
+    let imgContainer = document.getElementById('ios-canvas-img');
+    if (!imgContainer) {
+      imgContainer = document.createElement('div');
+      imgContainer.id = 'ios-canvas-img';
+      imgContainer.style.cssText = 'max-width:680px;margin:0 auto;text-align:center;padding:0 16px;';
+      document.querySelector('main').appendChild(imgContainer);
+    }
+    imgContainer.innerHTML = '<div class="loading"><div class="loading-spinner"></div><br>繪製中...</div>';
+
+    try {
+      const canvas = await drawShowcaseToCanvas(member, flowers);
+      const dataUrl = canvas.toDataURL('image/png');
+      imgContainer.innerHTML = `
+        <img src="${dataUrl}" style="max-width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
+        <div style="margin-top:12px;color:#9e6b7e;font-size:13px;padding:10px;background:rgba(233,106,30,0.08);border-radius:8px;">
+          📱 長按圖片 → 儲存至相片
+        </div>`;
+    } catch(e) {
+      imgContainer.innerHTML = `<div style="color:#c2510b;padding:20px;">生成失敗：${e.message}</div>`;
+    }
+    return;
+  }
+
+  // 非 iOS：顯示 HTML 版本
+  document.getElementById('showcase-card').style.display = 'block';
+
   const groups = {};
   flowers.forEach(f => {
     if (!groups[f.quality]) groups[f.quality] = [];
@@ -120,15 +151,13 @@ function renderShowcase(member, flowers) {
   if (flowers.length === 0) {
     container.innerHTML = '<div class="empty-state">🌸 此成員尚無花卉資料</div>';
   }
-
-  card.style.display = 'block';
 }
 
-function quickSelect(gameId) {
+async function quickSelect(gameId) {
   selectedMember = allMembers.find(m => (m.gameId || m.gameid) === gameId);
   if (selectedMember) {
     document.getElementById('searchInput').value = selectedMember.nickname;
-    searchSelected();
+    await searchSelected();
   }
 }
 
@@ -178,7 +207,7 @@ document.addEventListener('click', e => {
   }
 });
 
-function searchSelected() {
+async function searchSelected() {
   const member = selectedMember || (() => {
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
     return allMembers.find(m =>
@@ -187,7 +216,7 @@ function searchSelected() {
   })();
   if (!member) { alert('請從下拉選單選擇成員'); return; }
   const flowers = getMemberFlowers(member.gameId || member.gameid);
-  renderShowcase(member, flowers);
+  await renderShowcase(member, flowers);
   document.getElementById('downloadBtn').style.display = '';
   selectedMember = null;
 }
