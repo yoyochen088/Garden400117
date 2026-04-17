@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>[TEST] 個人花展 - ♡璀璨♡</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+  <style>
+    /* 成員快速按鈕 */
+    .member-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--pink-mid);
+      background: #fff;
+      color: var(--pink-dark);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 1px 4px rgba(233,106,30,0.1);
+    }
+    .member-btn:hover, .member-btn.active {
+      background: #c2510b;
+      color: #fff;
+      border-color: #c2510b;
+      box-shadow: 0 2px 8px rgba(233,106,30,0.35);
+    }
+
+    /* 模糊搜尋下拉 */
+    .search-wrapper { position: relative; }
+    .suggest-list {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1.5px solid var(--pink-mid);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(233,106,30,0.12);
+      z-index: 100;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .suggest-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--pink-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .suggest-item:last-child { border-bottom: none; }
+    .suggest-item:hover { background: var(--pink-light); }
+    .suggest-nick { font-weight: 600; color: var(--pink-dark); }
+    .suggest-id { font-size: 0.75rem; color: var(--text-muted); }
+    .suggest-role { font-size: 0.72rem; background: var(--pink-light); color: var(--pink-dark); padding: 1px 6px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- Header（與 index.html 相同） -->
+<header>
+  <div class="guild-name">♡璀璨♡ <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
+  <nav>
+    <a href="index.html">花卉圖鑑</a>
+    <a href="index.html#id-page">公會成員</a>
+    <a href="flower-showcase-test.html" class="active">個人花展</a>
+  </nav>
+</header>
+
+<main style="max-width:800px;margin:0 auto;padding:24px 16px 80px;">
+
+  <!-- 載入中 -->
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div><br>載入資料中...
+  </div>
+
+  <!-- 搜尋列 -->
+  <div id="search-area" style="display:none;margin-bottom:24px;">
+    <div class="search-bar">
+      <div class="search-wrapper">
+        <input id="searchInput" type="text" placeholder="輸入成員暱稱（模糊搜尋）..."
+          oninput="onSearchInput()" onkeydown="onSearchKey(event)"
+          autocomplete="off" />
+        <div class="suggest-list" id="suggestList" style="display:none;"></div>
+      </div>
+      <button class="btn btn-primary" onclick="searchSelected()">🔍 查詢</button>
+    </div>
+    <!-- 成員快速按鈕 -->
+    <div id="memberBtns" style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;"></div>
+  </div>
+
+  <!-- 花展卡片（截圖區域）-->
+  <div id="showcase-card" style="display:none;">
+    <div class="user-header">
+      <div class="user-avatar" id="user-initial">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name"></div>
+        <div class="user-stats">
+          <div id="user-gameid" style="color:var(--text-muted);font-size:0.78rem;"></div>
+          <div id="user-total" style="font-size:0.85rem;color:var(--pink-dark);font-weight:600;margin-top:2px;"></div>
+        </div>
+      </div>
+      <div class="guild-badge">
+        ♡璀璨♡<br>
+        <span style="font-size:0.7rem;opacity:0.85;">400117</span>
+      </div>
+    </div>
+    <div id="quality-sections"></div>
+  </div>
+
+</main>
+
+<!-- 底部浮動按鈕 -->
+<div class="fab-bar">
+  <button class="btn btn-primary" id="downloadBtn" style="display:none;" onclick="downloadImage()">📥 下載圖片</button>
+</div>
+
+<script src="flower-showcase-test.js"></script>
+</body>
+</html>
