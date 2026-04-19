@@ -204,11 +204,20 @@ async function searchSelected() {
 // ── 載入圖片為 ImageBitmap（iOS 可用）──
 async function loadImageBitmap(src) {
   try {
-    const res = await fetch(src);
+    const res = await fetch(src, { mode: 'cors' });
     const blob = await res.blob();
     return await createImageBitmap(blob);
   } catch(e) {
-    return null;
+    // fallback：用 Image 元素載入
+    return new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        createImageBitmap(img).then(resolve).catch(() => resolve(null));
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
   }
 }
 
@@ -230,15 +239,18 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
     groups[f.quality].push(f);
   });
 
-  const COLS = 5;
-  const CIRCLE = 80;
-  const LABEL_H = 22;
-  const ITEM_W = 96;
-  const ITEM_H = CIRCLE + LABEL_H + 8;
-  const PAD = 20;
-  const SECTION_PAD = 16;
+  const PAD = 16;
+  const SECTION_PAD = 12;
   const HEADER_H = 80;
   const BADGE_H = 36;
+
+  // 根據可用寬度動態計算欄數和圓圈大小
+  const availW = (cardWidth || 480) - PAD * 2 - SECTION_PAD * 2;
+  const COLS = Math.min(5, Math.floor(availW / 80));
+  const CIRCLE = Math.floor((availW - (COLS - 1) * 8) / COLS);
+  const LABEL_H = 20;
+  const ITEM_W = CIRCLE + 8;
+  const ITEM_H = CIRCLE + LABEL_H + 6;
 
   // 計算總高度
   let totalH = HEADER_H + PAD;
@@ -249,7 +261,7 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
     totalH += BADGE_H + rows * ITEM_H + SECTION_PAD * 2 + 12 + PAD;
   });
 
-  const W = cardWidth || (COLS * ITEM_W + PAD * 2);
+  const W = cardWidth || 480;
   const canvas = document.createElement('canvas');
   canvas.width = W * 2;
   canvas.height = totalH * 2;
@@ -337,7 +349,7 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
     for (let i = 0; i < items.length; i++) {
       const col = i % COLS;
       const row = Math.floor(i / COLS);
-      const ix = PAD + SECTION_PAD + col * ITEM_W + (ITEM_W - CIRCLE) / 2;
+      const ix = PAD + SECTION_PAD + col * (CIRCLE + 8);
       const itemY = iy + row * ITEM_H;
 
       // 圓形圖片
