@@ -473,7 +473,8 @@ async function downloadImage() {
       // 彈出提示
       alert('✅ 圖片已生成！\n請長按圖片儲存至相片。');
     } else {
-      // 非 iOS：html2canvas 下載（直接用 CORS，不預載）
+      // 非 iOS：html2canvas 下載
+      // html2canvas 不支援 object-fit，用 onclone 把 img 換成 background-image div
       const card = document.getElementById('showcase-card');
       const canvas = await html2canvas(card, {
         scale: 2,
@@ -483,12 +484,20 @@ async function downloadImage() {
         logging: false,
         imageTimeout: 15000,
         onclone: (doc) => {
-          // 確保 clone 後圖片樣式正確
-          doc.querySelectorAll('.flower-circle img').forEach(img => {
-            img.style.objectFit = 'cover';
-            img.style.objectPosition = '50% 60%';
-            img.style.width = '100%';
-            img.style.height = '100%';
+          doc.querySelectorAll('.flower-circle').forEach(circle => {
+            const img = circle.querySelector('img');
+            if (!img) return;
+            const src = img.src;
+            const div = doc.createElement('div');
+            div.style.cssText = `
+              width: 100%; height: 100%;
+              background-image: url('${src}');
+              background-size: cover;
+              background-position: 50% 60%;
+              border-radius: 50%;
+            `;
+            circle.innerHTML = '';
+            circle.appendChild(div);
           });
         }
       });
