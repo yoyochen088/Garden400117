@@ -470,29 +470,27 @@ async function downloadImage() {
       // 隱藏搜尋區和成員按鈕，避免疊加
       document.getElementById('search-area').style.display = 'none';
 
-      // 底部加「返回」按鈕（只加一次）
-      if (!document.getElementById('backBtn')) {
-        const backBtn = document.createElement('button');
-        backBtn.id = 'backBtn';
-        backBtn.className = 'btn btn-secondary';
-        backBtn.textContent = '← 返回';
-        backBtn.onclick = () => location.href = 'flower-showcase-test.html';
-        document.querySelector('.fab-bar').insertBefore(backBtn, btn);
-      }
-
       // 彈出提示
       alert('✅ 圖片已生成！\n請長按圖片儲存至相片。');
     } else {
-      // 非 iOS：html2canvas 下載
+      // 非 iOS：html2canvas 下載（直接用 CORS，不預載）
       const card = document.getElementById('showcase-card');
-      await preloadImages(card);
       const canvas = await html2canvas(card, {
         scale: 2,
-        useCORS: false,
-        allowTaint: true,
+        useCORS: true,
+        allowTaint: false,
         backgroundColor: '#fff8f5',
         logging: false,
-        imageTimeout: 0
+        imageTimeout: 15000,
+        onclone: (doc) => {
+          // 確保 clone 後圖片樣式正確
+          doc.querySelectorAll('.flower-circle img').forEach(img => {
+            img.style.objectFit = 'cover';
+            img.style.objectPosition = '50% 60%';
+            img.style.width = '100%';
+            img.style.height = '100%';
+          });
+        }
       });
       const link = document.createElement('a');
       link.download = `${name}_花展.png`;
