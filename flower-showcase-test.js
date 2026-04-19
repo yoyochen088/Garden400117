@@ -429,19 +429,47 @@ async function downloadImage() {
       const card = document.getElementById('showcase-card');
       card.style.display = 'none';
 
-      let imgContainer = document.getElementById('ios-canvas-img');
-      if (!imgContainer) {
-        imgContainer = document.createElement('div');
-        imgContainer.id = 'ios-canvas-img';
-        imgContainer.style.cssText = 'max-width:680px;margin:0 auto;text-align:center;padding:0 16px;';
-        card.parentNode.insertBefore(imgContainer, card.nextSibling);
-      }
+      // 清除舊圖片容器（重新生成時避免疊加）
+      const oldImg = document.getElementById('ios-canvas-img');
+      if (oldImg) oldImg.remove();
+
+      const imgContainer = document.createElement('div');
+      imgContainer.id = 'ios-canvas-img';
+      imgContainer.style.cssText = 'max-width:680px;margin:0 auto;text-align:center;padding:0 16px;';
+      card.parentNode.insertBefore(imgContainer, card.nextSibling);
+
       imgContainer.innerHTML = `
         <img src="${dataUrl}" style="max-width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
         <div style="margin-top:12px;color:#9e6b7e;font-size:13px;padding:10px;background:rgba(233,106,30,0.08);border-radius:8px;">
           📱 長按圖片 → 儲存至相片
         </div>`;
       btn.textContent = '🔄 重新生成';
+
+      // 隱藏搜尋區和成員按鈕，避免疊加
+      document.getElementById('search-area').style.display = 'none';
+
+      // 底部加「返回」按鈕（只加一次）
+      if (!document.getElementById('backBtn')) {
+        const backBtn = document.createElement('button');
+        backBtn.id = 'backBtn';
+        backBtn.className = 'btn btn-secondary';
+        backBtn.textContent = '← 返回';
+        backBtn.onclick = () => location.href = 'flower-showcase-test.html';
+        document.querySelector('.fab-bar').insertBefore(backBtn, btn);
+      }
+
+      // 隱藏搜尋區和成員按鈕，避免疊加
+      document.getElementById('search-area').style.display = 'none';
+
+      // 底部加「返回」按鈕（只加一次）
+      if (!document.getElementById('backBtn')) {
+        const backBtn = document.createElement('button');
+        backBtn.id = 'backBtn';
+        backBtn.className = 'btn btn-secondary';
+        backBtn.textContent = '← 返回';
+        backBtn.onclick = () => location.href = 'flower-showcase-test.html';
+        document.querySelector('.fab-bar').insertBefore(backBtn, btn);
+      }
 
       // 彈出提示
       alert('✅ 圖片已生成！\n請長按圖片儲存至相片。');
