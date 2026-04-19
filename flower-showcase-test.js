@@ -202,6 +202,24 @@ async function searchSelected() {
 //  [TEST] Canvas 繪製下載 - iOS 測試版
 // ══════════════════════════════════════════════
 
+// ── 圖片預載（PC 用，解決跨域）──
+async function preloadImages(container) {
+  const imgs = container.querySelectorAll('img');
+  await Promise.all([...imgs].map(img => new Promise(resolve => {
+    if (img.complete && img.naturalWidth > 0) { resolve(); return; }
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', img.src, true);
+    xhr.responseType = 'blob';
+    xhr.onload = () => {
+      const reader = new FileReader();
+      reader.onload = e => { img.src = e.target.result; resolve(); };
+      reader.readAsDataURL(xhr.response);
+    };
+    xhr.onerror = () => resolve();
+    xhr.send();
+  })));
+}
+
 // ── 載入圖片為 ImageBitmap（iOS 可用）──
 async function loadImageBitmap(src) {
   try {
@@ -444,19 +462,10 @@ async function downloadImage() {
           📱 長按圖片 → 儲存至相片
         </div>`;
       btn.textContent = '🔄 重新生成';
+      btn.onclick = () => location.href = 'flower-showcase-test.html';
 
       // 隱藏搜尋區和成員按鈕，避免疊加
       document.getElementById('search-area').style.display = 'none';
-
-      // 底部加「返回」按鈕（只加一次）
-      if (!document.getElementById('backBtn')) {
-        const backBtn = document.createElement('button');
-        backBtn.id = 'backBtn';
-        backBtn.className = 'btn btn-secondary';
-        backBtn.textContent = '← 返回';
-        backBtn.onclick = () => location.href = 'flower-showcase-test.html';
-        document.querySelector('.fab-bar').insertBefore(backBtn, btn);
-      }
 
       // 隱藏搜尋區和成員按鈕，避免疊加
       document.getElementById('search-area').style.display = 'none';
