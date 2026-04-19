@@ -7,6 +7,8 @@ const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
 let allFlowers = [];
 let allMembers = [];
 let allOwnership = [];
+let currentMember = null;
+let currentFlowers = [];
 
 // ── 從 Sheet 載入資料 ──
 async function loadData() {
@@ -68,17 +70,21 @@ function getMemberFlowers(gameId) {
 }
 
 // ── 渲染花展 ──
-function renderShowcase(member, flowers) {
-  const card = document.getElementById('showcase-card');
+async function renderShowcase(member, flowers) {
+  currentMember = member;
+  currentFlowers = flowers;
 
   // 用戶資訊
   const initial = (member.nickname || member.gameId || '?')[0];
   document.getElementById('user-initial').textContent = initial;
   document.getElementById('user-name').textContent = member.nickname || member.gameId;
   document.getElementById('user-gameid').textContent = member.gameId;
-  document.getElementById('user-total').textContent = `共擁有 ${flowers.length} 種花`;
+  // 移除共擁有顯示
+  document.getElementById('user-total').textContent = '';
 
-  // 按品質分組
+  // 顯示 HTML 版本（iOS 和非 iOS 都一樣）
+  document.getElementById('showcase-card').style.display = 'block';
+
   const groups = {};
   flowers.forEach(f => {
     if (!groups[f.quality]) groups[f.quality] = [];
@@ -117,14 +123,18 @@ function renderShowcase(member, flowers) {
     container.innerHTML = '<div class="empty-state">🌸 此成員尚無花卉資料</div>';
   }
 
-  card.style.display = 'block';
+  // 顯示按鈕，iOS 改文字
+  const btn = document.getElementById('downloadBtn');
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  btn.textContent = isIOS ? '🖼 生成圖片' : '📥 下載圖片';
+  btn.style.display = '';
 }
 
-function quickSelect(gameId) {
+async function quickSelect(gameId) {
   selectedMember = allMembers.find(m => (m.gameId || m.gameid) === gameId);
   if (selectedMember) {
     document.getElementById('searchInput').value = selectedMember.nickname;
-    searchSelected();
+    await searchSelected();
   }
 }
 
@@ -174,7 +184,7 @@ document.addEventListener('click', e => {
   }
 });
 
-function searchSelected() {
+async function searchSelected() {
   const member = selectedMember || (() => {
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
     return allMembers.find(m =>
@@ -183,12 +193,16 @@ function searchSelected() {
   })();
   if (!member) { alert('請從下拉選單選擇成員'); return; }
   const flowers = getMemberFlowers(member.gameId || member.gameid);
-  renderShowcase(member, flowers);
+  await renderShowcase(member, flowers);
   document.getElementById('downloadBtn').style.display = '';
   selectedMember = null;
 }
 
-// ── 圖片預載（非 iOS 用，解決跨域）──
+// ══════════════════════════════════════════════
+//  [TEST] Canvas 繪製下載 - iOS 測試版
+// ══════════════════════════════════════════════
+
+// ── 圖片預載（PC 用，解決跨域）──
 async function preloadImages(container) {
   const imgs = container.querySelectorAll('img');
   await Promise.all([...imgs].map(img => new Promise(resolve => {
@@ -206,63 +220,288 @@ async function preloadImages(container) {
   })));
 }
 
-// ── 下載成圖 ──
+// ── 載入圖片為 ImageBitmap（iOS 可用）──
+async function loadImageBitmap(src) {
+  try {
+    const res = await fetch(src, { mode: 'cors' });
+    const blob = await res.blob();
+    return await createImageBitmap(blob);
+  } catch(e) {
+    // fallback：用 Image 元素載入
+    return new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        createImageBitmap(img).then(resolve).catch(() => resolve(null));
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
+}
+
+// ── Canvas 繪製花展 ──
+async function drawShowcaseToCanvas(member, flowers, cardWidth) {
+  const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
+  const QC = {
+    '仙': { bg: 'rgba(255,78,138,0.08)', border: 'rgba(255,78,138,0.4)', badge: '#ff6b9d' },
+    '華': { bg: 'rgba(255,140,0,0.08)',  border: 'rgba(255,140,0,0.4)',  badge: '#ffb347' },
+    '珍': { bg: 'rgba(155,89,182,0.08)', border: 'rgba(155,89,182,0.4)', badge: '#c39bd3' },
+    '普': { bg: 'rgba(74,144,217,0.08)', border: 'rgba(74,144,217,0.4)', badge: '#74b9ff' },
+    '凡': { bg: 'rgba(127,140,110,0.08)','border': 'rgba(127,140,110,0.4)', badge: '#a8b89a' }
+  };
+
+  // 按品質分組
+  const groups = {};
+  flowers.forEach(f => {
+    if (!groups[f.quality]) groups[f.quality] = [];
+    groups[f.quality].push(f);
+  });
+
+  const PAD = 16;
+  const SECTION_PAD = 12;
+  const HEADER_H = 80;
+  const BADGE_H = 36;
+
+  // 固定 4 欄，根據寬度計算圓圈大小
+  const COLS = 4;
+  const availW = (cardWidth || 400) - PAD * 2 - SECTION_PAD * 2;
+  const CIRCLE = Math.floor((availW - (COLS - 1) * 8) / COLS);
+  const LABEL_H = 20;
+  const ITEM_H = CIRCLE + LABEL_H + 6;
+
+  // 計算總高度
+  let totalH = HEADER_H + PAD;
+  const qualityOrder = ['仙','華','珍','普','凡'];
+  const usedGroups = qualityOrder.filter(q => groups[q]?.length);
+  usedGroups.forEach(q => {
+    const rows = Math.ceil(groups[q].length / COLS);
+    totalH += BADGE_H + rows * ITEM_H + SECTION_PAD * 2 + 12 + PAD;
+  });
+
+  const W = cardWidth || 480;
+  const canvas = document.createElement('canvas');
+  canvas.width = W * 2;
+  canvas.height = totalH * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+
+  // 背景
+  ctx.fillStyle = '#fff8f5';
+  ctx.fillRect(0, 0, W, totalH);
+
+  // Header
+  const grad = ctx.createLinearGradient(0, 0, W, HEADER_H);
+  grad.addColorStop(0, '#c2510b');
+  grad.addColorStop(0.6, '#e96a1e');
+  grad.addColorStop(1, '#f4a46a');
+  ctx.fillStyle = grad;
+  roundRect(ctx, 0, 0, W, HEADER_H, 0);
+  ctx.fill();
+
+  // 頭像圓圈
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(PAD + 24, HEADER_H / 2, 24, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px Microsoft JhengHei, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText((member.nickname || '?')[0], PAD + 24, HEADER_H / 2);
+  ctx.restore();
+
+  // 暱稱
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 18px Microsoft JhengHei, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(member.nickname || '', PAD + 58, HEADER_H / 2 - 10);
+  ctx.font = '12px Microsoft JhengHei, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillText(member.gameId || member.gameid || '', PAD + 58, HEADER_H / 2 + 10);
+
+  // 公會 badge
+  ctx.font = 'bold 12px Microsoft JhengHei, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fillText('璀璨', W - PAD, HEADER_H / 2 - 8);
+  ctx.font = '10px Microsoft JhengHei, sans-serif';
+  ctx.fillText('400117', W - PAD, HEADER_H / 2 + 8);
+
+  let y = HEADER_H + PAD;
+
+  for (const q of usedGroups) {
+    const items = groups[q];
+    const qc = QC[q] || QC['凡'];
+    const rows = Math.ceil(items.length / COLS);
+    const sectionH = BADGE_H + rows * ITEM_H + SECTION_PAD * 2;
+
+    // 區塊背景
+    ctx.fillStyle = qc.bg;
+    ctx.strokeStyle = qc.border;
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, PAD, y, W - PAD * 2, sectionH, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    // 品質 badge
+    ctx.fillStyle = qc.badge;
+    roundRect(ctx, PAD + SECTION_PAD, y + 10, 48, 22, 11);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Microsoft JhengHei, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(q + ' 品', PAD + SECTION_PAD + 24, y + 21);
+
+    // 數量
+    ctx.fillStyle = '#9e6b7e';
+    ctx.font = '11px Microsoft JhengHei, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${items.length} 種`, PAD + SECTION_PAD + 56, y + 21);
+
+    let iy = y + BADGE_H;
+
+    for (let i = 0; i < items.length; i++) {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      const ix = PAD + SECTION_PAD + col * (CIRCLE + 8);
+      const itemY = iy + row * ITEM_H;
+
+      // 圓形圖片
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(ix + CIRCLE / 2, itemY + CIRCLE / 2, CIRCLE / 2, 0, Math.PI * 2);
+      ctx.clip();
+
+      const bitmap = await loadImageBitmap(items[i].img);
+      if (bitmap) {
+        // 擷取中心區域（跳過上方文字）
+        const bw = bitmap.width, bh = bitmap.height;
+        const sy = bh * 0.2; // 跳過上方 20%
+        const sh = bh * 0.6;
+        const sw = Math.min(bw, sh);
+        const sx = (bw - sw) / 2;
+        ctx.drawImage(bitmap, sx, sy, sw, sh, ix, itemY, CIRCLE, CIRCLE);
+      } else {
+        ctx.fillStyle = '#fef0e7';
+        ctx.fillRect(ix, itemY, CIRCLE, CIRCLE);
+      }
+      ctx.restore();
+
+      // 圓形邊框
+      ctx.beginPath();
+      ctx.arc(ix + CIRCLE / 2, itemY + CIRCLE / 2, CIRCLE / 2, 0, Math.PI * 2);
+      ctx.strokeStyle = qc.badge;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // 花名
+      ctx.fillStyle = '#5d3a4a';
+      ctx.font = '11px Microsoft JhengHei, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      const label = items[i].name.length > 5 ? items[i].name.slice(0, 5) + '…' : items[i].name;
+      ctx.fillText(label, ix + CIRCLE / 2, itemY + CIRCLE + 4);
+    }
+
+    y += sectionH + PAD;
+  }
+
+  return canvas;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// ── 下載/生成圖片 ──
 async function downloadImage() {
   const btn = document.getElementById('downloadBtn');
-  const card = document.getElementById('showcase-card');
   const name = document.getElementById('user-name').textContent || '花展';
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-  if (isIOS) {
-    // iOS 完全跳過圖片生成，直接開新視窗顯示 HTML，長按圖片儲存
-    const w = window.open('', '_blank');
-    if (!w) {
-      alert('請允許彈出視窗後再試。\n設定 → Safari → 封鎖彈出式視窗 → 關閉');
-      return;
-    }
-    // 把花展卡片的 HTML 複製到新視窗
-    const styleLink = Array.from(document.querySelectorAll('link[rel=stylesheet]'))
-      .map(l => `<link rel="stylesheet" href="${l.href}">`)
-      .join('');
-    w.document.write(`<!DOCTYPE html><html><head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>${name} 的花展</title>
-      ${styleLink}
-      <style>
-        body{margin:0;padding:16px;background:#fff8f5;}
-        #showcase-card{display:block!important;max-width:100%!important;aspect-ratio:unset!important;}
-        .tip{text-align:center;padding:14px;color:#9e6b7e;font-size:13px;margin-top:12px;}
-      </style>
-      </head><body>
-      ${card.outerHTML}
-      <div class="tip">📱 長按圖片可儲存，或使用截長圖功能</div>
-      </body></html>`);
-    w.document.close();
-    return;
-  }
-
-  // 非 iOS：html2canvas 生成圖片
   btn.textContent = '⏳ 生成中...';
   btn.disabled = true;
+
   try {
-    await preloadImages(card);
-    const canvas = await html2canvas(card, {
-      scale: 2,
-      useCORS: false,
-      allowTaint: true,
-      backgroundColor: '#fff8f5',
-      logging: false,
-      imageTimeout: 0
-    });
-    const link = document.createElement('a');
-    link.download = `${name}_花展.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    if (isIOS) {
+      // iOS：用 Canvas 繪製，取代頁面上的 HTML 花展
+      const cardWidth = Math.min(window.innerWidth - 32, 680);
+      const canvas = await drawShowcaseToCanvas(currentMember, currentFlowers, cardWidth);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // 取代 showcase-card 為圖片
+      const card = document.getElementById('showcase-card');
+      card.style.display = 'none';
+
+      // 清除舊圖片容器（重新生成時避免疊加）
+      const oldImg = document.getElementById('ios-canvas-img');
+      if (oldImg) oldImg.remove();
+
+      const imgContainer = document.createElement('div');
+      imgContainer.id = 'ios-canvas-img';
+      imgContainer.style.cssText = 'max-width:680px;margin:0 auto;text-align:center;padding:0 16px;';
+      card.parentNode.insertBefore(imgContainer, card.nextSibling);
+
+      imgContainer.innerHTML = `
+        <img src="${dataUrl}" style="max-width:100%;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
+        <div style="margin-top:12px;color:#9e6b7e;font-size:13px;padding:10px;background:rgba(233,106,30,0.08);border-radius:8px;">
+          📱 長按圖片 → 儲存至相片
+        </div>`;
+      btn.textContent = '🔄 重新生成';
+      btn.onclick = () => location.href = 'flower-showcase-test.html';
+
+      // 隱藏搜尋區和成員按鈕，避免疊加
+      document.getElementById('search-area').style.display = 'none';
+
+      // 隱藏搜尋區和成員按鈕，避免疊加
+      document.getElementById('search-area').style.display = 'none';
+
+      // 彈出提示
+      alert('✅ 圖片已生成！\n請長按圖片儲存至相片。');
+    } else {
+      // 非 iOS：html2canvas 下載
+      const card = document.getElementById('showcase-card');
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#fff8f5',
+        logging: false,
+        imageTimeout: 15000,
+        onclone: (doc) => {
+          doc.querySelectorAll('.flower-circle img').forEach(img => {
+            img.style.objectFit = 'cover';
+            img.style.objectPosition = '50% 60%';
+            img.style.width = '100%';
+            img.style.height = '100%';
+          });
+        }
+      });
+      const link = document.createElement('a');
+      link.download = `${name}_花展.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.textContent = '📥 下載圖片';
+    }
   } catch(e) {
     alert('生成失敗：' + e.message);
+    const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    btn.textContent = isIOS2 ? '🖼 生成圖片' : '📥 下載圖片';
   } finally {
-    btn.textContent = '📥 下載圖片';
     btn.disabled = false;
   }
 }
