@@ -492,8 +492,8 @@ async function downloadImage() {
             div.style.cssText = `
               width: 100%; height: 100%;
               background-image: url('${src}');
-              background-size: cover;
-              background-position: 50% 60%;
+              background-size: 135%;
+              background-position: 50% 55%;
               border-radius: 50%;
             `;
             circle.innerHTML = '';
