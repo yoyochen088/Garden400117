@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta property="og:title" content="♡璀璨♡ 花卉圖鑑" />
-  <meta property="og:description" content="璀璨工會花卉圖鑑，查詢花種競賽分、取得方式與擁有成員。" />
+  <meta property="og:title" content="璀璨 花卉圖鑑" />
+  <meta property="og:description" content="璀璨公會花卉圖鑑，查詢花種競賽分、取得方式與擁有成員。" />
   <meta property="og:type" content="website" />
-  <title>♡璀璨♡ 花卉圖鑑 [400117]</title>
+  <title>璀璨 花卉圖鑑 [400117]</title>
   <script>
   // ════════════════════════════════════════════
   //  Google Sheets 設定
@@ -258,18 +258,10 @@ async function loadFromSheets() {
       }
     });
 
-    // debug
-    console.log('flowers:', FLOWERS.length);
-    console.log('members:', MEMBERS.length);
-    console.log('ownership rows:', OWNERSHIP.length);
-    console.log('ownership sample:', JSON.stringify(OWNERSHIP.slice(0,3)));
-    console.log('flower 1 owners:', FLOWERS[0]?.owners);
-    console.log('flower 1 id type:', typeof FLOWERS[0]?.id, FLOWERS[0]?.id);
-
     dataLoaded = true;
     return true;
   } catch(e) {
-    console.error('載入失敗:', e);
+
     return false;
   }
 }

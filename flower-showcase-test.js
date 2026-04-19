@@ -326,7 +326,7 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
   ctx.font = 'bold 12px Microsoft JhengHei, sans-serif';
   ctx.textAlign = 'right';
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.fillText('♡璀璨♡', W - PAD, HEADER_H / 2 - 8);
+  ctx.fillText('璀璨', W - PAD, HEADER_H / 2 - 8);
   ctx.font = '10px Microsoft JhengHei, sans-serif';
   ctx.fillText('400117', W - PAD, HEADER_H / 2 + 8);
 
