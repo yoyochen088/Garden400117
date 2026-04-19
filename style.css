@@ -152,12 +152,16 @@ nav a:hover, nav a.active { background: rgba(255,255,255,0.25); }
 }
 
 .guild-badge {
-  font-size: 0.75rem;
-  background: linear-gradient(135deg, #e96a1e, #f4a46a);
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, #c2510b, #e96a1e);
   color: #fff;
-  padding: 3px 10px;
+  padding: 8px 16px;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(194,81,11,0.3);
+  letter-spacing: 1px;
 }
 
 /* ── 品質區塊 ── */
