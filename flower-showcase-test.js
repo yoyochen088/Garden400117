@@ -79,7 +79,8 @@ async function renderShowcase(member, flowers) {
   document.getElementById('user-initial').textContent = initial;
   document.getElementById('user-name').textContent = member.nickname || member.gameId;
   document.getElementById('user-gameid').textContent = member.gameId;
-  document.getElementById('user-total').textContent = `共擁有 ${flowers.length} 種花`;
+  // 移除共擁有顯示
+  document.getElementById('user-total').textContent = '';
 
   // 顯示 HTML 版本（iOS 和非 iOS 都一樣）
   document.getElementById('showcase-card').style.display = 'block';
@@ -244,12 +245,11 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
   const HEADER_H = 80;
   const BADGE_H = 36;
 
-  // 根據可用寬度動態計算欄數和圓圈大小
-  const availW = (cardWidth || 480) - PAD * 2 - SECTION_PAD * 2;
-  const COLS = Math.min(5, Math.floor(availW / 80));
+  // 固定 4 欄，根據寬度計算圓圈大小
+  const COLS = 4;
+  const availW = (cardWidth || 400) - PAD * 2 - SECTION_PAD * 2;
   const CIRCLE = Math.floor((availW - (COLS - 1) * 8) / COLS);
   const LABEL_H = 20;
-  const ITEM_W = CIRCLE + 8;
   const ITEM_H = CIRCLE + LABEL_H + 6;
 
   // 計算總高度
@@ -302,7 +302,7 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
   ctx.fillText(member.nickname || '', PAD + 58, HEADER_H / 2 - 10);
   ctx.font = '12px Microsoft JhengHei, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText(`共擁有 ${flowers.length} 種花`, PAD + 58, HEADER_H / 2 + 10);
+  ctx.fillText(member.gameId || member.gameid || '', PAD + 58, HEADER_H / 2 + 10);
 
   // 公會 badge
   ctx.font = 'bold 12px Microsoft JhengHei, sans-serif';
@@ -442,6 +442,9 @@ async function downloadImage() {
           📱 長按圖片 → 儲存至相片
         </div>`;
       btn.textContent = '🔄 重新生成';
+
+      // 彈出提示
+      alert('✅ 圖片已生成！\n請長按圖片儲存至相片。');
     } else {
       // 非 iOS：html2canvas 下載
       const card = document.getElementById('showcase-card');
