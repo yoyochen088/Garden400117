@@ -488,16 +488,22 @@ async function downloadImage() {
             const img = circle.querySelector('img');
             if (!img) return;
             const src = img.src;
-            const div = doc.createElement('div');
-            div.style.cssText = `
-              width: 100%; height: 100%;
-              background-image: url('${src}');
-              background-size: 135%;
-              background-position: 50% 55%;
-              border-radius: 50%;
+            // 用放大的 img 取代，模擬 scale(1.35) + object-position 效果
+            const newImg = doc.createElement('img');
+            newImg.src = src;
+            newImg.style.cssText = `
+              position: absolute;
+              width: 135%;
+              height: 135%;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -42%);
+              object-fit: cover;
             `;
+            circle.style.position = 'relative';
+            circle.style.overflow = 'hidden';
             circle.innerHTML = '';
-            circle.appendChild(div);
+            circle.appendChild(newImg);
           });
         }
       });
