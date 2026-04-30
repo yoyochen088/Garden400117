@@ -74,6 +74,26 @@
   <button class="btn-add" onclick="addM()">＋ 新增成員</button>
 </div>
 <div id="tf" class="panel">
+  <!-- 新增花卉區 -->
+  <div id="add-flower-area" style="background:#fff;border-radius:var(--radius);border:1.5px dashed var(--pink-mid);padding:14px 16px;margin-bottom:14px;display:none;">
+    <div style="font-size:.9rem;font-weight:700;color:var(--pink-dark);margin-bottom:10px;">&#10133; 新增花卉</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <div class="lbl">選擇圖片</div>
+        <input type="file" id="af-img" accept="image/*" onchange="onFlowerImgSelect(this)"
+          style="padding:5px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.85rem;background:var(--bg);" />
+      </div>
+      <img id="af-preview" style="display:none;width:52px;height:52px;object-fit:cover;border-radius:8px;border:2px solid var(--pink-mid);" />
+      <div style="flex:1;min-width:200px;">
+        <div class="lbl">GitHub Token（上傳圖片用）</div>
+        <input type="password" id="af-token" placeholder="ghp_... Fine-grained token"
+          style="padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.88rem;background:var(--bg);color:#3d1a2e;outline:none;width:100%;" />
+      </div>
+      <button class="btn" style="background:#9b59b6;color:#fff;align-self:flex-end;" onclick="uploadAndAddFlower()">&#128190; 上傳並新增</button>
+    </div>
+    <div id="af-status" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;font-size:.85rem;"></div>
+  </div>
+  <button class="btn-add" onclick="toggleAddFlower()" style="margin-bottom:14px;">&#10133; 新增花卉</button>
   <div class="fbar">
     <label style="font-size:.9rem;font-weight:600;color:var(--pink-dark);">品質：</label>
     <select id="qf" onchange="renderT()" style="width:auto;">
@@ -238,6 +258,107 @@ async function saveFlowers(){
     origFd=JSON.parse(JSON.stringify(fd));
   }catch(e){alert('❌ 儲存失敗：'+e.message);}
   finally{btn.innerHTML='💾 儲存花卡';btn.disabled=false;}
+}
+
+// ── 新增花卉 ──
+function toggleAddFlower() {
+  const area = document.getElementById('add-flower-area');
+  area.style.display = area.style.display === 'none' ? '' : 'none';
+}
+
+function onFlowerImgSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('af-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+}
+
+async function uploadAndAddFlower() {
+  const file = document.getElementById('af-img').files[0];
+  const token = document.getElementById('af-token').value.trim();
+  const status = document.getElementById('af-status');
+
+  if (!file) { showStatus(status, '請選擇圖片', 'err'); return; }
+  if (!token) { showStatus(status, '請填入 GitHub Token', 'err'); return; }
+
+  // 從表格最後一列取得新花的 id（最大 id + 1）
+  const newId = fd.length ? Math.max(...fd.map(f => f.id)) + 1 : 1;
+  const name = file.name.replace(/\.[^.]+$/, ''); // 用檔名當花名（去副檔名）
+  const quality = '仙'; // 預設品質，之後在表格修改
+  const imgPath = `FlowerImage/${quality}/${file.name}`;
+
+  showStatus(status, '⏳ 上傳圖片中...', 'info');
+
+  try {
+    // 讀取圖片為 base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    // 上傳到 GitHub
+    const { owner, repo, branch } = GITHUB_CONFIG;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(imgPath)}`;
+
+    // 先確認是否已存在
+    let sha;
+    const getRes = await fetch(apiUrl, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (getRes.ok) sha = (await getRes.json()).sha;
+
+    const body = { message: `add flower image: ${file.name}`, content: base64, branch };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!putRes.ok) { const e = await putRes.json(); throw new Error(e.message); }
+
+    showStatus(status, '✅ 圖片上傳成功！正在新增花卉資料...', 'ok');
+
+    // 新增到 fd 陣列（表格會顯示新的一列）
+    const newFlower = {
+      id: newId, name, quality, score: 25, obtain: '活動',
+      order: fd.length + 1, img: `../${imgPath}`, owners: []
+    };
+    fd.push(newFlower);
+    renderT();
+
+    // 同步寫入 Google Sheet
+    await new Promise(resolve => {
+      const params = encodeURIComponent(JSON.stringify({
+        action: 'addFlower',
+        id: newId, name, quality, score: 25, obtain: '活動',
+        order: fd.length, img: `../${imgPath}`
+      }));
+      const img = new Image();
+      img.onload = img.onerror = () => resolve();
+      img.src = `${APPS_SCRIPT_URL}?data=${params}`;
+    });
+
+    showStatus(status, `✅ 完成！花卉「${name}」已新增，請在表格中調整品質/分數/取得方式後儲存。`, 'ok');
+
+    // 清空上傳區
+    document.getElementById('af-img').value = '';
+    document.getElementById('af-preview').style.display = 'none';
+    document.getElementById('af-token').value = '';
+
+  } catch(e) {
+    showStatus(status, '❌ 失敗：' + e.message, 'err');
+  }
+}
+
+function showStatus(el, msg, type) {
+  el.textContent = msg;
+  el.style.background = type === 'ok' ? '#e8f5e9' : type === 'err' ? '#fce4ec' : '#e3f2fd';
+  el.style.color = type === 'ok' ? '#2e7d32' : type === 'err' ? '#c2185b' : '#1565c0';
+  el.style.display = 'block';
 }
 
 (async()=>{
