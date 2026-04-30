@@ -84,6 +84,13 @@
     <div style="font-size:.9rem;font-weight:700;color:var(--pink-dark);margin-bottom:10px;">&#10133; 新增花卉</div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <div>
+        <div class="lbl">品質（決定資料夾）</div>
+        <select id="af-quality" style="padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.88rem;background:var(--bg);color:#3d1a2e;outline:none;">
+          <option value="仙">仙</option><option value="華">華</option>
+          <option value="珍">珍</option><option value="普">普</option><option value="凡">凡</option>
+        </select>
+      </div>
+      <div>
         <div class="lbl">選擇圖片</div>
         <input type="file" id="af-img" accept="image/*" onchange="onFlowerImgSelect(this)"
           style="padding:5px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.85rem;background:var(--bg);" />
@@ -290,7 +297,7 @@ async function uploadAndAddFlower() {
   // 從表格最後一列取得新花的 id（最大 id + 1）
   const newId = fd.length ? Math.max(...fd.map(f => f.id)) + 1 : 1;
   const name = file.name.replace(/\.[^.]+$/, ''); // 用檔名當花名（去副檔名）
-  const quality = '仙'; // 預設品質，之後在表格修改
+  const quality = document.getElementById('af-quality').value; // 用選擇的品質決定資料夾
   const imgPath = `FlowerImage/${quality}/${file.name}`;
 
   showStatus(status, '⏳ 上傳圖片中...', 'info');
@@ -327,12 +334,12 @@ async function uploadAndAddFlower() {
 
     showStatus(status, '✅ 圖片上傳成功！正在新增花卉資料...', 'ok');
 
-    // 新增到 fd 陣列（表格會顯示新的一列）
+    // 新增到 fd 陣列第一列（表格最上方顯示）
     const newFlower = {
       id: newId, name, quality, score: 25, obtain: '活動',
-      order: fd.length + 1, img: `../${imgPath}`, owners: []
+      order: 1, img: `../${imgPath}`, owners: []
     };
-    fd.push(newFlower);
+    fd.unshift(newFlower); // 放在最前面
     renderT();
 
     // 同步寫入 Google Sheet
