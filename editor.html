@@ -235,10 +235,19 @@ document.addEventListener('click',e=>{if(!e.target.closest('.cs'))document.query
 function renderT(){
   const qf=document.getElementById('qf').value,of=document.getElementById('of').value;
   const fil=fd.map((f,i)=>({f,i})).filter(({f})=>(!qf||f.quality===qf)&&(!of||f.obtain===of))
-    .sort((a,b)=>{const qd=(QO[a.f.quality]??9)-(QO[b.f.quality]??9);return qd||((a.f.order??999)-(b.f.order??999));});
+    .sort((a,b)=>{
+      // 新增的（有 _localPreview）排最前
+      if (a.f._localPreview && !b.f._localPreview) return -1;
+      if (!a.f._localPreview && b.f._localPreview) return 1;
+      const qd=(QO[a.f.quality]??9)-(QO[b.f.quality]??9);
+      return qd||((a.f.order??999)-(b.f.order??999));
+    });
   document.getElementById('fc').textContent='顯示 '+fil.length+' / '+fd.length+' 筆';
   document.getElementById('tb').innerHTML=fil.map(({f,i})=>
-    '<tr><td><img class="thumb" src="'+(f._localPreview||f.img)+'" alt="'+f.name+'" onerror="this.style.opacity=0.3"></td>'
+    '<tr style="'+(f._localPreview?'background:#e8f5e9;':'')+'">'
+    +'<td><img class="thumb" src="'+(f._localPreview||f.img)+'" alt="'+f.name+'" onerror="this.style.opacity=0.3">'
+    +(f._localPreview?'<div style="font-size:.65rem;color:#2e7d32;font-weight:700;">NEW</div>':'')
+    +'</td>'
     +'<td><div class="fname">'+f.name+'</div></td>'
     +'<td><input type="number" min="1" value="'+(f.order||i+1)+'" onchange="fd['+i+'].order=Number(this.value)" style="width:60px;"></td>'
     +'<td>'+buildQS(i,f.quality)+'</td>'
