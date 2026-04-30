@@ -249,27 +249,47 @@ function renderT(){
 }
 
 async function saveFlowers(){
-  // 找出有變動的花（quality/score/obtain/order）
-  const changed=fd.filter((f,i)=>{
-    const o=origFd[i];
-    if(!o)return true;
+  // 區分新增（origFd 裡沒有）和修改（有但內容不同）
+  const origIds = new Set(origFd.map(f => f.id));
+  const toAdd = fd.filter(f => !origIds.has(f.id));
+  const toUpdate = fd.filter((f, i) => {
+    const o = origFd.find(of => of.id === f.id);
+    if (!o) return false;
     return f.quality!==o.quality||f.score!==o.score||f.obtain!==o.obtain||f.order!==o.order;
   });
-  if(!changed.length){alert('花卡資料沒有變動');return;}
-  const btn=document.getElementById('sfBtn');
-  btn.innerHTML='⏳ 儲存中...';btn.disabled=true;
-  try{
-    for(const f of changed){
-      await new Promise(res=>{
-        const p=encodeURIComponent(JSON.stringify({action:'updateFlower',id:f.id,quality:f.quality,score:f.score,obtain:f.obtain,order:f.order}));
-        const img=new Image();img.onload=img.onerror=()=>res();
-        img.src=APPS_SCRIPT_URL+'?data='+p;
+
+  if (!toAdd.length && !toUpdate.length) { alert('花卡資料沒有變動'); return; }
+
+  const btn = document.getElementById('sfBtn');
+  btn.innerHTML = '⏳ 儲存中...'; btn.disabled = true;
+  try {
+    // 新增的花
+    for (const f of toAdd) {
+      await new Promise(res => {
+        const p = encodeURIComponent(JSON.stringify({
+          action: 'addFlower',
+          id: f.id, name: f.name, quality: f.quality,
+          score: f.score, obtain: f.obtain, order: f.order, img: f.img
+        }));
+        const img = new Image(); img.onload = img.onerror = () => res();
+        img.src = APPS_SCRIPT_URL + '?data=' + p;
       });
     }
-    alert('✅ 花卡資料已儲存！（'+changed.length+' 筆變動）');
-    origFd=JSON.parse(JSON.stringify(fd));
-  }catch(e){alert('❌ 儲存失敗：'+e.message);}
-  finally{btn.innerHTML='💾 儲存花卡';btn.disabled=false;}
+    // 修改的花
+    for (const f of toUpdate) {
+      await new Promise(res => {
+        const p = encodeURIComponent(JSON.stringify({
+          action: 'updateFlower', id: f.id, quality: f.quality,
+          score: f.score, obtain: f.obtain, order: f.order
+        }));
+        const img = new Image(); img.onload = img.onerror = () => res();
+        img.src = APPS_SCRIPT_URL + '?data=' + p;
+      });
+    }
+    alert(`✅ 花卡資料已儲存！（新增 ${toAdd.length} 筆，修改 ${toUpdate.length} 筆）`);
+    origFd = JSON.parse(JSON.stringify(fd));
+  } catch(e) { alert('❌ 儲存失敗：' + e.message); }
+  finally { btn.innerHTML = '💾 儲存花卉'; btn.disabled = false; }
 }
 
 // ── 新增花卉 ──
