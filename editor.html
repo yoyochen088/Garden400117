@@ -238,7 +238,7 @@ function renderT(){
     .sort((a,b)=>{const qd=(QO[a.f.quality]??9)-(QO[b.f.quality]??9);return qd||((a.f.order??999)-(b.f.order??999));});
   document.getElementById('fc').textContent='顯示 '+fil.length+' / '+fd.length+' 筆';
   document.getElementById('tb').innerHTML=fil.map(({f,i})=>
-    '<tr><td><img class="thumb" src="'+f.img+'" alt="'+f.name+'" onerror="this.style.opacity=0.3"></td>'
+    '<tr><td><img class="thumb" src="'+(f._localPreview||f.img)+'" alt="'+f.name+'" onerror="this.style.opacity=0.3"></td>'
     +'<td><div class="fname">'+f.name+'</div></td>'
     +'<td><input type="number" min="1" value="'+(f.order||i+1)+'" onchange="fd['+i+'].order=Number(this.value)" style="width:60px;"></td>'
     +'<td>'+buildQS(i,f.quality)+'</td>'
@@ -335,9 +335,16 @@ async function uploadAndAddFlower() {
     showStatus(status, '✅ 圖片上傳成功！正在新增花卉資料...', 'ok');
 
     // 新增到 fd 陣列第一列（表格最上方顯示）
+    // order 取該品質最大值 + 1
+    const sameQuality = fd.filter(f => f.quality === quality);
+    const newOrder = sameQuality.length > 0 ? Math.max(...sameQuality.map(f => Number(f.order) || 0)) + 1 : 1;
+
     const newFlower = {
       id: newId, name, quality, score: 25, obtain: '活動',
-      order: 1, img: `../${imgPath}`, owners: []
+      order: newOrder,
+      img: `../${imgPath}`,
+      _localPreview: URL.createObjectURL(file), // 本機預覽用，儲存後移除
+      owners: []
     };
     fd.unshift(newFlower); // 放在最前面
     renderT();
