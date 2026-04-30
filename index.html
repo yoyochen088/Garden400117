@@ -230,12 +230,12 @@ async function loadFromSheets() {
     MEMBERS = membersSheet.values.slice(1).map(row => {
       const m = {};
       mHeaders.forEach((h, i) => { m[h.toLowerCase()] = row[i] || ''; });
-      // 統一欄位名稱
       m.gameId = m.gameid || m.gameId || '';
       m.nickname = m.nickname || '';
       m.note = m.note || '成員';
+      m.left = (m.left || '').toLowerCase() === 'true';
       return m;
-    });
+    }).filter(m => !m.left); // 過濾已離開成員
 
     // 解析 ownership
     const oHeaders = ownershipSheet.values[0];
