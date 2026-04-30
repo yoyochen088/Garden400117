@@ -97,7 +97,7 @@
       </div>
       <img id="af-preview" style="display:none;width:52px;height:52px;object-fit:cover;border-radius:8px;border:2px solid var(--pink-mid);" />
       <div style="flex:1;min-width:200px;">
-        <div class="lbl">GitHub Token（上傳圖片用）</div>
+        <div class="lbl">token（上傳圖片用）</div>
         <input type="password" id="af-token" placeholder="ghp_... Fine-grained token"
           style="padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.88rem;background:var(--bg);color:#3d1a2e;outline:none;width:100%;" />
       </div>
@@ -321,7 +321,7 @@ async function uploadAndAddFlower() {
   const status = document.getElementById('af-status');
 
   if (!file) { showStatus(status, '請選擇圖片', 'err'); return; }
-  if (!token) { showStatus(status, '請填入 GitHub Token', 'err'); return; }
+  if (!token) { showStatus(status, '請填入密碼', 'err'); return; }
 
   // 從表格最後一列取得新花的 id（最大 id + 1）
   const newId = fd.length ? Math.max(...fd.map(f => f.id)) + 1 : 1;
@@ -383,14 +383,17 @@ async function uploadAndAddFlower() {
       const params = encodeURIComponent(JSON.stringify({
         action: 'addFlower',
         id: newId, name, quality, score: 25, obtain: '活動',
-        order: fd.length, img: `../${imgPath}`
+        order: newOrder, img: `../${imgPath}`  // 用正確的 newOrder
       }));
       const img = new Image();
       img.onload = img.onerror = () => resolve();
       img.src = `${APPS_SCRIPT_URL}?data=${params}`;
     });
 
-    showStatus(status, `✅ 完成！花卉「${name}」已新增，請在表格中調整品質/分數/取得方式後儲存。`, 'ok');
+    // 寫入 Sheet 後加入 origFd，避免之後儲存時重複新增
+    origFd.unshift({ ...newFlower });
+
+    showStatus(status, `✅ 完成！花卉「${name}」已新增到 Sheet，請在表格中調整品質/分數/取得方式後按儲存更新。`, 'ok');
 
     // 清空上傳區
     document.getElementById('af-img').value = '';
