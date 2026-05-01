@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta property="og:title" content="璀璨 花卉圖鑑" />
-  <meta property="og:description" content="璀璨公會花卉圖鑑，查詢花種競賽分、取得方式與擁有成員。" />
-  <meta property="og:type" content="website" />
   <title>璀璨 花卉圖鑑 [400117]</title>
   <script>
   const SHEET_CONFIG = {
@@ -25,12 +22,7 @@
     body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
     /* ── Header ── */
-    header {
-      background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%);
-      color:#fff; padding:0 20px; display:flex; align-items:center;
-      justify-content:space-between; height:60px; position:sticky; top:0; z-index:100;
-      box-shadow:0 2px 8px rgba(194,81,11,0.3);
-    }
+    header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
     .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; }
     nav { display:flex; gap:8px; }
     nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
@@ -40,16 +32,45 @@
     .page { display:none; }
     .page.active { display:block; }
 
-    /* ── Loading ── */
+    /* ── Loading spinner ── */
     .loading { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:1rem; }
     .loading-spinner { display:inline-block; width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--pink); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
+    /* ── Skeleton ── */
+    .skeleton-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
+    .skeleton-card { background:var(--card-bg); border-radius:var(--radius); border:1.5px solid var(--border); overflow:hidden; }
+    .skeleton-img { width:100%; height:200px; background:linear-gradient(90deg,#f0e6df 25%,#fde8d8 50%,#f0e6df 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
+    .skeleton-body { padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+    .skeleton-line { height:12px; border-radius:6px; background:linear-gradient(90deg,#f0e6df 25%,#fde8d8 50%,#f0e6df 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
+    .skeleton-line.short { width:60%; }
+    .skeleton-line.xshort { width:40%; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
     /* ── Controls ── */
-    .controls { background:var(--card-bg); border-radius:var(--radius); padding:18px 20px; margin-bottom:20px; box-shadow:var(--shadow); border:1px solid var(--border); }
+    .controls { background:var(--card-bg); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border); }
     .search-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
     .search-box { flex:1; min-width:200px; padding:9px 14px; border:1.5px solid var(--pink-mid); border-radius:24px; font-size:0.95rem; outline:none; transition:border-color 0.2s; background:var(--bg); color:var(--text); }
     .search-box:focus { border-color:var(--pink); }
+
+    /* ── 品質 Tab ── */
+    .quality-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+    .qtab { padding:6px 16px; border-radius:20px; font-size:0.85rem; font-weight:700; cursor:pointer; border:1.5px solid transparent; transition:all 0.18s; background:var(--bg); color:var(--text-muted); }
+    .qtab:hover { opacity:0.85; }
+    .qtab.active { color:#fff; }
+    .qtab[data-q=""]     { border-color:var(--pink-mid); color:var(--pink-dark); }
+    .qtab[data-q=""].active { background:var(--pink); border-color:var(--pink); color:#fff; }
+    .qtab[data-q="仙"].active { background:linear-gradient(135deg,#ff4e8a,#ff8c42); border-color:#ff4e8a; }
+    .qtab[data-q="華"].active { background:linear-gradient(135deg,#ff8c00,#ffb347); border-color:#ff8c00; }
+    .qtab[data-q="珍"].active { background:linear-gradient(135deg,#9b59b6,#c39bd3); border-color:#9b59b6; }
+    .qtab[data-q="普"].active { background:linear-gradient(135deg,#4a90d9,#74b9ff); border-color:#4a90d9; }
+    .qtab[data-q="凡"].active { background:linear-gradient(135deg,#7f8c6e,#a8b89a); border-color:#7f8c6e; }
+    .qtab[data-q="仙"] { border-color:#ff6b9d; color:#ff4e8a; }
+    .qtab[data-q="華"] { border-color:#ffb347; color:#ff8c00; }
+    .qtab[data-q="珍"] { border-color:#c39bd3; color:#9b59b6; }
+    .qtab[data-q="普"] { border-color:#74b9ff; color:#4a90d9; }
+    .qtab[data-q="凡"] { border-color:#a8b89a; color:#7f8c6e; }
+
     .filter-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .filter-group { display:flex; flex-direction:column; gap:4px; flex:1; min-width:140px; }
     .filter-group label { font-size:0.78rem; color:var(--text-muted); font-weight:600; padding-left:4px; }
@@ -61,62 +82,63 @@
     .result-count { font-size:0.9rem; color:var(--text-muted); margin-bottom:14px; padding-left:4px; }
     .result-count span { color:var(--pink); font-weight:700; font-size:1rem; }
 
+    /* ── 品質分組標題 ── */
+    .quality-section-title {
+      display:flex; align-items:center; gap:10px;
+      margin:24px 0 12px; font-size:1rem; font-weight:700;
+    }
+    .quality-section-title .qs-badge {
+      padding:4px 16px; border-radius:20px; color:#fff; font-size:0.9rem; font-weight:700;
+    }
+    .quality-section-title .qs-line { flex:1; height:1.5px; opacity:0.3; }
+    .quality-section-title .qs-count { font-size:0.82rem; color:var(--text-muted); font-weight:400; }
+    .qs-仙 .qs-badge { background:linear-gradient(135deg,#ff4e8a,#ff8c42); }
+    .qs-仙 .qs-line  { background:linear-gradient(90deg,#ff4e8a,transparent); }
+    .qs-華 .qs-badge { background:linear-gradient(135deg,#ff8c00,#ffb347); }
+    .qs-華 .qs-line  { background:linear-gradient(90deg,#ff8c00,transparent); }
+    .qs-珍 .qs-badge { background:linear-gradient(135deg,#9b59b6,#c39bd3); }
+    .qs-珍 .qs-line  { background:linear-gradient(90deg,#9b59b6,transparent); }
+    .qs-普 .qs-badge { background:linear-gradient(135deg,#4a90d9,#74b9ff); }
+    .qs-普 .qs-line  { background:linear-gradient(90deg,#4a90d9,transparent); }
+    .qs-凡 .qs-badge { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
+    .qs-凡 .qs-line  { background:linear-gradient(90deg,#7f8c6e,transparent); }
+
     /* ── 大圖卡片 Grid ── */
-    .flower-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-      gap:18px;
-    }
+    .flower-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
 
+    /* ── 卡片入場動畫 ── */
+    @keyframes cardIn {
+      from { opacity:0; transform:translateY(22px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
     .flower-card {
-      background:var(--card-bg);
-      border-radius:var(--radius);
-      border:1.5px solid var(--border);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
+      background:var(--card-bg); border-radius:var(--radius); border:1.5px solid var(--border);
+      box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column;
       transition:transform 0.22s, box-shadow 0.22s;
-      cursor:default;
-    }
-    .flower-card:hover {
-      transform:translateY(-5px) scale(1.02);
-      box-shadow:0 10px 32px rgba(233,106,30,0.22);
-      z-index:2;
-    }
-
-    /* 大圖區 — 正方形比例，圖片完整顯示 */
-    .card-thumb {
-      width:100%;
-      aspect-ratio:1 / 1;
-      background:linear-gradient(135deg,#fef0e7,#f8d5b0);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:4rem;
-      color:var(--pink-mid);
-      overflow:hidden;
+      animation:cardIn 0.35s ease both;
       position:relative;
-      flex-shrink:0;
     }
-    .card-thumb img {
-      width:100%;
-      height:100%;
-      object-fit:contain;   /* 完整顯示，不裁切 */
-      object-position:center;
-      transition:transform 0.3s;
-      background:linear-gradient(135deg,#fef0e7,#f8d5b0);
+    .flower-card:hover { transform:translateY(-5px) scale(1.02); box-shadow:0 10px 32px rgba(233,106,30,0.22); z-index:2; }
+
+    /* ── 仙品 glow pulse ── */
+    @keyframes glowPulse {
+      0%,100% { box-shadow:0 0 8px 2px rgba(255,78,138,0.35), var(--shadow); }
+      50%      { box-shadow:0 0 18px 6px rgba(255,78,138,0.55), var(--shadow); }
     }
-    .flower-card:hover .card-thumb img {
-      transform:scale(1.06);
-    }
+    .flower-card.quality-仙 { border-color:#ff6b9d; animation:cardIn 0.35s ease both, glowPulse 2.8s ease-in-out infinite; }
+    .flower-card.quality-仙:hover { animation:glowPulse 2.8s ease-in-out infinite; }
+    .flower-card.quality-華 { border-color:#ffb347; }
+    .flower-card.quality-珍 { border-color:#c39bd3; }
+    .flower-card.quality-普 { border-color:#74b9ff; }
+    .flower-card.quality-凡 { border-color:#a8b89a; }
+
+    /* 大圖區 */
+    .card-thumb { width:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--pink-mid); overflow:hidden; position:relative; flex-shrink:0; cursor:zoom-in; }
+    .card-thumb img { width:100%; height:auto; display:block; transition:transform 0.3s; }
+    .flower-card:hover .card-thumb img { transform:scale(1.06); }
 
     /* 品質色條 */
-    .quality-bar {
-      height:4px;
-      width:100%;
-      flex-shrink:0;
-    }
+    .quality-bar { height:4px; width:100%; flex-shrink:0; }
     .quality-bar-仙 { background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
     .quality-bar-華 { background:linear-gradient(90deg,#ff8c00,#ffb347); }
     .quality-bar-珍 { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
@@ -136,20 +158,26 @@
     .badge-quality-普 { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
     .badge-quality-凡 { background:linear-gradient(135deg,#7f8c6e,#a8b89a); color:#fff; }
 
-    /* 卡片邊框品質色 */
-    .flower-card.quality-仙 { border-color:#ff6b9d; }
-    .flower-card.quality-華 { border-color:#ffb347; }
-    .flower-card.quality-珍 { border-color:#c39bd3; }
-    .flower-card.quality-普 { border-color:#74b9ff; }
-    .flower-card.quality-凡 { border-color:#a8b89a; }
-
     /* 擁有者 */
     .owners-section { margin-top:2px; }
     .owners-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
     .owners-list { display:flex; flex-wrap:wrap; gap:4px; }
-    .owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:8px; padding:2px 8px; font-size:0.75rem; font-weight:500; border:1px solid var(--border); }
+    .owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:8px; padding:2px 8px; font-size:0.75rem; font-weight:500; border:1px solid var(--border); position:relative; cursor:default; }
     .no-owner { font-size:0.78rem; color:#bbb; font-style:italic; }
     .owner-count-badge { font-size:0.75rem; color:var(--text-muted); }
+
+    /* ── Owner Tooltip ── */
+    .owner-tag .tooltip {
+      display:none; position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+      background:#3d1a2e; color:#fff; border-radius:8px; padding:5px 10px;
+      font-size:0.75rem; white-space:nowrap; z-index:50; pointer-events:none;
+      box-shadow:0 4px 12px rgba(0,0,0,0.25);
+    }
+    .owner-tag .tooltip::after {
+      content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      border:5px solid transparent; border-top-color:#3d1a2e;
+    }
+    .owner-tag:hover .tooltip { display:block; }
 
     .no-result { text-align:center; padding:48px 20px; color:var(--text-muted); font-size:1rem; }
 
@@ -160,7 +188,6 @@
     .role-理事   { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
     .role-菁英   { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
     .role-成員   { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
-
     .id-table-wrap { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); overflow-x:auto; }
     table { width:100%; border-collapse:collapse; font-size:0.92rem; }
     thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
@@ -170,42 +197,20 @@
     tbody tr:hover { background:var(--pink-light); }
 
     /* ── Lightbox ── */
-    #lightbox {
-      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.82);
-      z-index:999; align-items:center; justify-content:center; flex-direction:column;
-      gap:16px; padding:20px;
-    }
+    #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:20px; }
     #lightbox.open { display:flex; }
-    #lightbox img {
-      max-width:min(90vw, 600px);
-      max-height:80vh;
-      object-fit:contain;
-      border-radius:12px;
-      box-shadow:0 8px 40px rgba(0,0,0,0.5);
-    }
-    #lightbox-name {
-      color:#fff; font-size:1.2rem; font-weight:700; text-align:center;
-      text-shadow:0 2px 8px rgba(0,0,0,0.5);
-    }
-    #lightbox-close {
-      position:absolute; top:18px; right:22px; color:#fff; font-size:2rem;
-      cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s;
-    }
+    #lightbox-img { max-width:min(90vw,600px); max-height:75vh; object-fit:contain; border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.5); transition:opacity 0.2s; }
+    #lightbox-name { color:#fff; font-size:1.2rem; font-weight:700; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
+    #lightbox-close { position:absolute; top:18px; right:22px; color:#fff; font-size:2rem; cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s; }
     #lightbox-close:hover { opacity:1; }
+    #lightbox-prev, #lightbox-next { position:absolute; top:50%; transform:translateY(-50%); color:#fff; font-size:2.2rem; cursor:pointer; opacity:0.7; transition:opacity 0.2s; user-select:none; padding:10px; }
+    #lightbox-prev { left:16px; }
+    #lightbox-next { right:16px; }
+    #lightbox-prev:hover, #lightbox-next:hover { opacity:1; }
 
     /* ── RWD ── */
-    @media(max-width:900px) {
-      .flower-grid { grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
-    }
-    @media(max-width:600px) {
-      .guild-name { font-size:1rem; }
-      nav a { padding:5px 10px; font-size:0.82rem; }
-      .flower-grid { grid-template-columns:repeat(2, 1fr); gap:10px; }
-      .filter-group { min-width:100%; }
-    }
-    @media(max-width:360px) {
-      .flower-grid { grid-template-columns:1fr; }
-    }
+    @media(max-width:900px) { .flower-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } .skeleton-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } }
+    @media(max-width:600px) { .guild-name{font-size:1rem;} nav a{padding:5px 10px;font-size:0.82rem;} .flower-grid{grid-template-columns:1fr;gap:12px;} .skeleton-grid{grid-template-columns:1fr;} .filter-group{min-width:100%;} #lightbox-prev{left:4px;} #lightbox-next{right:4px;} }
   </style>
 </head>
 <body>
@@ -220,31 +225,36 @@
 </header>
 
 <!-- Lightbox -->
-<div id="lightbox" onclick="closeLightbox()">
+<div id="lightbox" onclick="handleLightboxClick(event)">
   <span id="lightbox-close" onclick="closeLightbox()">✕</span>
+  <span id="lightbox-prev" onclick="shiftLightbox(-1);event.stopPropagation()">&#8249;</span>
   <img id="lightbox-img" src="" alt="">
   <div id="lightbox-name"></div>
+  <span id="lightbox-next" onclick="shiftLightbox(1);event.stopPropagation()">&#8250;</span>
 </div>
 
 <main>
   <div id="flower-page" class="page active">
-    <div id="flowerLoading" class="loading">
-      <div class="loading-spinner"></div><br>載入花卉資料中...
+    <!-- Skeleton 載入中 -->
+    <div id="flowerLoading">
+      <div class="skeleton-grid" id="skeletonGrid"></div>
     </div>
+
     <div id="flowerContent" style="display:none;">
       <div class="controls">
         <div class="search-row">
           <input class="search-box" id="searchInput" type="text" placeholder="🔍 搜尋花名 / 擁有者..." oninput="applyFilters()" />
         </div>
+        <!-- 品質快速 Tab -->
+        <div class="quality-tabs" id="qualityTabs">
+          <button class="qtab active" data-q="" onclick="setQTab(this)">全部</button>
+          <button class="qtab" data-q="仙" onclick="setQTab(this)">仙</button>
+          <button class="qtab" data-q="華" onclick="setQTab(this)">華</button>
+          <button class="qtab" data-q="珍" onclick="setQTab(this)">珍</button>
+          <button class="qtab" data-q="普" onclick="setQTab(this)">普</button>
+          <button class="qtab" data-q="凡" onclick="setQTab(this)">凡</button>
+        </div>
         <div class="filter-row">
-          <div class="filter-group">
-            <label>品質</label>
-            <select id="filterQuality" onchange="applyFilters()">
-              <option value="">全部</option>
-              <option value="仙">仙</option><option value="華">華</option>
-              <option value="珍">珍</option><option value="普">普</option><option value="凡">凡</option>
-            </select>
-          </div>
           <div class="filter-group">
             <label>競賽分</label>
             <select id="filterScore" onchange="applyFilters()">
@@ -278,7 +288,7 @@
         </div>
       </div>
       <div class="result-count" id="resultCount"></div>
-      <div class="flower-grid" id="flowerGrid"></div>
+      <div id="flowerGrid"></div>
     </div>
   </div>
 
@@ -299,11 +309,29 @@
 
 <script>
 const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
-const ROLE_ORDER = {'會長':0,'副會長':1,'理事':2,'菁英':3,'成員':4};
+const ROLE_ORDER    = {'會長':0,'副會長':1,'理事':2,'菁英':3,'成員':4};
+const QUALITY_LIST  = ['仙','華','珍','普','凡'];
 
 let FLOWERS = [], MEMBERS = [], OWNERSHIP = [];
-let dataLoaded = false;
+let currentList = [];   // 目前篩選後的花卉（供 lightbox 左右切換）
+let lightboxIdx = 0;
+let activeQTab  = '';   // 目前品質 tab
 
+// ── Skeleton 佔位 ──
+(function buildSkeleton() {
+  const n = 12;
+  document.getElementById('skeletonGrid').innerHTML = Array.from({length:n}).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-body">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line xshort"></div>
+      </div>
+    </div>`).join('');
+})();
+
+// ── 載入資料 ──
 async function loadFromSheets() {
   const { apiKey, sheetId, ranges } = SHEET_CONFIG;
   const rangeParam = ranges.map(r => `ranges=${encodeURIComponent(r)}`).join('&');
@@ -327,10 +355,10 @@ async function loadFromSheets() {
     MEMBERS = membersSheet.values.slice(1).map(row => {
       const m = {};
       mHeaders.forEach((h, i) => { m[h.toLowerCase()] = row[i] || ''; });
-      m.gameId = m.gameid || m.gameId || '';
+      m.gameId   = m.gameid || m.gameId || '';
       m.nickname = m.nickname || '';
-      m.note = m.note || '成員';
-      m.left = (m.left || '').toLowerCase() === 'true';
+      m.note     = m.note || '成員';
+      m.left     = (m.left || '').toLowerCase() === 'true';
       return m;
     }).filter(m => !m.left);
 
@@ -345,11 +373,10 @@ async function loadFromSheets() {
     FLOWERS.forEach(f => { flowerMap[f.id] = f; });
     OWNERSHIP.forEach(o => {
       const gameId = o.gameid || o.gameId || Object.values(o)[0] || '';
-      const fid = Number(o.flowerid || o.flowerId || Object.values(o)[1] || '');
+      const fid    = Number(o.flowerid || o.flowerId || Object.values(o)[1] || '');
       if (flowerMap[fid] && gameId) flowerMap[fid].owners.push(gameId);
     });
 
-    dataLoaded = true;
     return true;
   } catch(e) {
     return false;
@@ -358,13 +385,11 @@ async function loadFromSheets() {
 
 function buildGameIdMap() {
   const map = {};
-  MEMBERS.forEach(m => {
-    const id = m.gameId || m.gameid || '';
-    if (id) map[id] = m.nickname || id;
-  });
+  MEMBERS.forEach(m => { if (m.gameId) map[m.gameId] = { nick: m.nickname || m.gameId, role: m.note || '成員' }; });
   return map;
 }
 
+// ── 頁面切換 ──
 function showPage(pageId, link) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
@@ -373,19 +398,31 @@ function showPage(pageId, link) {
   if (pageId === 'id-page') renderIdTable();
 }
 
+// ── 品質 Tab ──
+function setQTab(btn) {
+  document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeQTab = btn.dataset.q;
+  applyFilters();
+}
+
+// ── 篩選 ──
 function applyFilters() {
-  const gameIdMap = buildGameIdMap();
-  const ownerDisplay = o => gameIdMap[o] || o;
-  const q       = document.getElementById('searchInput').value.trim().toLowerCase();
-  const quality = document.getElementById('filterQuality').value;
-  const score   = document.getElementById('filterScore').value;
-  const obtain  = document.getElementById('filterObtain').value;
-  const sort    = document.getElementById('sortBy').value;
+  const gameIdMap   = buildGameIdMap();
+  const ownerDisplay = id => (gameIdMap[id] ? gameIdMap[id].nick : id);
+  const ownerRole    = id => (gameIdMap[id] ? gameIdMap[id].role : '');
+  const q      = document.getElementById('searchInput').value.trim().toLowerCase();
+  const score  = document.getElementById('filterScore').value;
+  const obtain = document.getElementById('filterObtain').value;
+  const sort   = document.getElementById('sortBy').value;
 
   let list = FLOWERS.filter(f => {
     const ownerNames = f.owners.map(ownerDisplay);
     const matchQ = !q || f.name.toLowerCase().includes(q) || ownerNames.some(o => o.toLowerCase().includes(q));
-    return matchQ && (!quality || f.quality === quality) && (!score || String(f.score) === score) && (!obtain || f.obtain === obtain);
+    return matchQ
+      && (!activeQTab || f.quality === activeQTab)
+      && (!score  || String(f.score) === score)
+      && (!obtain || f.obtain === obtain);
   });
 
   if (sort === 'name_asc')   list.sort((a,b) => a.name.localeCompare(b.name,'zh-TW'));
@@ -397,67 +434,174 @@ function applyFilters() {
     return qd !== 0 ? qd : (a.order??999) - (b.order??999);
   });
 
-  renderFlowers(list, ownerDisplay);
+  currentList = list;
+  renderFlowers(list, ownerDisplay, ownerRole);
 }
 
 function resetFilters() {
-  ['searchInput','filterQuality','filterScore','filterObtain','sortBy'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterScore').value = '';
+  document.getElementById('filterObtain').value = '';
+  document.getElementById('sortBy').value = '';
+  // 重置 tab 到全部
+  document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
+  document.querySelector('.qtab[data-q=""]').classList.add('active');
+  activeQTab = '';
   applyFilters();
 }
 
-function renderFlowers(list, ownerDisplay) {
-  ownerDisplay = ownerDisplay || (o => o);
-  document.getElementById('resultCount').innerHTML = `共找到 <span>${list.length}</span> 種花`;
-  if (list.length === 0) {
-    document.getElementById('flowerGrid').innerHTML = '<div class="no-result">🌸 找不到符合條件的花卉</div>';
-    return;
-  }
-  document.getElementById('flowerGrid').innerHTML = list.map(f => {
-    const ownerNames = f.owners.map(ownerDisplay);
-    const ownerTags = ownerNames.length
-      ? ownerNames.map(o => `<span class="owner-tag">${o}</span>`).join('')
-      : '<span class="no-owner">尚無人擁有</span>';
-    const thumbContent = f.img
-      ? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='🌸'" onclick="openLightbox('${f.img.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}');event.stopPropagation();">`
-      : '🌸';
-    return `
-      <div class="flower-card quality-${f.quality}">
-        <div class="card-thumb">${thumbContent}</div>
-        <div class="quality-bar quality-bar-${f.quality}"></div>
-        <div class="card-body">
-          <div class="card-title">${f.name}</div>
-          <div class="card-meta">
-            <span class="badge badge-quality-${f.quality}">${f.quality}</span>
-            <span class="badge badge-score">⭐ ${f.score}</span>
-            <span class="badge badge-obtain">${f.obtain}</span>
-          </div>
-          <div class="owners-section">
-            <div class="owners-label">擁有者 <span class="owner-count-badge">(${ownerNames.length} 人)</span></div>
-            <div class="owners-list">${ownerTags}</div>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
+// ── 數字計數動畫 ──
+function animateCount(el, target) {
+  const start = parseInt(el.textContent) || 0;
+  if (start === target) return;
+  const dur = Math.min(600, Math.abs(target - start) * 8);
+  const step = (target - start) / (dur / 16);
+  let cur = start;
+  const tick = () => {
+    cur += step;
+    const done = step > 0 ? cur >= target : cur <= target;
+    el.textContent = done ? target : Math.round(cur);
+    if (!done) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
-function openLightbox(src, name) {
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox-name').textContent = name;
+// ── 渲染花卉（含品質分組 + stagger 動畫）──
+function renderFlowers(list, ownerDisplay, ownerRole) {
+  const countEl = document.getElementById('resultCount');
+  const countSpan = countEl.querySelector('span') || (() => {
+    countEl.innerHTML = '共找到 <span>0</span> 種花';
+    return countEl.querySelector('span');
+  })();
+  animateCount(countSpan, list.length);
+
+  const grid = document.getElementById('flowerGrid');
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="no-result">🌸 找不到符合條件的花卉</div>';
+    return;
+  }
+
+  // 決定是否分組（無品質篩選時分組）
+  const grouped = !activeQTab;
+  let html = '';
+  let globalIdx = 0;
+
+  if (grouped) {
+    const byQ = {};
+    QUALITY_LIST.forEach(q => { byQ[q] = list.filter(f => f.quality === q); });
+    QUALITY_LIST.forEach(q => {
+      const group = byQ[q];
+      if (!group.length) return;
+      html += `<div class="quality-section-title qs-${q}">
+        <span class="qs-badge">${q}</span>
+        <div class="qs-line"></div>
+        <span class="qs-count">${group.length} 種</span>
+      </div>
+      <div class="flower-grid">`;
+      group.forEach(f => {
+        html += buildCard(f, ownerDisplay, ownerRole, globalIdx++);
+      });
+      html += '</div>';
+    });
+  } else {
+    html = '<div class="flower-grid">';
+    list.forEach(f => { html += buildCard(f, ownerDisplay, ownerRole, globalIdx++); });
+    html += '</div>';
+  }
+
+  grid.innerHTML = html;
+}
+
+function buildCard(f, ownerDisplay, ownerRole, idx) {
+  const ownerNames = f.owners.map(ownerDisplay);
+  const ownerTags = ownerNames.length
+    ? ownerNames.map(id => {
+        const role = ownerRole(id);
+        return `<span class="owner-tag">${ownerDisplay(id)}<span class="tooltip">${role}</span></span>`;
+      }).join('')
+    : '<span class="no-owner">尚無人擁有</span>';
+
+  const safeImg  = (f.img  || '').replace(/'/g, "\\'");
+  const safeName = (f.name || '').replace(/'/g, "\\'");
+  const thumbContent = f.img
+    ? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='🌸'">`
+    : '🌸';
+
+  // stagger delay：每張卡片延遲 30ms，最多 600ms
+  const delay = Math.min(idx * 30, 600);
+
+  return `
+    <div class="flower-card quality-${f.quality}" style="animation-delay:${delay}ms"
+         onclick="openLightboxByIdx(${idx})">
+      <div class="card-thumb">${thumbContent}</div>
+      <div class="quality-bar quality-bar-${f.quality}"></div>
+      <div class="card-body">
+        <div class="card-title">${f.name}</div>
+        <div class="card-meta">
+          <span class="badge badge-quality-${f.quality}">${f.quality}</span>
+          <span class="badge badge-score">⭐ ${f.score}</span>
+          <span class="badge badge-obtain">${f.obtain}</span>
+        </div>
+        <div class="owners-section">
+          <div class="owners-label">擁有者 <span class="owner-count-badge">(${ownerNames.length} 人)</span></div>
+          <div class="owners-list">${ownerTags}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Lightbox ──
+function openLightboxByIdx(idx) {
+  if (!currentList[idx] || !currentList[idx].img) return;
+  lightboxIdx = idx;
+  showLightboxItem();
   document.getElementById('lightbox').classList.add('open');
 }
+
+function showLightboxItem() {
+  const f = currentList[lightboxIdx];
+  if (!f) return;
+  const imgEl = document.getElementById('lightbox-img');
+  imgEl.style.opacity = '0';
+  imgEl.src = f.img || '';
+  imgEl.alt = f.name || '';
+  document.getElementById('lightbox-name').textContent = f.name || '';
+  imgEl.onload = () => { imgEl.style.opacity = '1'; };
+  // 左右箭頭顯示控制
+  document.getElementById('lightbox-prev').style.opacity = lightboxIdx > 0 ? '0.7' : '0.2';
+  document.getElementById('lightbox-next').style.opacity = lightboxIdx < currentList.length - 1 ? '0.7' : '0.2';
+}
+
+function shiftLightbox(dir) {
+  const next = lightboxIdx + dir;
+  if (next < 0 || next >= currentList.length) return;
+  // 跳過沒有圖片的
+  let i = next;
+  while (i >= 0 && i < currentList.length && !currentList[i].img) i += dir;
+  if (i < 0 || i >= currentList.length) return;
+  lightboxIdx = i;
+  showLightboxItem();
+}
+
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.getElementById('lightbox-img').src = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
+function handleLightboxClick(e) {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape')      closeLightbox();
+  if (e.key === 'ArrowLeft')   shiftLightbox(-1);
+  if (e.key === 'ArrowRight')  shiftLightbox(1);
+});
+
+// ── 成員表格 ──
 function renderIdTable() {
-  const sorted = MEMBERS.slice().sort((a,b) => {
-    const rd = (ROLE_ORDER[a.note]??9) - (ROLE_ORDER[b.note]??9);
-    return rd !== 0 ? rd : 0;
-  });
+  const sorted = MEMBERS.slice().sort((a,b) => (ROLE_ORDER[a.note]??9) - (ROLE_ORDER[b.note]??9));
   document.getElementById('idTableBody').innerHTML = sorted.map((m,i) => `
     <tr>
       <td>${i+1}</td>
@@ -469,6 +613,7 @@ function renderIdTable() {
   document.getElementById('memberContent').style.display = 'block';
 }
 
+// ── 初始化 ──
 (async () => {
   const ok = await loadFromSheets();
   document.getElementById('flowerLoading').style.display = 'none';
@@ -476,9 +621,9 @@ function renderIdTable() {
     document.getElementById('flowerContent').style.display = 'block';
     applyFilters();
   } else {
+    document.getElementById('flowerContent').style.display = 'block';
     document.getElementById('flowerGrid').innerHTML =
       '<div class="no-result">⚠️ 無法載入資料，請確認 API Key 和 Sheet 設定</div>';
-    document.getElementById('flowerContent').style.display = 'block';
   }
 })();
 </script>
