@@ -297,21 +297,36 @@
     #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:20px; }
     #lightbox.open { display:flex; }
 
-    /* ── Lightbox tilt wrapper ── */
+    /* ── Lightbox flip card ── */
     #lightbox-tilt-wrap {
       position:relative; display:inline-block;
-      transform-style:preserve-3d;
-      perspective:800px;
+      perspective:1000px;
       border-radius:12px;
-      cursor:grab;
+      cursor:pointer;
+    }
+    #lightbox-flip-inner {
+      position:relative;
+      transform-style:preserve-3d;
+      transition:transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
+      border-radius:12px;
+    }
+    #lightbox-tilt-wrap.flipped #lightbox-flip-inner {
+      transform:rotateY(180deg);
+    }
+
+    /* 正面：圖片 */
+    #lightbox-front {
+      position:relative;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      border-radius:12px;
     }
     #lightbox-img {
-      max-width:90vw; max-height:90vh; width:auto; height:auto;
+      max-width:90vw; max-height:75vh; width:auto; height:auto;
       border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.5);
-      transition:opacity 0.2s, transform 0.08s ease-out;
+      transition:opacity 0.2s;
       display:block; position:relative; z-index:1;
     }
-    /* 光影反射層 */
     #lightbox-shine {
       position:absolute; inset:0; border-radius:12px; z-index:2;
       pointer-events:none;
@@ -319,6 +334,54 @@
       transition:background 0.08s ease-out;
       mix-blend-mode:screen;
     }
+    /* 點擊提示 */
+    #lightbox-front::after {
+      content:'點擊查看資訊';
+      position:absolute; bottom:10px; right:12px;
+      background:rgba(0,0,0,0.45); color:#fff;
+      font-size:0.72rem; padding:3px 9px; border-radius:10px;
+      pointer-events:none; opacity:0.8;
+    }
+
+    /* 背面：資訊 */
+    #lightbox-back {
+      position:absolute; inset:0;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transform:rotateY(180deg);
+      border-radius:12px;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      gap:14px; padding:28px 24px;
+      box-shadow:0 8px 40px rgba(0,0,0,0.5);
+      min-width:260px;
+    }
+    .lb-back-name {
+      font-size:1.4rem; font-weight:800; color:#fff;
+      text-shadow:0 2px 10px rgba(0,0,0,0.4);
+      text-align:center; line-height:1.3;
+    }
+    .lb-back-meta { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    .lb-back-badge {
+      padding:4px 14px; border-radius:12px; font-size:0.85rem; font-weight:700;
+      background:rgba(255,255,255,0.2); color:#fff; border:1.5px solid rgba(255,255,255,0.4);
+    }
+    .lb-back-owners-title {
+      font-size:0.8rem; color:rgba(255,255,255,0.7); font-weight:600; text-align:center;
+    }
+    .lb-back-owners { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:320px; }
+    .lb-back-owner-tag {
+      background:rgba(255,255,255,0.18); color:#fff;
+      border-radius:10px; padding:3px 10px; font-size:0.8rem;
+      border:1px solid rgba(255,255,255,0.3);
+    }
+    .lb-back-no-owner { color:rgba(255,255,255,0.5); font-size:0.85rem; font-style:italic; }
+    /* 背面背景依品質 */
+    .lb-back-仙 { background:linear-gradient(135deg,#c2185b,#ff4e8a,#ff8c42); }
+    .lb-back-華 { background:linear-gradient(135deg,#c2510b,#e96a1e,#ffb347); }
+    .lb-back-珍 { background:linear-gradient(135deg,#6a1b9a,#9b59b6,#c39bd3); }
+    .lb-back-普 { background:linear-gradient(135deg,#1565c0,#4a90d9,#74b9ff); }
+    .lb-back-凡 { background:linear-gradient(135deg,#4a5240,#7f8c6e,#a8b89a); }
+
     #lightbox-name { color:#fff; font-size:1.2rem; font-weight:700; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
     #lightbox-close { position:absolute; top:18px; right:22px; color:#fff; font-size:2rem; cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s; }
     #lightbox-close:hover { opacity:1; }
@@ -404,9 +467,19 @@
 <div id="lightbox" onclick="handleLightboxClick(event)">
   <span id="lightbox-close" onclick="closeLightbox()">✕</span>
   <span id="lightbox-prev" onclick="shiftLightbox(-1);event.stopPropagation()">&#8249;</span>
-  <div id="lightbox-tilt-wrap">
-    <img id="lightbox-img" src="" alt="">
-    <div id="lightbox-shine"></div>
+  <div id="lightbox-tilt-wrap" onclick="toggleLightboxFlip(event)">
+    <div id="lightbox-flip-inner">
+      <div id="lightbox-front">
+        <img id="lightbox-img" src="" alt="">
+        <div id="lightbox-shine"></div>
+      </div>
+      <div id="lightbox-back" class="lb-back-仙">
+        <div class="lb-back-name" id="lb-back-name"></div>
+        <div class="lb-back-meta" id="lb-back-meta"></div>
+        <div class="lb-back-owners-title">擁有者</div>
+        <div class="lb-back-owners" id="lb-back-owners"></div>
+      </div>
+    </div>
   </div>
   <div id="lightbox-name"></div>
   <div id="lightbox-thumbs"></div>
@@ -875,8 +948,26 @@ function showLightboxItem() {
   imgEl.src = f.img || '';
   imgEl.alt = f.name || '';
   document.getElementById('lightbox-name').textContent = f.name || '';
+
+  // 重置翻轉狀態
+  document.getElementById('lightbox-tilt-wrap').classList.remove('flipped');
+
+  // 填入背面資訊
+  const gameIdMap = buildGameIdMap();
+  const ownerNames = (f.owners || []).map(id => gameIdMap[id] ? gameIdMap[id].nick : id);
+  document.getElementById('lb-back-name').textContent = f.name || '';
+  document.getElementById('lb-back-meta').innerHTML = `
+    <span class="lb-back-badge">${f.quality || ''}</span>
+    <span class="lb-back-badge">⭐ ${f.score || 0}</span>
+    <span class="lb-back-badge">${f.obtain || ''}</span>`;
+  document.getElementById('lb-back-owners').innerHTML = ownerNames.length
+    ? ownerNames.map(n => `<span class="lb-back-owner-tag">${n}</span>`).join('')
+    : '<span class="lb-back-no-owner">尚無人擁有</span>';
+  // 背面背景依品質
+  const back = document.getElementById('lightbox-back');
+  back.className = `lb-back-${f.quality || '凡'}`;
+
   imgEl.onload = () => {
-    // 統一顯示尺寸：固定寬度，高度依比例
     const targetW = Math.min(370, window.innerWidth * 0.88);
     const ratio = imgEl.naturalHeight / imgEl.naturalWidth;
     imgEl.style.width  = Math.round(targetW) + 'px';
@@ -885,6 +976,13 @@ function showLightboxItem() {
   };
   document.getElementById('lightbox-prev').style.opacity = lightboxIdx > 0 ? '0.7' : '0.2';
   document.getElementById('lightbox-next').style.opacity = lightboxIdx < currentList.length - 1 ? '0.7' : '0.2';
+}
+
+function toggleLightboxFlip(e) {
+  // 不攔截左右箭頭點擊
+  if (e.target.id === 'lightbox-prev' || e.target.id === 'lightbox-next') return;
+  e.stopPropagation();
+  document.getElementById('lightbox-tilt-wrap').classList.toggle('flipped');
 }
 
 function shiftLightbox(dir) {
@@ -901,11 +999,9 @@ function shiftLightbox(dir) {
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.getElementById('lightbox-img').src = '';
-  // 重置傾斜
   const wrap = document.getElementById('lightbox-tilt-wrap');
-  const img  = document.getElementById('lightbox-img');
+  wrap.classList.remove('flipped');
   wrap.style.transform = '';
-  img.style.transform  = '';
 }
 
 // ── Lightbox 3D tilt ──
@@ -917,6 +1013,7 @@ function closeLightbox() {
   const MAX_TILT = 18; // 最大傾斜角度（度）
 
   wrap.addEventListener('mousemove', e => {
+    if (wrap.classList.contains('flipped')) return; // 翻轉後不做 tilt
     const rect = wrap.getBoundingClientRect();
     const cx = rect.left + rect.width  / 2;
     const cy = rect.top  + rect.height / 2;
