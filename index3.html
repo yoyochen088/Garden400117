@@ -516,7 +516,6 @@
             <label>排序</label>
             <select id="sortBy" onchange="applyFilters()">
               <option value="">預設</option>
-              <option value="name_asc">花名 A→Z</option><option value="name_desc">花名 Z→A</option>
               <option value="score_asc">競賽分 低→高</option><option value="score_desc">競賽分 高→低</option>
               <option value="pop_asc">公會最缺（擁有人數少→多）</option>
               <option value="pop_desc">公會最多（擁有人數多→少）</option>
@@ -663,8 +662,6 @@ function applyFilters() {
       && (!obtain || f.obtain === obtain);
   });
 
-  if (sort === 'name_asc')   list.sort((a,b) => a.name.localeCompare(b.name,'zh-TW'));
-  if (sort === 'name_desc')  list.sort((a,b) => b.name.localeCompare(a.name,'zh-TW'));
   if (sort === 'score_asc')  list.sort((a,b) => a.score - b.score);
   if (sort === 'score_desc') list.sort((a,b) => b.score - a.score);
   if (sort === 'pop_asc')    list.sort((a,b) => a.owners.length - b.owners.length);
@@ -967,35 +964,30 @@ function closeLightbox() {
   wrap.style.transform = '';
 }
 
-// ── Lightbox 3D tilt ──
-(function initLightboxTilt() {
-  const lb    = document.getElementById('lightbox');
-  const wrap  = document.getElementById('lightbox-tilt-wrap');
-  const img   = document.getElementById('lightbox-img');
-  const shine = document.getElementById('lightbox-shine');
-  const MAX_TILT = 18; // 最大傾斜角度（度）
-
-  wrap.addEventListener('mousemove', e => {
-    if (wrap.classList.contains('flipped')) return; // 翻轉後不做 tilt
-    const rect = wrap.getBoundingClientRect();
+// ── 花卡 3D tilt ──
+(function initCardTilt() {
+  const MAX_TILT = 12;
+  document.addEventListener('mousemove', e => {
+    const card = e.target.closest('.flower-card');
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
     const cx = rect.left + rect.width  / 2;
     const cy = rect.top  + rect.height / 2;
-    const dx = (e.clientX - cx) / (rect.width  / 2); // -1 ~ 1
-    const dy = (e.clientY - cy) / (rect.height / 2); // -1 ~ 1
+    const dx = (e.clientX - cx) / (rect.width  / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
     const rotY =  dx * MAX_TILT;
     const rotX = -dy * MAX_TILT;
-
-    wrap.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.03)`;
-
-    // 光影：跟著滑鼠位置移動
-    const shineX = Math.round((dx + 1) / 2 * 100);
-    const shineY = Math.round((dy + 1) / 2 * 100);
-    shine.style.background = `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255,255,255,0.28) 0%, transparent 65%)`;
+    card.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   });
-
-  wrap.addEventListener('mouseleave', () => {
-    wrap.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
-    shine.style.background = 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 70%)';
+  document.addEventListener('mouseleave', e => {
+    const card = e.target.closest?.('.flower-card');
+    if (card) card.style.transform = '';
+  }, true);
+  document.addEventListener('mouseout', e => {
+    const card = e.target.closest('.flower-card');
+    if (card && !card.contains(e.relatedTarget)) {
+      card.style.transform = '';
+    }
   });
 })();
 
