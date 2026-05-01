@@ -990,6 +990,8 @@ function closeLightbox() {
   document.addEventListener('mousemove', e => {
     const card = e.target.closest('.flower-card');
     if (!card) return;
+    // 停止入場動畫，讓 inline transform 生效
+    card.style.animation = 'none';
     const rect = card.getBoundingClientRect();
     const cx = rect.left + rect.width  / 2;
     const cy = rect.top  + rect.height / 2;
@@ -999,10 +1001,6 @@ function closeLightbox() {
     const rotX = -dy * MAX_TILT;
     card.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   });
-  document.addEventListener('mouseleave', e => {
-    const card = e.target.closest?.('.flower-card');
-    if (card) card.style.transform = '';
-  }, true);
   document.addEventListener('mouseout', e => {
     const card = e.target.closest('.flower-card');
     if (card && !card.contains(e.relatedTarget)) {
