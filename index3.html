@@ -334,14 +334,16 @@
       transition:background 0.08s ease-out;
       mix-blend-mode:screen;
     }
-    /* 點擊提示 */
+    /* 點擊提示 — 持續顯示，翻轉後隱藏 */
     #lightbox-front::after {
-      content:'點擊查看資訊';
+      content:'🔄 點擊查看資訊';
       position:absolute; bottom:10px; right:12px;
-      background:rgba(0,0,0,0.45); color:#fff;
-      font-size:0.72rem; padding:3px 9px; border-radius:10px;
-      pointer-events:none; opacity:0.8;
+      background:rgba(0,0,0,0.5); color:#fff;
+      font-size:0.72rem; padding:3px 10px; border-radius:10px;
+      pointer-events:none; opacity:1;
+      transition:opacity 0.3s;
     }
+    #lightbox-tilt-wrap.flipped #lightbox-front::after { opacity:0; }
 
     /* 背面：資訊 */
     #lightbox-back {
@@ -395,26 +397,6 @@
     @media(max-width:600px) { .guild-name{font-size:1rem;} nav a{padding:5px 10px;font-size:0.82rem;} .flower-grid{grid-template-columns:1fr;gap:12px;} .skeleton-grid{grid-template-columns:1fr;} .filter-group{min-width:100%;} #lightbox-prev{left:4px;} #lightbox-next{right:4px;} }
 
     /* ══════════════════════════════════════
-       10. 品質統計圖
-    ══════════════════════════════════════ */
-    .stats-panel {
-      background:var(--card-bg); border-radius:var(--radius); padding:18px 20px;
-      margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border);
-    }
-    .stats-title { font-size:0.85rem; font-weight:700; color:var(--text-muted); margin-bottom:12px; letter-spacing:1px; }
-    .stats-bars { display:flex; flex-direction:column; gap:8px; }
-    .stats-row { display:flex; align-items:center; gap:10px; }
-    .stats-label { width:28px; font-size:0.8rem; font-weight:700; text-align:center; flex-shrink:0; }
-    .stats-bar-wrap { flex:1; background:#f5ede8; border-radius:6px; height:14px; overflow:hidden; }
-    .stats-bar-fill { height:100%; border-radius:6px; transition:width 0.8s cubic-bezier(0.34,1.2,0.64,1); width:0; }
-    .stats-bar-fill.q-仙 { background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
-    .stats-bar-fill.q-華 { background:linear-gradient(90deg,#ff8c00,#ffb347); }
-    .stats-bar-fill.q-珍 { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
-    .stats-bar-fill.q-普 { background:linear-gradient(90deg,#4a90d9,#74b9ff); }
-    .stats-bar-fill.q-凡 { background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
-    .stats-num { font-size:0.78rem; color:var(--text-muted); width:36px; text-align:right; flex-shrink:0; }
-
-    /* ══════════════════════════════════════
        11. 成員擁有熱力圖（成員頁）
     ══════════════════════════════════════ */
     .member-bar-wrap { display:flex; align-items:center; gap:8px; }
@@ -423,16 +405,17 @@
     .member-bar-count { font-size:0.75rem; color:var(--text-muted); white-space:nowrap; }
 
     /* ══════════════════════════════════════
-       12. 稀有度指標
+       12. 花朵普及度長條圖
     ══════════════════════════════════════ */
-    .rarity-badge {
-      display:inline-flex; align-items:center; gap:3px;
-      padding:1px 7px; border-radius:8px; font-size:0.7rem; font-weight:700;
-    }
-    .rarity-0 { background:#fff0f5; color:#ff4e8a; border:1px solid #ffb3d1; } /* 極稀有 */
-    .rarity-1 { background:#fff8ee; color:#e96a1e; border:1px solid #f4a46a; } /* 稀有 */
-    .rarity-2 { background:#f0f7ff; color:#4a90d9; border:1px solid #74b9ff; } /* 普及 */
-    .rarity-3 { background:#f4f8f0; color:#7f8c6e; border:1px solid #a8b89a; } /* 常見 */
+    .popularity-row { display:flex; align-items:center; gap:6px; margin-top:4px; }
+    .popularity-bar-bg { flex:1; background:#f0e8e0; border-radius:4px; height:7px; overflow:hidden; }
+    .popularity-bar-fill { height:100%; border-radius:4px; transition:width 0.6s ease; }
+    .pop-仙 { background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
+    .pop-華 { background:linear-gradient(90deg,#ff8c00,#ffb347); }
+    .pop-珍 { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
+    .pop-普 { background:linear-gradient(90deg,#4a90d9,#74b9ff); }
+    .pop-凡 { background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
+    .popularity-label { font-size:0.7rem; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
 
     /* ══════════════════════════════════════
        13. Lightbox 縮圖列
@@ -494,11 +477,6 @@
     </div>
 
     <div id="flowerContent" style="display:none;">
-      <!-- 10. 品質統計圖 -->
-      <div class="stats-panel" id="statsPanel">
-        <div class="stats-title">📊 花卉品質分布</div>
-        <div class="stats-bars" id="statsBars"></div>
-      </div>
       <div class="controls">
         <div class="search-row">
           <input class="search-box" id="searchInput" type="text" placeholder="🔍 搜尋花名 / 擁有者..." oninput="applyFilters()" />
@@ -540,6 +518,8 @@
               <option value="">預設</option>
               <option value="name_asc">花名 A→Z</option><option value="name_desc">花名 Z→A</option>
               <option value="score_asc">競賽分 低→高</option><option value="score_desc">競賽分 高→低</option>
+              <option value="pop_asc">公會最缺（擁有人數少→多）</option>
+              <option value="pop_desc">公會最多（擁有人數多→少）</option>
             </select>
           </div>
           <button class="btn-reset" onclick="resetFilters()">重置</button>
@@ -687,6 +667,8 @@ function applyFilters() {
   if (sort === 'name_desc')  list.sort((a,b) => b.name.localeCompare(a.name,'zh-TW'));
   if (sort === 'score_asc')  list.sort((a,b) => a.score - b.score);
   if (sort === 'score_desc') list.sort((a,b) => b.score - a.score);
+  if (sort === 'pop_asc')    list.sort((a,b) => a.owners.length - b.owners.length);
+  if (sort === 'pop_desc')   list.sort((a,b) => b.owners.length - a.owners.length);
   if (!sort) list.sort((a,b) => {
     const qd = (QUALITY_ORDER[a.quality]??9) - (QUALITY_ORDER[b.quality]??9);
     return qd !== 0 ? qd : (a.order??999) - (b.order??999);
