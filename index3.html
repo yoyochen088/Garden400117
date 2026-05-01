@@ -335,15 +335,14 @@
       mix-blend-mode:screen;
     }
     /* 點擊提示 — 持續顯示，翻轉後隱藏 */
-    #lightbox-front::after {
-      content:'🔄 點擊查看資訊';
-      position:absolute; bottom:10px; right:12px;
+    #lightbox-hint {
+      position:absolute; bottom:10px; right:12px; z-index:5;
       background:rgba(0,0,0,0.5); color:#fff;
       font-size:0.72rem; padding:3px 10px; border-radius:10px;
       pointer-events:none; opacity:1;
       transition:opacity 0.3s;
     }
-    #lightbox-tilt-wrap.flipped #lightbox-front::after { opacity:0; }
+    #lightbox-tilt-wrap.flipped #lightbox-hint { opacity:0; }
 
     /* 背面：資訊 */
     #lightbox-back {
@@ -455,6 +454,7 @@
       <div id="lightbox-front">
         <img id="lightbox-img" src="" alt="">
         <div id="lightbox-shine"></div>
+        <div id="lightbox-hint">🔄 點擊查看資訊</div>
       </div>
       <div id="lightbox-back" class="lb-back-仙">
         <div class="lb-back-name" id="lb-back-name"></div>
