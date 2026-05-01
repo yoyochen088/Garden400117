@@ -143,7 +143,7 @@
     .flower-card {
       background:var(--card-bg); border-radius:var(--radius);
       border:2px solid var(--border);
-      box-shadow:var(--shadow); overflow:visible; display:flex; flex-direction:column;
+      box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column;
       transition:box-shadow 0.3s ease, background 0.3s ease;
       animation:cardIn 0.35s ease both;
       position:relative;
@@ -237,7 +237,7 @@
     .flower-card.quality-凡 { border-color:#a8b89a; }
 
     /* 大圖區 */
-    .card-thumb { width:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--pink-mid); overflow:hidden; position:relative; flex-shrink:0; cursor:zoom-in; }
+    .card-thumb { width:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--pink-mid); overflow:hidden; position:relative; flex-shrink:0; cursor:zoom-in; border-radius:var(--radius) var(--radius) 0 0; }
     .card-thumb img { width:100%; height:auto; display:block; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), filter 0.3s ease; transform-origin:center 60%; transform:scale(1.5); }
     .flower-card:hover .card-thumb img { transform:scale(1.8); filter:drop-shadow(0 6px 18px rgba(0,0,0,0.4)); }
 
@@ -289,7 +289,29 @@
     /* ── Lightbox ── */
     #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:20px; }
     #lightbox.open { display:flex; }
-    #lightbox-img { max-width:90vw; max-height:90vh; width:auto; height:auto; border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.5); transition:opacity 0.2s; display:block; }
+
+    /* ── Lightbox tilt wrapper ── */
+    #lightbox-tilt-wrap {
+      position:relative; display:inline-block;
+      transform-style:preserve-3d;
+      perspective:800px;
+      border-radius:12px;
+      cursor:grab;
+    }
+    #lightbox-img {
+      max-width:90vw; max-height:90vh; width:auto; height:auto;
+      border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.5);
+      transition:opacity 0.2s, transform 0.08s ease-out;
+      display:block; position:relative; z-index:1;
+    }
+    /* 光影反射層 */
+    #lightbox-shine {
+      position:absolute; inset:0; border-radius:12px; z-index:2;
+      pointer-events:none;
+      background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 70%);
+      transition:background 0.08s ease-out;
+      mix-blend-mode:screen;
+    }
     #lightbox-name { color:#fff; font-size:1.2rem; font-weight:700; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
     #lightbox-close { position:absolute; top:18px; right:22px; color:#fff; font-size:2rem; cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s; }
     #lightbox-close:hover { opacity:1; }
@@ -318,7 +340,10 @@
 <div id="lightbox" onclick="handleLightboxClick(event)">
   <span id="lightbox-close" onclick="closeLightbox()">✕</span>
   <span id="lightbox-prev" onclick="shiftLightbox(-1);event.stopPropagation()">&#8249;</span>
-  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-tilt-wrap">
+    <img id="lightbox-img" src="" alt="">
+    <div id="lightbox-shine"></div>
+  </div>
   <div id="lightbox-name"></div>
   <span id="lightbox-next" onclick="shiftLightbox(1);event.stopPropagation()">&#8250;</span>
 </div>
@@ -721,7 +746,43 @@ function shiftLightbox(dir) {
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.getElementById('lightbox-img').src = '';
+  // 重置傾斜
+  const wrap = document.getElementById('lightbox-tilt-wrap');
+  const img  = document.getElementById('lightbox-img');
+  wrap.style.transform = '';
+  img.style.transform  = '';
 }
+
+// ── Lightbox 3D tilt ──
+(function initLightboxTilt() {
+  const lb    = document.getElementById('lightbox');
+  const wrap  = document.getElementById('lightbox-tilt-wrap');
+  const img   = document.getElementById('lightbox-img');
+  const shine = document.getElementById('lightbox-shine');
+  const MAX_TILT = 18; // 最大傾斜角度（度）
+
+  wrap.addEventListener('mousemove', e => {
+    const rect = wrap.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width  / 2); // -1 ~ 1
+    const dy = (e.clientY - cy) / (rect.height / 2); // -1 ~ 1
+    const rotY =  dx * MAX_TILT;
+    const rotX = -dy * MAX_TILT;
+
+    wrap.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.03)`;
+
+    // 光影：跟著滑鼠位置移動
+    const shineX = Math.round((dx + 1) / 2 * 100);
+    const shineY = Math.round((dy + 1) / 2 * 100);
+    shine.style.background = `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255,255,255,0.28) 0%, transparent 65%)`;
+  });
+
+  wrap.addEventListener('mouseleave', () => {
+    wrap.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+    shine.style.background = 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 70%)';
+  });
+})();
 
 function handleLightboxClick(e) {
   if (e.target === document.getElementById('lightbox')) closeLightbox();
