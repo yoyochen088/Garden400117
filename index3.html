@@ -762,13 +762,10 @@ function buildCard(f, ownerDisplay, ownerRole, idx) {
     ? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='🌸'">`
     : '🌸';
 
-  // 12. 稀有度指標
+  // 12. 普及度長條圖（相對於全公會成員數）
   const cnt = ownerNames.length;
-  let rarityClass, rarityLabel;
-  if      (cnt === 0) { rarityClass='rarity-0'; rarityLabel='✦ 極稀有'; }
-  else if (cnt <= 2)  { rarityClass='rarity-1'; rarityLabel='◆ 稀有'; }
-  else if (cnt <= 5)  { rarityClass='rarity-2'; rarityLabel='● 普及'; }
-  else                { rarityClass='rarity-3'; rarityLabel='○ 常見'; }
+  const total = MEMBERS.length || 1;
+  const pct = Math.round(cnt / total * 100);
 
   const delay = Math.min(idx * 50, 800);
 
@@ -785,10 +782,15 @@ function buildCard(f, ownerDisplay, ownerRole, idx) {
           <span class="badge badge-quality-${f.quality}">${f.quality}</span>
           <span class="badge badge-score">⭐ ${f.score}</span>
           <span class="badge badge-obtain">${f.obtain}</span>
-          <span class="rarity-badge ${rarityClass}">${rarityLabel}</span>
+        </div>
+        <div class="popularity-row">
+          <div class="popularity-bar-bg">
+            <div class="popularity-bar-fill pop-${f.quality}" style="width:${pct}%"></div>
+          </div>
+          <span class="popularity-label">${cnt}/${total} 人 (${pct}%)</span>
         </div>
         <div class="owners-section">
-          <div class="owners-label">擁有者 <span class="owner-count-badge">(${ownerNames.length} 人)</span></div>
+          <div class="owners-label">擁有者 <span class="owner-count-badge">(${cnt} 人)</span></div>
           <div class="owners-list">${ownerTags}</div>
         </div>
       </div>
@@ -831,27 +833,6 @@ function spawnParticles(card, quality) {
     `;
     container.appendChild(p);
   }
-}
-
-// ── 10. 品質統計圖 ──
-function renderStats() {
-  const counts = {};
-  QUALITY_LIST.forEach(q => { counts[q] = FLOWERS.filter(f => f.quality === q).length; });
-  const max = Math.max(...Object.values(counts), 1);
-  document.getElementById('statsBars').innerHTML = QUALITY_LIST.map(q => `
-    <div class="stats-row">
-      <span class="stats-label badge badge-quality-${q}">${q}</span>
-      <div class="stats-bar-wrap">
-        <div class="stats-bar-fill q-${q}" data-pct="${Math.round(counts[q]/max*100)}"></div>
-      </div>
-      <span class="stats-num">${counts[q]} 種</span>
-    </div>`).join('');
-  // 動畫：延遲後展開
-  requestAnimationFrame(() => {
-    document.querySelectorAll('.stats-bar-fill').forEach(el => {
-      el.style.width = el.dataset.pct + '%';
-    });
-  });
 }
 
 // ── 11. 成員擁有熱力圖 ──
@@ -1066,7 +1047,6 @@ function renderIdTable() {
   document.getElementById('flowerLoading').style.display = 'none';
   if (ok) {
     document.getElementById('flowerContent').style.display = 'block';
-    renderStats();
     applyFilters();
   } else {
     document.getElementById('flowerContent').style.display = 'block';
