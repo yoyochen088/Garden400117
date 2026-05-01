@@ -118,15 +118,9 @@
       animation:cardIn 0.35s ease both;
       position:relative;
     }
-    .flower-card:hover { transform:translateY(-5px) scale(1.02); box-shadow:0 10px 32px rgba(233,106,30,0.22); z-index:2; }
+    .flower-card:hover { transform:translateY(-4px); box-shadow:0 10px 32px rgba(233,106,30,0.22); z-index:2; }
 
-    /* ── 仙品 glow pulse ── */
-    @keyframes glowPulse {
-      0%,100% { box-shadow:0 0 8px 2px rgba(255,78,138,0.35), var(--shadow); }
-      50%      { box-shadow:0 0 18px 6px rgba(255,78,138,0.55), var(--shadow); }
-    }
-    .flower-card.quality-仙 { border-color:#ff6b9d; animation:cardIn 0.35s ease both, glowPulse 2.8s ease-in-out infinite; }
-    .flower-card.quality-仙:hover { animation:glowPulse 2.8s ease-in-out infinite; }
+    .flower-card.quality-仙 { border-color:#ff6b9d; }
     .flower-card.quality-華 { border-color:#ffb347; }
     .flower-card.quality-珍 { border-color:#c39bd3; }
     .flower-card.quality-普 { border-color:#74b9ff; }
@@ -162,22 +156,9 @@
     .owners-section { margin-top:2px; }
     .owners-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
     .owners-list { display:flex; flex-wrap:wrap; gap:4px; }
-    .owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:8px; padding:2px 8px; font-size:0.75rem; font-weight:500; border:1px solid var(--border); position:relative; cursor:default; }
+    .owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:8px; padding:2px 8px; font-size:0.75rem; font-weight:500; border:1px solid var(--border); }
     .no-owner { font-size:0.78rem; color:#bbb; font-style:italic; }
     .owner-count-badge { font-size:0.75rem; color:var(--text-muted); }
-
-    /* ── Owner Tooltip ── */
-    .owner-tag .tooltip {
-      display:none; position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
-      background:#3d1a2e; color:#fff; border-radius:8px; padding:5px 10px;
-      font-size:0.75rem; white-space:nowrap; z-index:50; pointer-events:none;
-      box-shadow:0 4px 12px rgba(0,0,0,0.25);
-    }
-    .owner-tag .tooltip::after {
-      content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
-      border:5px solid transparent; border-top-color:#3d1a2e;
-    }
-    .owner-tag:hover .tooltip { display:block; }
 
     .no-result { text-align:center; padding:48px 20px; color:var(--text-muted); font-size:1rem; }
 
@@ -199,7 +180,7 @@
     /* ── Lightbox ── */
     #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:20px; }
     #lightbox.open { display:flex; }
-    #lightbox-img { max-width:min(90vw,600px); max-height:75vh; object-fit:contain; border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.5); transition:opacity 0.2s; }
+    #lightbox-img { max-width:min(60vw,420px); max-height:75vh; object-fit:contain; border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.5); transition:opacity 0.2s; }
     #lightbox-name { color:#fff; font-size:1.2rem; font-weight:700; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
     #lightbox-close { position:absolute; top:18px; right:22px; color:#fff; font-size:2rem; cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s; }
     #lightbox-close:hover { opacity:1; }
@@ -515,10 +496,7 @@ function renderFlowers(list, ownerDisplay, ownerRole) {
 function buildCard(f, ownerDisplay, ownerRole, idx) {
   const ownerNames = f.owners.map(ownerDisplay);
   const ownerTags = ownerNames.length
-    ? ownerNames.map(id => {
-        const role = ownerRole(id);
-        return `<span class="owner-tag">${ownerDisplay(id)}<span class="tooltip">${role}</span></span>`;
-      }).join('')
+    ? ownerNames.map(id => `<span class="owner-tag">${ownerDisplay(id)}</span>`).join('')
     : '<span class="no-owner">尚無人擁有</span>';
 
   const safeImg  = (f.img  || '').replace(/'/g, "\\'");
@@ -527,8 +505,8 @@ function buildCard(f, ownerDisplay, ownerRole, idx) {
     ? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='🌸'">`
     : '🌸';
 
-  // stagger delay：每張卡片延遲 30ms，最多 600ms
-  const delay = Math.min(idx * 30, 600);
+  // stagger delay：每張卡片延遲 50ms，最多 800ms
+  const delay = Math.min(idx * 50, 800);
 
   return `
     <div class="flower-card quality-${f.quality}" style="animation-delay:${delay}ms"
