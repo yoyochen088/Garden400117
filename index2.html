@@ -143,11 +143,18 @@
     .flower-card {
       background:var(--card-bg); border-radius:var(--radius);
       border:2px solid var(--border);
-      box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column;
+      box-shadow:var(--shadow); overflow:visible; display:flex; flex-direction:column;
       transition:box-shadow 0.3s ease, background 0.3s ease;
       animation:cardIn 0.35s ease both;
       position:relative;
     }
+    /* 內容區裁切，讓圖片不溢出，但偽元素邊框可以超出 */
+    .flower-card .card-thumb,
+    .flower-card .quality-bar,
+    .flower-card .card-body {
+      position:relative; z-index:1;
+    }
+    .flower-card .card-thumb { overflow:hidden; border-radius:calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0 0; }
     /* overflow:visible 讓粒子可以飛出卡片外，但內容要裁切 */
     .flower-card::before {
       content:''; position:absolute; inset:-2px; border-radius:var(--radius);
@@ -237,7 +244,7 @@
     .flower-card.quality-凡 { border-color:#a8b89a; }
 
     /* 大圖區 */
-    .card-thumb { width:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--pink-mid); overflow:hidden; position:relative; flex-shrink:0; cursor:zoom-in; border-radius:var(--radius) var(--radius) 0 0; }
+    .card-thumb { width:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--pink-mid); position:relative; flex-shrink:0; cursor:zoom-in; }
     .card-thumb img { width:100%; height:auto; display:block; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), filter 0.3s ease; transform-origin:center 60%; transform:scale(1.5); }
     .flower-card:hover .card-thumb img { transform:scale(1.8); filter:drop-shadow(0 6px 18px rgba(0,0,0,0.4)); }
 
