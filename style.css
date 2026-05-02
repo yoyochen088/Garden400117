@@ -328,7 +328,7 @@ nav a:hover, nav a.active { background: rgba(255,255,255,0.25); }
 
 /* ── RWD ── */
 @media (min-width: 768px) {
-  body { padding: 32px 24px 80px; }
+  main { padding-top: 32px; padding-left: 24px; padding-right: 24px; }
   #showcase-card { padding: 32px 28px 36px; }
   .flower-items { grid-template-columns: repeat(7, 1fr); gap: 12px; }
   .flower-circle { width: 88px; height: 88px; }
