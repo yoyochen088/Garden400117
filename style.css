@@ -10,6 +10,7 @@ body {
   color: #3d1a2e;
   min-height: 100vh;
   padding: 0 0 80px;
+  margin: 0;
 }
 
 /* ── Header（天條）── */
@@ -46,17 +47,20 @@ nav a {
 }
 nav a:hover, nav a.active { background: rgba(255,255,255,0.25); }
 
-/* 手機：header 改兩排 */
+/* 手機：天條單排，nav 文字縮短 */
 @media (max-width: 600px) {
   header {
-    height: auto;
-    flex-wrap: wrap;
-    padding: 8px 16px;
+    height: 60px;
+    flex-wrap: nowrap;
+    padding: 0 12px;
     gap: 6px;
   }
-  .guild-name { width: 100%; }
-  nav { width: 100%; justify-content: flex-start; }
-  nav a { font-size: 0.82rem; padding: 5px 10px; }
+  .guild-name { font-size: 0.95rem; white-space: nowrap; }
+  nav { gap: 5px; flex-shrink: 0; }
+  nav a { font-size: 0.78rem; padding: 4px 8px; }
+  /* 手機版縮短文字（用 data-short 屬性） */
+  nav a[data-short]::before { content: attr(data-short); }
+  nav a[data-short] span { display: none; }
 }
 
 /* ── 頂部操作列 ── */
