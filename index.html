@@ -639,7 +639,10 @@ async function loadFromSheets() {
 
 function buildGameIdMap() {
   const map = {};
-  MEMBERS.forEach(m => { if (m.gameId) map[m.gameId] = { nick: m.nickname || m.gameId, role: m.note || '成員' }; });
+  // 只加入在職成員（left !== true）
+  MEMBERS.forEach(m => {
+    if (m.gameId && !m.left) map[m.gameId] = { nick: m.nickname || m.gameId, role: m.note || '成員' };
+  });
   return map;
 }
 
@@ -663,7 +666,8 @@ function setQTab(btn) {
 // ── 篩選 ──
 function applyFilters() {
   const gameIdMap   = buildGameIdMap();
-  const ownerDisplay = id => (gameIdMap[id] ? gameIdMap[id].nick : id);
+  // 只顯示在職成員，left 成員直接過濾掉
+  const ownerDisplay = id => gameIdMap[id] ? gameIdMap[id].nick : null;
   const ownerRole    = id => (gameIdMap[id] ? gameIdMap[id].role : '');
   const q      = document.getElementById('searchInput').value.trim().toLowerCase();
   const score  = document.getElementById('filterScore').value;
@@ -671,7 +675,7 @@ function applyFilters() {
   const sort   = document.getElementById('sortBy').value;
 
   let list = FLOWERS.filter(f => {
-    const ownerNames = f.owners.map(ownerDisplay);
+    const ownerNames = f.owners.map(ownerDisplay).filter(Boolean);
     const matchQ = !q || f.name.toLowerCase().includes(q) || ownerNames.some(o => o.toLowerCase().includes(q));
     return matchQ
       && (!activeQTab || f.quality === activeQTab)
@@ -767,9 +771,9 @@ function renderFlowers(list, ownerDisplay, ownerRole) {
 }
 
 function buildCard(f, ownerDisplay, ownerRole, idx) {
-  const ownerNames = f.owners.map(ownerDisplay);
+  const ownerNames = f.owners.map(ownerDisplay).filter(Boolean);
   const ownerTags = ownerNames.length
-    ? ownerNames.map(id => `<span class="owner-tag">${ownerDisplay(id)}</span>`).join('')
+    ? ownerNames.map(name => `<span class="owner-tag">${name}</span>`).join('')
     : '<span class="no-owner">尚無人擁有</span>';
 
   const thumbContent = f.img
@@ -931,7 +935,7 @@ function showLightboxItem() {
 
   // 填入背面資訊
   const gameIdMap = buildGameIdMap();
-  const ownerNames = (f.owners || []).map(id => gameIdMap[id] ? gameIdMap[id].nick : id);
+  const ownerNames = (f.owners || []).map(id => gameIdMap[id] ? gameIdMap[id].nick : null).filter(Boolean);
   document.getElementById('lb-back-name').textContent = f.name || '';
   document.getElementById('lb-back-meta').innerHTML = `
     <span class="lb-back-badge">${f.quality || ''}</span>
@@ -964,6 +968,20 @@ function toggleLightboxFlip(e) {
   e.stopPropagation();
   document.getElementById('lightbox-tilt-wrap').classList.toggle('flipped');
 }
+
+// 手機 touch 翻轉
+(function initFlipTouch() {
+  const wrap = document.getElementById('lightbox-tilt-wrap');
+  let touchMoved = false;
+  wrap.addEventListener('touchstart', () => { touchMoved = false; }, { passive:true });
+  wrap.addEventListener('touchmove',  () => { touchMoved = true;  }, { passive:true });
+  wrap.addEventListener('touchend', e => {
+    if (touchMoved) return; // 滑動不觸發翻轉
+    if (e.target.id === 'lightbox-prev' || e.target.id === 'lightbox-next') return;
+    e.preventDefault();
+    wrap.classList.toggle('flipped');
+  });
+})();
 
 function shiftLightbox(dir) {
   const next = lightboxIdx + dir;
