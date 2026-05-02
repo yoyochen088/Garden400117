@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>?€???±å??–é? [400117]</title>
+  <title>ç’€ç’¨ èŠ±å‰åœ–é‘‘ [400117]</title>
   <script>
   const SHEET_CONFIG = {
     apiKey:  'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg',
@@ -21,7 +21,7 @@
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-    /* ?€?€ Header ?€?€ */
+    /* â”€â”€ Header â”€â”€ */
     header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
     .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; }
     nav { display:flex; gap:8px; }
@@ -32,12 +32,12 @@
     .page { display:none; }
     .page.active { display:block; }
 
-    /* ?€?€ Loading spinner ?€?€ */
+    /* â”€â”€ Loading spinner â”€â”€ */
     .loading { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:1rem; }
     .loading-spinner { display:inline-block; width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--pink); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
-    /* ?€?€ Skeleton ?€?€ */
+    /* â”€â”€ Skeleton â”€â”€ */
     .skeleton-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
     .skeleton-card { background:var(--card-bg); border-radius:var(--radius); border:1.5px solid var(--border); overflow:hidden; }
     .skeleton-img { width:100%; height:200px; background:linear-gradient(90deg,#f0e6df 25%,#fde8d8 50%,#f0e6df 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
@@ -47,29 +47,29 @@
     .skeleton-line.xshort { width:40%; }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-    /* ?€?€ Controls ?€?€ */
+    /* â”€â”€ Controls â”€â”€ */
     .controls { background:var(--card-bg); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border); }
     .search-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
     .search-box { flex:1; min-width:200px; padding:9px 14px; border:1.5px solid var(--pink-mid); border-radius:24px; font-size:0.95rem; outline:none; transition:border-color 0.2s; background:var(--bg); color:var(--text); }
     .search-box:focus { border-color:var(--pink); }
 
-    /* ?€?€ ?è³ª Tab ?€?€ */
+    /* â”€â”€ å“è³ª Tab â”€â”€ */
     .quality-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
     .qtab { padding:6px 16px; border-radius:20px; font-size:0.85rem; font-weight:700; cursor:pointer; border:1.5px solid transparent; transition:all 0.18s; background:var(--bg); color:var(--text-muted); }
     .qtab:hover { opacity:0.85; }
     .qtab.active { color:#fff; }
     .qtab[data-q=""]     { border-color:var(--pink-mid); color:var(--pink-dark); }
     .qtab[data-q=""].active { background:var(--pink); border-color:var(--pink); color:#fff; }
-    .qtab[data-q="ä»?].active { background:linear-gradient(135deg,#ff4e8a,#ff8c42); border-color:#ff4e8a; color:#fff; }
-    .qtab[data-q="??].active { background:linear-gradient(135deg,#ff8c00,#ffb347); border-color:#ff8c00; color:#fff; }
-    .qtab[data-q="??].active { background:linear-gradient(135deg,#9b59b6,#c39bd3); border-color:#9b59b6; color:#fff; }
-    .qtab[data-q="??].active { background:linear-gradient(135deg,#4a90d9,#74b9ff); border-color:#4a90d9; color:#fff; }
-    .qtab[data-q="??].active { background:linear-gradient(135deg,#7f8c6e,#a8b89a); border-color:#7f8c6e; color:#fff; }
-    .qtab[data-q="ä»?] { border-color:#ff6b9d; color:#ff4e8a; }
-    .qtab[data-q="??] { border-color:#ffb347; color:#ff8c00; }
-    .qtab[data-q="??] { border-color:#c39bd3; color:#9b59b6; }
-    .qtab[data-q="??] { border-color:#74b9ff; color:#4a90d9; }
-    .qtab[data-q="??] { border-color:#a8b89a; color:#7f8c6e; }
+    .qtab[data-q="ä»™"].active { background:linear-gradient(135deg,#ff4e8a,#ff8c42); border-color:#ff4e8a; color:#fff; }
+    .qtab[data-q="è¯"].active { background:linear-gradient(135deg,#ff8c00,#ffb347); border-color:#ff8c00; color:#fff; }
+    .qtab[data-q="ç"].active { background:linear-gradient(135deg,#9b59b6,#c39bd3); border-color:#9b59b6; color:#fff; }
+    .qtab[data-q="æ™®"].active { background:linear-gradient(135deg,#4a90d9,#74b9ff); border-color:#4a90d9; color:#fff; }
+    .qtab[data-q="å‡¡"].active { background:linear-gradient(135deg,#7f8c6e,#a8b89a); border-color:#7f8c6e; color:#fff; }
+    .qtab[data-q="ä»™"] { border-color:#ff6b9d; color:#ff4e8a; }
+    .qtab[data-q="è¯"] { border-color:#ffb347; color:#ff8c00; }
+    .qtab[data-q="ç"] { border-color:#c39bd3; color:#9b59b6; }
+    .qtab[data-q="æ™®"] { border-color:#74b9ff; color:#4a90d9; }
+    .qtab[data-q="å‡¡"] { border-color:#a8b89a; color:#7f8c6e; }
 
     .filter-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .filter-group { display:flex; flex-direction:column; gap:4px; flex:1; min-width:140px; }
@@ -82,7 +82,7 @@
     .result-count { font-size:0.9rem; color:var(--text-muted); margin-bottom:14px; padding-left:4px; }
     .result-count span { color:var(--pink); font-weight:700; font-size:1rem; }
 
-    /* ?€?€ ?è³ª?†ç?æ¨™é? ?€?€ */
+    /* â”€â”€ å“è³ªåˆ†çµ„æ¨™é¡Œ â”€â”€ */
     .quality-section-title {
       display:flex; align-items:center; gap:10px;
       margin:24px 0 12px; font-size:1rem; font-weight:700;
@@ -92,49 +92,49 @@
     }
     .quality-section-title .qs-line { flex:1; height:1.5px; opacity:0.3; }
     .quality-section-title .qs-count { font-size:0.82rem; color:var(--text-muted); font-weight:400; }
-    .qs-ä»?.qs-badge { background:linear-gradient(135deg,#ff4e8a,#ff8c42); }
-    .qs-ä»?.qs-line  { background:linear-gradient(90deg,#ff4e8a,transparent); }
-    .qs-??.qs-badge { background:linear-gradient(135deg,#ff8c00,#ffb347); }
-    .qs-??.qs-line  { background:linear-gradient(90deg,#ff8c00,transparent); }
-    .qs-??.qs-badge { background:linear-gradient(135deg,#9b59b6,#c39bd3); }
-    .qs-??.qs-line  { background:linear-gradient(90deg,#9b59b6,transparent); }
-    .qs-??.qs-badge { background:linear-gradient(135deg,#4a90d9,#74b9ff); }
-    .qs-??.qs-line  { background:linear-gradient(90deg,#4a90d9,transparent); }
-    .qs-??.qs-badge { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
-    .qs-??.qs-line  { background:linear-gradient(90deg,#7f8c6e,transparent); }
+    .qs-ä»™ .qs-badge { background:linear-gradient(135deg,#ff4e8a,#ff8c42); }
+    .qs-ä»™ .qs-line  { background:linear-gradient(90deg,#ff4e8a,transparent); }
+    .qs-è¯ .qs-badge { background:linear-gradient(135deg,#ff8c00,#ffb347); }
+    .qs-è¯ .qs-line  { background:linear-gradient(90deg,#ff8c00,transparent); }
+    .qs-ç .qs-badge { background:linear-gradient(135deg,#9b59b6,#c39bd3); }
+    .qs-ç .qs-line  { background:linear-gradient(90deg,#9b59b6,transparent); }
+    .qs-æ™® .qs-badge { background:linear-gradient(135deg,#4a90d9,#74b9ff); }
+    .qs-æ™® .qs-line  { background:linear-gradient(90deg,#4a90d9,transparent); }
+    .qs-å‡¡ .qs-badge { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
+    .qs-å‡¡ .qs-line  { background:linear-gradient(90deg,#7f8c6e,transparent); }
 
-    /* ?€?€ å¤§å??¡ç? Grid ?€?€ */
+    /* â”€â”€ å¤§åœ–å¡ç‰‡ Grid â”€â”€ */
     .flower-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
 
-    /* ?€?€ ?¡ç??¥å ´?•ç•« ?€?€ */
+    /* â”€â”€ å¡ç‰‡å…¥å ´å‹•ç•« â”€â”€ */
     @keyframes cardIn {
       from { opacity:0; transform:translateY(22px); }
       to   { opacity:1; transform:translateY(0); }
     }
 
-    /* ?€?€ ?Šæ??‰æ? keyframesï¼ˆå??è³ªï¼??€?€ */
-    @keyframes borderFlow-ä»?{
+    /* â”€â”€ é‚Šæ¡†å…‰æµ keyframesï¼ˆå„å“è³ªï¼‰ â”€â”€ */
+    @keyframes borderFlow-ä»™ {
       0%   { background-position: 0% 50%; }
       100% { background-position: 400% 50%; }
     }
-    @keyframes borderFlow-??{
+    @keyframes borderFlow-è¯ {
       0%   { background-position: 0% 50%; }
       100% { background-position: 400% 50%; }
     }
-    @keyframes borderFlow-??{
+    @keyframes borderFlow-ç {
       0%   { background-position: 0% 50%; }
       100% { background-position: 400% 50%; }
     }
-    @keyframes borderFlow-??{
+    @keyframes borderFlow-æ™® {
       0%   { background-position: 0% 50%; }
       100% { background-position: 400% 50%; }
     }
-    @keyframes borderFlow-??{
+    @keyframes borderFlow-å‡¡ {
       0%   { background-position: 0% 50%; }
       100% { background-position: 400% 50%; }
     }
 
-    /* ?€?€ ç²’å? keyframes ?€?€ */
+    /* â”€â”€ ç²’å­ keyframes â”€â”€ */
     @keyframes particle {
       0%   { transform:translate(0,0) scale(1); opacity:1; }
       100% { transform:translate(var(--px), var(--py)) scale(0); opacity:0; }
@@ -148,67 +148,67 @@
       animation:cardIn 0.35s ease both;
       position:relative;
     }
-    /* ?§å®¹?€è£å?ï¼Œè??–ç?ä¸æº¢?ºï?ä½†å½?ƒç??Šæ??¯ä»¥è¶…å‡º */
+    /* å…§å®¹å€è£åˆ‡ï¼Œè®“åœ–ç‰‡ä¸æº¢å‡ºï¼Œä½†å½å…ƒç´ é‚Šæ¡†å¯ä»¥è¶…å‡º */
     .flower-card .card-thumb,
     .flower-card .quality-bar,
     .flower-card .card-body {
       position:relative; z-index:1;
     }
     .flower-card .card-thumb { overflow:hidden; border-radius:calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0 0; }
-    /* overflow:visible è®“ç?å­å¯ä»¥é??ºå¡?‡å?ï¼Œä??§å®¹è¦è???*/
+    /* overflow:visible è®“ç²’å­å¯ä»¥é£›å‡ºå¡ç‰‡å¤–ï¼Œä½†å…§å®¹è¦è£åˆ‡ */
     .flower-card::before {
       content:''; position:absolute; inset:-2px; border-radius:var(--radius);
       z-index:0; pointer-events:none; opacity:0;
       transition:opacity 0.3s;
       background-size:300% 300%;
     }
-    /* ?¨å½?ƒç??šå?æµé?æ¡?*/
+    /* ç”¨å½å…ƒç´ åšå…‰æµé‚Šæ¡† */
     .flower-card:hover::before { opacity:1; }
 
-    .flower-card.quality-ä»?:before {
+    .flower-card.quality-ä»™::before {
       background:linear-gradient(90deg,#ff4e8a,#ffb347,#ff8c42,#ff4e8a,#ffe0f0,#ff4e8a);
       background-size:400% 400%;
-      animation:borderFlow-ä»?2s linear infinite;
+      animation:borderFlow-ä»™ 2s linear infinite;
       border-radius:calc(var(--radius) + 2px);
       padding:2px;
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
     }
-    .flower-card.quality-??:before {
+    .flower-card.quality-è¯::before {
       background:linear-gradient(90deg,#ff8c00,#ffb347,#ffe082,#ff8c00,#fff3cd,#ff8c00);
       background-size:400% 400%;
-      animation:borderFlow-??2s linear infinite;
+      animation:borderFlow-è¯ 2s linear infinite;
       border-radius:calc(var(--radius) + 2px);
       padding:2px;
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
     }
-    .flower-card.quality-??:before {
+    .flower-card.quality-ç::before {
       background:linear-gradient(90deg,#9b59b6,#c39bd3,#e8d5f5,#9b59b6,#d7bde2,#9b59b6);
       background-size:400% 400%;
-      animation:borderFlow-??2s linear infinite;
+      animation:borderFlow-ç 2s linear infinite;
       border-radius:calc(var(--radius) + 2px);
       padding:2px;
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
     }
-    .flower-card.quality-??:before {
+    .flower-card.quality-æ™®::before {
       background:linear-gradient(90deg,#4a90d9,#74b9ff,#d6eaff,#4a90d9,#aed6f1,#4a90d9);
       background-size:400% 400%;
-      animation:borderFlow-??2s linear infinite;
+      animation:borderFlow-æ™® 2s linear infinite;
       border-radius:calc(var(--radius) + 2px);
       padding:2px;
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
     }
-    .flower-card.quality-??:before {
+    .flower-card.quality-å‡¡::before {
       background:linear-gradient(90deg,#7f8c6e,#a8b89a,#d5e8d4,#7f8c6e,#c8e6c9,#7f8c6e);
       background-size:400% 400%;
-      animation:borderFlow-??2s linear infinite;
+      animation:borderFlow-å‡¡ 2s linear infinite;
       border-radius:calc(var(--radius) + 2px);
       padding:2px;
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -216,59 +216,59 @@
       mask-composite: exclude;
     }
 
-    /* ?¡ç??§å®¹å±¤ï??‹åœ¨?½å?ç´ ä?ï¼?*/
+    /* å¡ç‰‡å…§å®¹å±¤ï¼ˆè“‹åœ¨å½å…ƒç´ ä¸Šï¼‰ */
     .flower-card > * { position:relative; z-index:1; }
 
-    /* hover ?Œæ™¯?²æ¼¸è®Šï??„å?è³ªï? */
-    .flower-card.quality-ä»?hover { background:linear-gradient(160deg,#fff0f5,#fff8f5); box-shadow:0 14px 36px rgba(255,78,138,0.28); z-index:10; }
-    .flower-card.quality-??hover { background:linear-gradient(160deg,#fff8ee,#fff8f5); box-shadow:0 14px 36px rgba(255,140,0,0.25); z-index:10; }
-    .flower-card.quality-??hover { background:linear-gradient(160deg,#f8f0ff,#fff8f5); box-shadow:0 14px 36px rgba(155,89,182,0.22); z-index:10; }
-    .flower-card.quality-??hover { background:linear-gradient(160deg,#f0f7ff,#fff8f5); box-shadow:0 14px 36px rgba(74,144,217,0.22); z-index:10; }
-    .flower-card.quality-??hover { background:linear-gradient(160deg,#f4f8f0,#fff8f5); box-shadow:0 14px 36px rgba(127,140,110,0.20); z-index:10; }
+    /* hover èƒŒæ™¯è‰²æ¼¸è®Šï¼ˆå„å“è³ªï¼‰ */
+    .flower-card.quality-ä»™:hover { background:linear-gradient(160deg,#fff0f5,#fff8f5); box-shadow:0 14px 36px rgba(255,78,138,0.28); z-index:10; }
+    .flower-card.quality-è¯:hover { background:linear-gradient(160deg,#fff8ee,#fff8f5); box-shadow:0 14px 36px rgba(255,140,0,0.25); z-index:10; }
+    .flower-card.quality-ç:hover { background:linear-gradient(160deg,#f8f0ff,#fff8f5); box-shadow:0 14px 36px rgba(155,89,182,0.22); z-index:10; }
+    .flower-card.quality-æ™®:hover { background:linear-gradient(160deg,#f0f7ff,#fff8f5); box-shadow:0 14px 36px rgba(74,144,217,0.22); z-index:10; }
+    .flower-card.quality-å‡¡:hover { background:linear-gradient(160deg,#f4f8f0,#fff8f5); box-shadow:0 14px 36px rgba(127,140,110,0.20); z-index:10; }
 
-    /* æ¨™é??‡å??¾å¤§ */
+    /* æ¨™é¡Œæ–‡å­—æ”¾å¤§ */
     .card-title { font-size:1rem; font-weight:700; color:var(--pink-dark); line-height:1.3; transition:font-size 0.25s ease, color 0.25s ease; }
     .flower-card:hover .card-title { font-size:1.1rem; color:var(--pink); }
 
-    /* ç²’å?å®¹å™¨ */
+    /* ç²’å­å®¹å™¨ */
     .card-particles { position:absolute; inset:0; pointer-events:none; z-index:2; overflow:visible; }
     .particle {
       position:absolute; border-radius:50%; opacity:0;
       animation:particle 0.9s ease-out forwards;
     }
 
-    .flower-card.quality-ä»?{ border-color:#ff6b9d; }
-    .flower-card.quality-??{ border-color:#ffb347; }
-    .flower-card.quality-??{ border-color:#c39bd3; }
-    .flower-card.quality-??{ border-color:#74b9ff; }
-    .flower-card.quality-??{ border-color:#a8b89a; }
+    .flower-card.quality-ä»™ { border-color:#ff6b9d; }
+    .flower-card.quality-è¯ { border-color:#ffb347; }
+    .flower-card.quality-ç { border-color:#c39bd3; }
+    .flower-card.quality-æ™® { border-color:#74b9ff; }
+    .flower-card.quality-å‡¡ { border-color:#a8b89a; }
 
-    /* å¤§å??€ */
+    /* å¤§åœ–å€ */
     .card-thumb { width:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--pink-mid); position:relative; flex-shrink:0; cursor:zoom-in; }
     .card-thumb img { width:100%; height:auto; display:block; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), filter 0.3s ease; transform-origin:center 60%; transform:scale(1.5); }
     .flower-card:hover .card-thumb img { transform:scale(1.8); filter:drop-shadow(0 6px 18px rgba(0,0,0,0.4)); }
 
-    /* ?è³ª?²æ? */
+    /* å“è³ªè‰²æ¢ */
     .quality-bar { height:4px; width:100%; flex-shrink:0; }
-    .quality-bar-ä»?{ background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
-    .quality-bar-??{ background:linear-gradient(90deg,#ff8c00,#ffb347); }
-    .quality-bar-??{ background:linear-gradient(90deg,#9b59b6,#c39bd3); }
-    .quality-bar-??{ background:linear-gradient(90deg,#4a90d9,#74b9ff); }
-    .quality-bar-??{ background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
+    .quality-bar-ä»™ { background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
+    .quality-bar-è¯ { background:linear-gradient(90deg,#ff8c00,#ffb347); }
+    .quality-bar-ç { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
+    .quality-bar-æ™® { background:linear-gradient(90deg,#4a90d9,#74b9ff); }
+    .quality-bar-å‡¡ { background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
 
-    /* ?¡ç?è³‡è??€ */
+    /* å¡ç‰‡è³‡è¨Šå€ */
     .card-body { padding:12px 14px; flex:1; display:flex; flex-direction:column; gap:7px; }
     .card-meta { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
     .badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:0.75rem; font-weight:600; }
     .badge-score { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
     .badge-obtain { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
-    .badge-quality-ä»?{ background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
-    .badge-quality-??{ background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
-    .badge-quality-??{ background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
-    .badge-quality-??{ background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
-    .badge-quality-??{ background:linear-gradient(135deg,#7f8c6e,#a8b89a); color:#fff; }
+    .badge-quality-ä»™ { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
+    .badge-quality-è¯ { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
+    .badge-quality-ç { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .badge-quality-æ™® { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
+    .badge-quality-å‡¡ { background:linear-gradient(135deg,#7f8c6e,#a8b89a); color:#fff; }
 
-    /* ?æ???*/
+    /* æ“æœ‰è€… */
     .owners-section { margin-top:2px; }
     .owners-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
     .owners-list { display:flex; flex-wrap:wrap; gap:4px; }
@@ -278,13 +278,13 @@
 
     .no-result { text-align:center; padding:48px 20px; color:var(--text-muted); font-size:1rem; }
 
-    /* ?€?€ ?å“¡è¡¨æ ¼ ?€?€ */
+    /* â”€â”€ æˆå“¡è¡¨æ ¼ â”€â”€ */
     .role-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:0.8rem; font-weight:700; }
-    .role-?ƒé•·   { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
-    .role-?¯æ???{ background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
-    .role-?†ä?   { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
-    .role-?è‹±   { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
-    .role-?å“¡   { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .role-æœƒé•·   { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
+    .role-å‰¯æœƒé•· { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
+    .role-ç†äº‹   { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .role-èè‹±   { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
+    .role-æˆå“¡   { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
     .id-table-wrap { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); overflow-x:auto; }
     table { width:100%; border-collapse:collapse; font-size:0.92rem; }
     thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
@@ -293,15 +293,14 @@
     tbody tr:last-child td { border-bottom:none; }
     tbody tr:hover { background:var(--pink-light); }
 
-    /* ?€?€ Lightbox ?€?€ */
+    /* â”€â”€ Lightbox â”€â”€ */
     #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:20px; }
     #lightbox.open { display:flex; }
 
-    /* ?€?€ Lightbox flip card ?€?€ */
+    /* â”€â”€ Lightbox flip card â”€â”€ */
     #lightbox-tilt-wrap {
       position:relative; display:inline-block;
       perspective:1000px;
-      -webkit-perspective:1000px;
       border-radius:12px;
       cursor:pointer;
     }
@@ -318,7 +317,7 @@
       -webkit-transform:rotateY(180deg);
     }
 
-    /* æ­?¢ */
+    /* æ­£é¢ */
     #lightbox-front {
       position:relative;
       display:block;
@@ -342,7 +341,7 @@
       transition:background 0.08s ease-out;
       mix-blend-mode:screen;
     }
-    /* é»æ??ç¤º */
+    /* é»æ“Šæç¤º */
     #lightbox-hint {
       position:absolute; bottom:10px; right:12px; z-index:5;
       background:rgba(0,0,0,0.45); color:#fff;
@@ -352,7 +351,7 @@
     }
     #lightbox-tilt-wrap.flipped #lightbox-hint { opacity:0; }
 
-    /* ?Œé¢ ???‡æ­£?¢å?å°ºå¯¸ï¼Œç?å°å?ä½ç??¨æ­£?¢ä? */
+    /* èƒŒé¢ â€” èˆ‡æ­£é¢åŒå°ºå¯¸ï¼Œçµ•å°å®šä½ç–Šåœ¨æ­£é¢ä¸Š */
     #lightbox-back {
       position:absolute; inset:0;
       backface-visibility:hidden;
@@ -413,34 +412,34 @@
     #lightbox-next { right:16px; }
     #lightbox-prev:hover, #lightbox-next:hover { opacity:1; }
 
-    /* ?€?€ RWD ?€?€ */
+    /* â”€â”€ RWD â”€â”€ */
     @media(max-width:900px) { .flower-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } .skeleton-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } }
     @media(max-width:600px) { .guild-name{font-size:1rem;} nav a{padding:5px 10px;font-size:0.82rem;} .flower-grid{grid-template-columns:1fr;gap:12px;} .skeleton-grid{grid-template-columns:1fr;} .filter-group{min-width:100%;} #lightbox-prev{left:4px;} #lightbox-next{right:4px;} }
 
-    /* ?â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â?
-       11. ?å“¡?æ??±å??–ï??å“¡?ï?
-    ?â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â? */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       11. æˆå“¡æ“æœ‰ç†±åŠ›åœ–ï¼ˆæˆå“¡é ï¼‰
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .member-bar-wrap { display:flex; align-items:center; gap:8px; }
     .member-bar-bg { flex:1; background:#f5ede8; border-radius:4px; height:8px; overflow:hidden; min-width:60px; }
     .member-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#e96a1e,#f4a46a); transition:width 0.7s ease; }
     .member-bar-count { font-size:0.75rem; color:var(--text-muted); white-space:nowrap; }
 
-    /* ?â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â?
-       12. ?±æœµ?®å?åº¦é•·æ¢å?
-    ?â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â? */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       12. èŠ±æœµæ™®åŠåº¦é•·æ¢åœ–
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .popularity-row { display:flex; align-items:center; gap:6px; margin-top:4px; }
     .popularity-bar-bg { flex:1; background:#f0e8e0; border-radius:4px; height:7px; overflow:hidden; }
     .popularity-bar-fill { height:100%; border-radius:4px; transition:width 0.6s ease; }
-    .pop-ä»?{ background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
-    .pop-??{ background:linear-gradient(90deg,#ff8c00,#ffb347); }
-    .pop-??{ background:linear-gradient(90deg,#9b59b6,#c39bd3); }
-    .pop-??{ background:linear-gradient(90deg,#4a90d9,#74b9ff); }
-    .pop-??{ background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
+    .pop-ä»™ { background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
+    .pop-è¯ { background:linear-gradient(90deg,#ff8c00,#ffb347); }
+    .pop-ç { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
+    .pop-æ™® { background:linear-gradient(90deg,#4a90d9,#74b9ff); }
+    .pop-å‡¡ { background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
     .popularity-label { font-size:0.7rem; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
 
-    /* ?â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â?
-       13. Lightbox ç¸®å???
-    ?â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â??â? */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       13. Lightbox ç¸®åœ–åˆ—
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     #lightbox-thumbs {
       display:flex; gap:6px; overflow-x:auto; max-width:90vw;
       padding:4px 2px; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.3) transparent;
@@ -459,32 +458,32 @@
 <body>
 
 <header>
-  <div class="guild-name">?€??<small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
+  <div class="guild-name">ç’€ç’¨ <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
   <nav>
-    <a href="#" class="active" onclick="showPage('flower-page',this)">?±å??–é?</a>
-    <a href="#" onclick="showPage('id-page',this)">?¬æ??å“¡</a>
-    <a href="flower-showcase.html">?‹äºº?±å?</a>
+    <a href="#" class="active" onclick="showPage('flower-page',this)">èŠ±å‰åœ–é‘‘</a>
+    <a href="#" onclick="showPage('id-page',this)">å…¬æœƒæˆå“¡</a>
+    <a href="flower-showcase.html">å€‹äººèŠ±å±•</a>
   </nav>
 </header>
 
 <!-- Lightbox -->
 <div id="lightbox" onclick="handleLightboxClick(event)">
-  <span id="lightbox-close" onclick="closeLightbox()">??/span>
+  <span id="lightbox-close" onclick="closeLightbox()">âœ•</span>
   <span id="lightbox-prev" onclick="shiftLightbox(-1);event.stopPropagation()">&#8249;</span>
   <div id="lightbox-tilt-wrap" onclick="toggleLightboxFlip(event)">
     <div id="lightbox-flip-inner">
       <div id="lightbox-front">
         <img id="lightbox-img" src="" alt="">
         <div id="lightbox-shine"></div>
-        <div id="lightbox-hint">?? é»æ??¥ç?è³‡è?</div>
+        <div id="lightbox-hint">ğŸ”„ é»æ“ŠæŸ¥çœ‹è³‡è¨Š</div>
       </div>
-      <div id="lightbox-back" class="lb-back-ä»?>
+      <div id="lightbox-back" class="lb-back-ä»™">
         <div id="lightbox-back-bg"></div>
         <div id="lightbox-back-overlay"></div>
         <div id="lightbox-back-content">
           <div class="lb-back-name" id="lb-back-name"></div>
           <div class="lb-back-meta" id="lb-back-meta"></div>
-          <div class="lb-back-owners-title">?æ???/div>
+          <div class="lb-back-owners-title">æ“æœ‰è€…</div>
           <div class="lb-back-owners" id="lb-back-owners"></div>
         </div>
       </div>
@@ -497,7 +496,7 @@
 
 <main>
   <div id="flower-page" class="page active">
-    <!-- Skeleton è¼‰å…¥ä¸?-->
+    <!-- Skeleton è¼‰å…¥ä¸­ -->
     <div id="flowerLoading">
       <div class="skeleton-grid" id="skeletonGrid"></div>
     </div>
@@ -505,49 +504,49 @@
     <div id="flowerContent" style="display:none;">
       <div class="controls">
         <div class="search-row">
-          <input class="search-box" id="searchInput" type="text" placeholder="?? ?œå??±å? / ?æ???.." oninput="applyFilters()" />
+          <input class="search-box" id="searchInput" type="text" placeholder="ğŸ” æœå°‹èŠ±å / æ“æœ‰è€…..." oninput="applyFilters()" />
         </div>
-        <!-- ?è³ªå¿«é€?Tab -->
+        <!-- å“è³ªå¿«é€Ÿ Tab -->
         <div class="quality-tabs" id="qualityTabs">
-          <button class="qtab active" data-q="" onclick="setQTab(this)">?¨éƒ¨</button>
-          <button class="qtab" data-q="ä»? onclick="setQTab(this)">ä»?/button>
-          <button class="qtab" data-q="?? onclick="setQTab(this)">??/button>
-          <button class="qtab" data-q="?? onclick="setQTab(this)">??/button>
-          <button class="qtab" data-q="?? onclick="setQTab(this)">??/button>
-          <button class="qtab" data-q="?? onclick="setQTab(this)">??/button>
+          <button class="qtab active" data-q="" onclick="setQTab(this)">å…¨éƒ¨</button>
+          <button class="qtab" data-q="ä»™" onclick="setQTab(this)">ä»™</button>
+          <button class="qtab" data-q="è¯" onclick="setQTab(this)">è¯</button>
+          <button class="qtab" data-q="ç" onclick="setQTab(this)">ç</button>
+          <button class="qtab" data-q="æ™®" onclick="setQTab(this)">æ™®</button>
+          <button class="qtab" data-q="å‡¡" onclick="setQTab(this)">å‡¡</button>
         </div>
         <div class="filter-row">
           <div class="filter-group">
-            <label>ç«¶è³½??/label>
+            <label>ç«¶è³½åˆ†</label>
             <select id="filterScore" onchange="applyFilters()">
-              <option value="">?¨éƒ¨</option>
+              <option value="">å…¨éƒ¨</option>
               <option value="14">14</option><option value="21">21</option>
               <option value="23">23</option><option value="25">25</option>
               <option value="28">28</option><option value="30">30</option>
             </select>
           </div>
           <div class="filter-group">
-            <label>?–å??¹å?</label>
+            <label>å–å¾—æ–¹å¼</label>
             <select id="filterObtain" onchange="applyFilters()">
-              <option value="">?¨éƒ¨</option>
-              <option value="ç­‰ç?">ç­‰ç?</option><option value="æ´»å?">æ´»å?</option>
-              <option value="?±å?">?±å?</option><option value="?±å?">?±å?</option>
-              <option value="VIP">VIP</option><option value="?±èŠ±">?±èŠ±</option>
-              <option value="?Ÿæ²³? è?">?Ÿæ²³? è?</option><option value="?±é??†å?">?±é??†å?</option>
-              <option value="ç²¾é???>ç²¾é???/option><option value="?¡å?">?¡å?</option>
-              <option value="å¿ƒè¯??>å¿ƒè¯??/option><option value="ç´¯ç??²å€?>ç´¯ç??²å€?/option>
+              <option value="">å…¨éƒ¨</option>
+              <option value="ç­‰ç´š">ç­‰ç´š</option><option value="æ´»å‹•">æ´»å‹•</option>
+              <option value="èŠ±åœƒ">èŠ±åœƒ</option><option value="èŠ±åŠ">èŠ±åŠ</option>
+              <option value="VIP">VIP</option><option value="é€±èŠ±">é€±èŠ±</option>
+              <option value="æ˜Ÿæ²³æ˜ è•Š">æ˜Ÿæ²³æ˜ è•Š</option><option value="èŠ±éˆå•†åº—">èŠ±éˆå•†åº—</option>
+              <option value="ç²¾éˆèŠ±">ç²¾éˆèŠ±</option><option value="å¡å†Š">å¡å†Š</option>
+              <option value="å¿ƒè¯ç›Ÿ">å¿ƒè¯ç›Ÿ</option><option value="ç´¯ç©å„²å€¼">ç´¯ç©å„²å€¼</option>
             </select>
           </div>
           <div class="filter-group">
-            <label>?’å?</label>
+            <label>æ’åº</label>
             <select id="sortBy" onchange="applyFilters()">
-              <option value="">?è¨­</option>
-              <option value="score_asc">ç«¶è³½??ä½â?é«?/option><option value="score_desc">ç«¶è³½??é«˜â?ä½?/option>
-              <option value="pop_asc">?¬æ??€ç¼ºï??æ?äººæ•¸å°‘â?å¤šï?</option>
-              <option value="pop_desc">?¬æ??€å¤šï??æ?äººæ•¸å¤šâ?å°‘ï?</option>
+              <option value="">é è¨­</option>
+              <option value="score_asc">ç«¶è³½åˆ† ä½â†’é«˜</option><option value="score_desc">ç«¶è³½åˆ† é«˜â†’ä½</option>
+              <option value="pop_asc">å…¬æœƒæœ€ç¼ºï¼ˆæ“æœ‰äººæ•¸å°‘â†’å¤šï¼‰</option>
+              <option value="pop_desc">å…¬æœƒæœ€å¤šï¼ˆæ“æœ‰äººæ•¸å¤šâ†’å°‘ï¼‰</option>
             </select>
           </div>
-          <button class="btn-reset" onclick="resetFilters()">?ç½®</button>
+          <button class="btn-reset" onclick="resetFilters()">é‡ç½®</button>
         </div>
       </div>
       <div class="result-count" id="resultCount"></div>
@@ -557,12 +556,12 @@
 
   <div id="id-page" class="page">
     <div id="memberLoading" class="loading">
-      <div class="loading-spinner"></div><br>è¼‰å…¥?å“¡è³‡æ?ä¸?..
+      <div class="loading-spinner"></div><br>è¼‰å…¥æˆå“¡è³‡æ–™ä¸­...
     </div>
     <div id="memberContent" style="display:none;">
       <div class="id-table-wrap">
         <table>
-          <thead><tr><th>#</th><th>?±ç¨±</th><th>?Šæˆ² ID</th><th>?·ä?</th><th>?æ??±å?</th></tr></thead>
+          <thead><tr><th>#</th><th>æš±ç¨±</th><th>éŠæˆ² ID</th><th>è·ä½</th></tr></thead>
           <tbody id="idTableBody"></tbody>
         </table>
       </div>
@@ -571,16 +570,16 @@
 </main>
 
 <script>
-const QUALITY_ORDER = {'ä»?:0,'??:1,'??:2,'??:3,'??:4};
-const ROLE_ORDER    = {'?ƒé•·':0,'?¯æ???:1,'?†ä?':2,'?è‹±':3,'?å“¡':4};
-const QUALITY_LIST  = ['ä»?,'??,'??,'??,'??];
+const QUALITY_ORDER = {'ä»™':0,'è¯':1,'ç':2,'æ™®':3,'å‡¡':4};
+const ROLE_ORDER    = {'æœƒé•·':0,'å‰¯æœƒé•·':1,'ç†äº‹':2,'èè‹±':3,'æˆå“¡':4};
+const QUALITY_LIST  = ['ä»™','è¯','ç','æ™®','å‡¡'];
 
 let FLOWERS = [], MEMBERS = [], OWNERSHIP = [];
-let currentList = [];   // ?®å?ç¯©é¸å¾Œç??±å?ï¼ˆä? lightbox å·¦å³?‡æ?ï¼?
+let currentList = [];   // ç›®å‰ç¯©é¸å¾Œçš„èŠ±å‰ï¼ˆä¾› lightbox å·¦å³åˆ‡æ›ï¼‰
 let lightboxIdx = 0;
-let activeQTab  = '';   // ?®å??è³ª tab
+let activeQTab  = '';   // ç›®å‰å“è³ª tab
 
-// ?€?€ Skeleton ä½”ä? ?€?€
+// â”€â”€ Skeleton ä½”ä½ â”€â”€
 (function buildSkeleton() {
   const n = 12;
   document.getElementById('skeletonGrid').innerHTML = Array.from({length:n}).map(() => `
@@ -594,7 +593,7 @@ let activeQTab  = '';   // ?®å??è³ª tab
     </div>`).join('');
 })();
 
-// ?€?€ è¼‰å…¥è³‡æ? ?€?€
+// â”€â”€ è¼‰å…¥è³‡æ–™ â”€â”€
 async function loadFromSheets() {
   const { apiKey, sheetId, ranges } = SHEET_CONFIG;
   const rangeParam = ranges.map(r => `ranges=${encodeURIComponent(r)}`).join('&');
@@ -620,7 +619,7 @@ async function loadFromSheets() {
       mHeaders.forEach((h, i) => { m[h.toLowerCase()] = row[i] || ''; });
       m.gameId   = m.gameid || m.gameId || '';
       m.nickname = m.nickname || '';
-      m.note     = m.note || '?å“¡';
+      m.note     = m.note || 'æˆå“¡';
       m.left     = (m.left || '').toLowerCase() === 'true';
       return m;
     }).filter(m => !m.left);
@@ -648,14 +647,14 @@ async function loadFromSheets() {
 
 function buildGameIdMap() {
   const map = {};
-  // ?ªå??¥åœ¨?·æ??¡ï?left !== trueï¼?
+  // åªåŠ å…¥åœ¨è·æˆå“¡ï¼ˆleft !== trueï¼‰
   MEMBERS.forEach(m => {
-    if (m.gameId && !m.left) map[m.gameId] = { nick: m.nickname || m.gameId, role: m.note || '?å“¡' };
+    if (m.gameId && !m.left) map[m.gameId] = { nick: m.nickname || m.gameId, role: m.note || 'æˆå“¡' };
   });
   return map;
 }
 
-// ?€?€ ?é¢?‡æ? ?€?€
+// â”€â”€ é é¢åˆ‡æ› â”€â”€
 function showPage(pageId, link) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
@@ -664,7 +663,7 @@ function showPage(pageId, link) {
   if (pageId === 'id-page') renderIdTable();
 }
 
-// ?€?€ ?è³ª Tab ?€?€
+// â”€â”€ å“è³ª Tab â”€â”€
 function setQTab(btn) {
   document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -672,10 +671,10 @@ function setQTab(btn) {
   applyFilters();
 }
 
-// ?€?€ ç¯©é¸ ?€?€
+// â”€â”€ ç¯©é¸ â”€â”€
 function applyFilters() {
   const gameIdMap   = buildGameIdMap();
-  // ?ªé¡¯ç¤ºåœ¨?·æ??¡ï?left ?å“¡?´æ¥?æ¿¾??
+  // åªé¡¯ç¤ºåœ¨è·æˆå“¡ï¼Œleft æˆå“¡ç›´æ¥éæ¿¾æ‰
   const ownerDisplay = id => gameIdMap[id] ? gameIdMap[id].nick : null;
   const ownerRole    = id => (gameIdMap[id] ? gameIdMap[id].role : '');
   const q      = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -710,14 +709,14 @@ function resetFilters() {
   document.getElementById('filterScore').value = '';
   document.getElementById('filterObtain').value = '';
   document.getElementById('sortBy').value = '';
-  // ?ç½® tab ?°å…¨??
+  // é‡ç½® tab åˆ°å…¨éƒ¨
   document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
   document.querySelector('.qtab[data-q=""]').classList.add('active');
   activeQTab = '';
   applyFilters();
 }
 
-// ?€?€ ?¸å?è¨ˆæ•¸?•ç•« ?€?€
+// â”€â”€ æ•¸å­—è¨ˆæ•¸å‹•ç•« â”€â”€
 function animateCount(el, target) {
   const start = parseInt(el.textContent) || 0;
   if (start === target) return;
@@ -733,22 +732,22 @@ function animateCount(el, target) {
   requestAnimationFrame(tick);
 }
 
-// ?€?€ æ¸²æ??±å?ï¼ˆå«?è³ª?†ç? + stagger ?•ç•«ï¼‰â??€
+// â”€â”€ æ¸²æŸ“èŠ±å‰ï¼ˆå«å“è³ªåˆ†çµ„ + stagger å‹•ç•«ï¼‰â”€â”€
 function renderFlowers(list, ownerDisplay, ownerRole) {
   const countEl = document.getElementById('resultCount');
   const countSpan = countEl.querySelector('span') || (() => {
-    countEl.innerHTML = '?±æ‰¾??<span>0</span> ç¨®èŠ±';
+    countEl.innerHTML = 'å…±æ‰¾åˆ° <span>0</span> ç¨®èŠ±';
     return countEl.querySelector('span');
   })();
   animateCount(countSpan, list.length);
 
   const grid = document.getElementById('flowerGrid');
   if (list.length === 0) {
-    grid.innerHTML = '<div class="no-result">?Œ¸ ?¾ä??°ç¬¦?ˆæ?ä»¶ç??±å?</div>';
+    grid.innerHTML = '<div class="no-result">ğŸŒ¸ æ‰¾ä¸åˆ°ç¬¦åˆæ¢ä»¶çš„èŠ±å‰</div>';
     return;
   }
 
-  // æ±ºå??¯å¦?†ç?ï¼ˆç„¡?è³ªç¯©é¸?‚å?çµ„ï?
+  // æ±ºå®šæ˜¯å¦åˆ†çµ„ï¼ˆç„¡å“è³ªç¯©é¸æ™‚åˆ†çµ„ï¼‰
   const grouped = !activeQTab;
   let html = '';
   let globalIdx = 0;
@@ -762,7 +761,7 @@ function renderFlowers(list, ownerDisplay, ownerRole) {
       html += `<div class="quality-section-title qs-${q}">
         <span class="qs-badge">${q}</span>
         <div class="qs-line"></div>
-        <span class="qs-count">${group.length} ç¨?/span>
+        <span class="qs-count">${group.length} ç¨®</span>
       </div>
       <div class="flower-grid">`;
       group.forEach(f => {
@@ -783,13 +782,13 @@ function buildCard(f, ownerDisplay, ownerRole, idx) {
   const ownerNames = f.owners.map(ownerDisplay).filter(Boolean);
   const ownerTags = ownerNames.length
     ? ownerNames.map(name => `<span class="owner-tag">${name}</span>`).join('')
-    : '<span class="no-owner">å°šç„¡äººæ???/span>';
+    : '<span class="no-owner">å°šç„¡äººæ“æœ‰</span>';
 
   const thumbContent = f.img
-    ? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='?Œ¸'">`
-    : '?Œ¸';
+    ? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='ğŸŒ¸'">`
+    : 'ğŸŒ¸';
 
-  // 12. ?®å?åº¦é•·æ¢å?ï¼ˆç›¸å°æ–¼?¨å…¬?ƒæ??¡æ•¸ï¼?
+  // 12. æ™®åŠåº¦é•·æ¢åœ–ï¼ˆç›¸å°æ–¼å…¨å…¬æœƒæˆå“¡æ•¸ï¼‰
   const cnt = ownerNames.length;
   const total = MEMBERS.length || 1;
   const pct = Math.round(cnt / total * 100);
@@ -807,36 +806,36 @@ function buildCard(f, ownerDisplay, ownerRole, idx) {
         <div class="card-title">${f.name}</div>
         <div class="card-meta">
           <span class="badge badge-quality-${f.quality}">${f.quality}</span>
-          <span class="badge badge-score">â­?${f.score}</span>
+          <span class="badge badge-score">â­ ${f.score}</span>
           <span class="badge badge-obtain">${f.obtain}</span>
         </div>
         <div class="popularity-row">
           <div class="popularity-bar-bg">
             <div class="popularity-bar-fill pop-${f.quality}" style="width:${pct}%"></div>
           </div>
-          <span class="popularity-label">${cnt}/${total} äº?(${pct}%)</span>
+          <span class="popularity-label">${cnt}/${total} äºº (${pct}%)</span>
         </div>
         <div class="owners-section">
-          <div class="owners-label">?æ???<span class="owner-count-badge">(${cnt} äº?</span></div>
+          <div class="owners-label">æ“æœ‰è€… <span class="owner-count-badge">(${cnt} äºº)</span></div>
           <div class="owners-list">${ownerTags}</div>
         </div>
       </div>
     </div>`;
 }
 
-// ?€?€ ç²’å??¹æ? ?€?€
+// â”€â”€ ç²’å­ç‰¹æ•ˆ â”€â”€
 const PARTICLE_COLORS = {
-  'ä»?: ['#ff4e8a','#ffb3d1','#ff8c42','#ffe0f0','#fff'],
-  '??: ['#ff8c00','#ffb347','#ffe082','#fff3cd','#fff'],
-  '??: ['#9b59b6','#c39bd3','#e8d5f5','#d7bde2','#fff'],
-  '??: ['#4a90d9','#74b9ff','#d6eaff','#aed6f1','#fff'],
-  '??: ['#7f8c6e','#a8b89a','#d5e8d4','#c8e6c9','#fff'],
+  'ä»™': ['#ff4e8a','#ffb3d1','#ff8c42','#ffe0f0','#fff'],
+  'è¯': ['#ff8c00','#ffb347','#ffe082','#fff3cd','#fff'],
+  'ç': ['#9b59b6','#c39bd3','#e8d5f5','#d7bde2','#fff'],
+  'æ™®': ['#4a90d9','#74b9ff','#d6eaff','#aed6f1','#fff'],
+  'å‡¡': ['#7f8c6e','#a8b89a','#d5e8d4','#c8e6c9','#fff'],
 };
 function spawnParticles(card, quality) {
   const container = card.querySelector('.card-particles');
   if (!container) return;
   container.innerHTML = '';
-  const colors = PARTICLE_COLORS[quality] || PARTICLE_COLORS['??];
+  const colors = PARTICLE_COLORS[quality] || PARTICLE_COLORS['å‡¡'];
   const count = 12;
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div');
@@ -862,9 +861,9 @@ function spawnParticles(card, quality) {
   }
 }
 
-// ?€?€ 11. ?å“¡?æ??±å????€?€
+// â”€â”€ 11. æˆå“¡æ“æœ‰ç†±åŠ›åœ– â”€â”€
 function renderIdTable() {
-  // è¨ˆç?æ¯ä??å“¡?æ??±å???
+  // è¨ˆç®—æ¯ä½æˆå“¡æ“æœ‰èŠ±å‰æ•¸
   const ownerCount = {};
   OWNERSHIP.forEach(o => {
     const id = o.gameid || o.gameId || Object.values(o)[0] || '';
@@ -880,11 +879,11 @@ function renderIdTable() {
       <td>${i+1}</td>
       <td>${m.nickname}</td>
       <td>${m.gameId}</td>
-      <td><span class="role-badge role-${m.note||'?å“¡'}">${m.note||'?å“¡'}</span></td>
+      <td><span class="role-badge role-${m.note||'æˆå“¡'}">${m.note||'æˆå“¡'}</span></td>
       <td>
         <div class="member-bar-wrap">
           <div class="member-bar-bg"><div class="member-bar-fill" style="width:${pct}%"></div></div>
-          <span class="member-bar-count">${cnt} ç¨?/span>
+          <span class="member-bar-count">${cnt} ç¨®</span>
         </div>
       </td>
     </tr>`;
@@ -893,7 +892,7 @@ function renderIdTable() {
   document.getElementById('memberContent').style.display = 'block';
 }
 
-// ?€?€ 13. Lightbox ç¸®å????€?€
+// â”€â”€ 13. Lightbox ç¸®åœ–åˆ— â”€â”€
 function renderLightboxThumbs() {
   const strip = document.getElementById('lightbox-thumbs');
   strip.innerHTML = currentList.map((f, i) => {
@@ -913,13 +912,13 @@ function updateThumbActive() {
   document.querySelectorAll('.lb-thumb').forEach((el, i) => {
     el.classList.toggle('active', i === lightboxIdx);
   });
-  // ?²å??°ç•¶?ç¸®??
+  // æ²å‹•åˆ°ç•¶å‰ç¸®åœ–
   const strip = document.getElementById('lightbox-thumbs');
   const active = strip.querySelector('.lb-thumb.active');
   if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
 }
 
-// ?€?€ Lightbox ?€?€
+// â”€â”€ Lightbox â”€â”€
 function openLightboxByIdx(idx) {
   if (!currentList[idx] || !currentList[idx].img) return;
   lightboxIdx = idx;
@@ -939,23 +938,23 @@ function showLightboxItem() {
   imgEl.alt = f.name || '';
   document.getElementById('lightbox-name').textContent = f.name || '';
 
-  // ?ç½®ç¿»è??€??
+  // é‡ç½®ç¿»è½‰ç‹€æ…‹
   document.getElementById('lightbox-tilt-wrap').classList.remove('flipped');
 
-  // å¡«å…¥?Œé¢è³‡è?
+  // å¡«å…¥èƒŒé¢è³‡è¨Š
   const gameIdMap = buildGameIdMap();
   const ownerNames = (f.owners || []).map(id => gameIdMap[id] ? gameIdMap[id].nick : null).filter(Boolean);
   document.getElementById('lb-back-name').textContent = f.name || '';
   document.getElementById('lb-back-meta').innerHTML = `
     <span class="lb-back-badge">${f.quality || ''}</span>
-    <span class="lb-back-badge">â­?${f.score || 0}</span>
+    <span class="lb-back-badge">â­ ${f.score || 0}</span>
     <span class="lb-back-badge">${f.obtain || ''}</span>`;
   document.getElementById('lb-back-owners').innerHTML = ownerNames.length
     ? ownerNames.map(n => `<span class="lb-back-owner-tag">${n}</span>`).join('')
-    : '<span class="lb-back-no-owner">å°šç„¡äººæ???/span>';
-  // ?Œé¢?Œæ™¯ï¼šç”¨æ­?¢?–ç?æ¨¡ç??é£½??
+    : '<span class="lb-back-no-owner">å°šç„¡äººæ“æœ‰</span>';
+  // èƒŒé¢èƒŒæ™¯ï¼šç”¨æ­£é¢åœ–ç‰‡æ¨¡ç³Šé™é£½å’Œ
   const back = document.getElementById('lightbox-back');
-  back.className = `lb-back-${f.quality || '??}`;
+  back.className = `lb-back-${f.quality || 'å‡¡'}`;
   const backBg = document.getElementById('lightbox-back-bg');
   if (f.img) backBg.style.backgroundImage = `url('${f.img.replace(/'/g,"\\'")}')`;
   else backBg.style.backgroundImage = 'none';
@@ -972,20 +971,20 @@ function showLightboxItem() {
 }
 
 function toggleLightboxFlip(e) {
-  // ä¸æ??ªå·¦?³ç®­?­é???
+  // ä¸æ””æˆªå·¦å³ç®­é ­é»æ“Š
   if (e.target.id === 'lightbox-prev' || e.target.id === 'lightbox-next') return;
   e.stopPropagation();
   document.getElementById('lightbox-tilt-wrap').classList.toggle('flipped');
 }
 
-// ?‹æ? touch ç¿»è?
+// æ‰‹æ©Ÿ touch ç¿»è½‰
 (function initFlipTouch() {
   const wrap = document.getElementById('lightbox-tilt-wrap');
   let touchMoved = false;
   wrap.addEventListener('touchstart', () => { touchMoved = false; }, { passive:true });
   wrap.addEventListener('touchmove',  () => { touchMoved = true;  }, { passive:true });
   wrap.addEventListener('touchend', e => {
-    if (touchMoved) return; // æ»‘å?ä¸è§¸?¼ç¿»è½?
+    if (touchMoved) return; // æ»‘å‹•ä¸è§¸ç™¼ç¿»è½‰
     if (e.target.id === 'lightbox-prev' || e.target.id === 'lightbox-next') return;
     e.preventDefault();
     wrap.classList.toggle('flipped');
@@ -1011,13 +1010,13 @@ function closeLightbox() {
   wrap.style.transform = '';
 }
 
-// ?€?€ ?±å¡ 3D tilt ?€?€
+// â”€â”€ èŠ±å¡ 3D tilt â”€â”€
 (function initCardTilt() {
   const MAX_TILT = 12;
   document.addEventListener('mousemove', e => {
     const card = e.target.closest('.flower-card');
     if (!card) return;
-    // ?œæ­¢?¥å ´?•ç•«ï¼Œè? inline transform ?Ÿæ?
+    // åœæ­¢å…¥å ´å‹•ç•«ï¼Œè®“ inline transform ç”Ÿæ•ˆ
     card.style.animation = 'none';
     const rect = card.getBoundingClientRect();
     const cx = rect.left + rect.width  / 2;
@@ -1047,7 +1046,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight')  shiftLightbox(1);
 });
 
-// ?€?€ 14. è§¸æ§æ»‘å?ï¼ˆæ?æ©Ÿï? ?€?€
+// â”€â”€ 14. è§¸æ§æ»‘å‹•ï¼ˆæ‰‹æ©Ÿï¼‰ â”€â”€
 (function initTouchSwipe() {
   const lb = document.getElementById('lightbox');
   let touchStartX = 0, touchStartY = 0;
@@ -1064,7 +1063,7 @@ document.addEventListener('keydown', e => {
   }, { passive:true });
 })();
 
-// ?€?€ ?å????€?€
+// â”€â”€ åˆå§‹åŒ– â”€â”€
 (async () => {
   const ok = await loadFromSheets();
   document.getElementById('flowerLoading').style.display = 'none';
@@ -1074,7 +1073,7 @@ document.addEventListener('keydown', e => {
   } else {
     document.getElementById('flowerContent').style.display = 'block';
     document.getElementById('flowerGrid').innerHTML =
-      '<div class="no-result">? ï? ?¡æ?è¼‰å…¥è³‡æ?ï¼Œè?ç¢ºè? API Key ??Sheet è¨­å?</div>';
+      '<div class="no-result">âš ï¸ ç„¡æ³•è¼‰å…¥è³‡æ–™ï¼Œè«‹ç¢ºèª API Key å’Œ Sheet è¨­å®š</div>';
   }
 })();
 </script>
