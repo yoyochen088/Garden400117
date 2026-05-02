@@ -34,7 +34,6 @@
     nav { display:flex; gap:8px; }
     nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
     nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
-
     main { max-width:1400px; margin:0 auto; padding:24px 16px 48px; }
     .page { display:none; }
     .page.active { display:block; }
@@ -427,6 +426,10 @@
       .flower-grid{grid-template-columns:1fr;gap:12px;}
       .skeleton-grid{grid-template-columns:1fr;}
       #lightbox-prev{left:4px;} #lightbox-next{right:4px;}
+      /* 天條改兩排 */
+      header { height:auto; flex-wrap:wrap; padding:8px 16px; gap:6px; }
+      .guild-name { width:100%; }
+      nav { width:100%; justify-content:flex-start; flex-wrap:wrap; }
       /* 品質 Tab — 縮小讓一排放得下 */
       .quality-tabs { gap:4px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
       .qtab { padding:5px 10px; font-size:0.78rem; white-space:nowrap; flex-shrink:0; }
