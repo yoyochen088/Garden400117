@@ -537,9 +537,12 @@
             <label>競賽分</label>
             <select id="filterScore" onchange="applyFilters()">
               <option value="">全部</option>
-              <option value="14">14</option><option value="21">21</option>
-              <option value="23">23</option><option value="25">25</option>
-              <option value="28">28</option><option value="30">30</option>
+              <option value="30">30</option>
+              <option value="28">28</option>
+              <option value="25">25</option>
+              <option value="23">23</option>
+              <option value="21">21</option>
+              <option value="14">14</option>            
             </select>
           </div>
           <div class="filter-group">
@@ -558,9 +561,10 @@
             <label>排序</label>
             <select id="sortBy" onchange="applyFilters()">
               <option value="">預設</option>
-              <option value="score_asc">競賽分 低→高</option><option value="score_desc">競賽分 高→低</option>
-              <option value="pop_asc">公會最缺（擁有人數少→多）</option>
-              <option value="pop_desc">公會最多（擁有人數多→少）</option>
+              <option value="score_asc">競賽分 低→高</option>
+              <option value="score_desc">競賽分 高→低</option>
+              <option value="pop_asc">擁有數 少→多</option>
+              <option value="pop_desc">擁有數 多→少</option>
             </select>
           </div>
           <button class="btn-reset" onclick="resetFilters()">重置</button>
