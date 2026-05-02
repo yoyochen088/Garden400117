@@ -307,11 +307,14 @@
     #lightbox-flip-inner {
       position:relative;
       transform-style:preserve-3d;
+      -webkit-transform-style:preserve-3d;
       transition:transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
+      -webkit-transition:-webkit-transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
       border-radius:12px;
     }
     #lightbox-tilt-wrap.flipped #lightbox-flip-inner {
       transform:rotateY(180deg);
+      -webkit-transform:rotateY(180deg);
     }
 
     /* 正面 */
@@ -322,6 +325,8 @@
       -webkit-backface-visibility:hidden;
       border-radius:12px;
       line-height:0;
+      -webkit-transform:rotateY(0deg);
+      transform:rotateY(0deg);
     }
     #lightbox-img {
       max-width:90vw; max-height:75vh; width:auto; height:auto;
@@ -352,8 +357,8 @@
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       transform:rotateY(180deg);
+      -webkit-transform:rotateY(180deg);
       border-radius:12px;
-      overflow:hidden;
       box-shadow:0 8px 40px rgba(0,0,0,0.5);
     }
     #lightbox-back-bg {
@@ -361,10 +366,13 @@
       background-size:cover; background-position:center;
       filter:blur(3px) saturate(75%) brightness(0.85);
       transform:scale(1.04);
+      border-radius:12px;
+      overflow:hidden;
     }
     #lightbox-back-overlay {
       position:absolute; inset:0;
       background:rgba(0,0,0,0.12);
+      border-radius:12px;
     }
     #lightbox-back-content {
       position:absolute; inset:0;
