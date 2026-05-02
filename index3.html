@@ -414,7 +414,24 @@
 
     /* ── RWD ── */
     @media(max-width:900px) { .flower-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } .skeleton-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } }
-    @media(max-width:600px) { .guild-name{font-size:1rem;} nav a{padding:5px 10px;font-size:0.82rem;} .flower-grid{grid-template-columns:1fr;gap:12px;} .skeleton-grid{grid-template-columns:1fr;} .filter-group{min-width:100%;} #lightbox-prev{left:4px;} #lightbox-next{right:4px;} }
+    @media(max-width:600px) {
+      .guild-name{font-size:1rem;}
+      nav a{padding:5px 10px;font-size:0.82rem;}
+      .flower-grid{grid-template-columns:1fr;gap:12px;}
+      .skeleton-grid{grid-template-columns:1fr;}
+      #lightbox-prev{left:4px;} #lightbox-next{right:4px;}
+      /* 品質 Tab — 縮小讓一排放得下 */
+      .quality-tabs { gap:4px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
+      .qtab { padding:5px 10px; font-size:0.78rem; white-space:nowrap; flex-shrink:0; }
+      /* 下拉篩選 — 兩欄並排 */
+      .filter-row { gap:6px; }
+      .filter-group { min-width:calc(50% - 3px); flex:1 1 calc(50% - 3px); }
+      .filter-group label { font-size:0.72rem; }
+      select { padding:6px 8px; font-size:0.82rem; }
+      .btn-reset { width:100%; }
+      /* 熱力圖欄位手機隱藏 */
+      .member-bar-col { display:none; }
+    }
 
     /* ══════════════════════════════════════
        11. 成員擁有熱力圖（成員頁）
@@ -561,7 +578,7 @@
     <div id="memberContent" style="display:none;">
       <div class="id-table-wrap">
         <table>
-          <thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th></tr></thead>
+          <thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
           <tbody id="idTableBody"></tbody>
         </table>
       </div>
@@ -880,7 +897,7 @@ function renderIdTable() {
       <td>${m.nickname}</td>
       <td>${m.gameId}</td>
       <td><span class="role-badge role-${m.note||'成員'}">${m.note||'成員'}</span></td>
-      <td>
+      <td class="member-bar-col">
         <div class="member-bar-wrap">
           <div class="member-bar-bg"><div class="member-bar-fill" style="width:${pct}%"></div></div>
           <span class="member-bar-count">${cnt} 種</span>
