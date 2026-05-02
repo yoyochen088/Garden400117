@@ -426,10 +426,13 @@
       .flower-grid{grid-template-columns:1fr;gap:12px;}
       .skeleton-grid{grid-template-columns:1fr;}
       #lightbox-prev{left:4px;} #lightbox-next{right:4px;}
-      /* 天條改兩排 */
-      header { height:auto; flex-wrap:wrap; padding:8px 16px; gap:6px; }
-      .guild-name { width:100%; }
-      nav { width:100%; justify-content:flex-start; flex-wrap:wrap; }
+      /* 天條單排，nav 文字縮短 */
+      header { height:60px; flex-wrap:nowrap; padding:0 12px; gap:6px; }
+      .guild-name { font-size:0.95rem; }
+      nav { gap:5px; flex-shrink:0; }
+      nav a { font-size:0.78rem; padding:4px 8px; }
+      nav a[data-short]::before { content:attr(data-short); }
+      nav a[data-short] span { display:none; }
       /* 品質 Tab — 縮小讓一排放得下 */
       .quality-tabs { gap:4px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
       .qtab { padding:5px 10px; font-size:0.78rem; white-space:nowrap; flex-shrink:0; }
@@ -487,9 +490,9 @@
 <header>
   <div class="guild-name">璀璨 <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
   <nav>
-    <a href="#" class="active" onclick="showPage('flower-page',this)">花卉圖鑑</a>
-    <a href="#" onclick="showPage('id-page',this)">公會成員</a>
-    <a href="flower-showcase.html">個人花展</a>
+    <a href="#" class="active" data-short="圖鑑" onclick="showPage('flower-page',this)"><span>花卉圖鑑</span></a>
+    <a href="#" data-short="成員" onclick="showPage('id-page',this)"><span>公會成員</span></a>
+    <a href="flower-showcase.html" data-short="花展"><span>個人花展</span></a>
   </nav>
 </header>
 
