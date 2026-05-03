@@ -26,7 +26,7 @@
       --shadow:0 2px 12px rgba(233,106,30,0.10); --radius:14px;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overscroll-behavior-y:none; }
 
     /* ── Header ── */
     header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
@@ -1183,52 +1183,61 @@ document.addEventListener('keydown', e => {
   const indicator = document.getElementById('ptr-indicator');
   const spinner   = document.getElementById('ptr-spinner');
   const text      = document.getElementById('ptr-text');
-  const THRESHOLD = 80;   // 下拉超過這個距離才觸發
-  let startY = 0, pulling = false, refreshing = false;
+  const THRESHOLD = 75;
+  let startY = 0, currentDy = 0, pulling = false, refreshing = false;
+
+  function getScrollTop() {
+    return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  }
 
   document.addEventListener('touchstart', e => {
-    // 只在頁面頂部、且 lightbox 未開啟時才啟動
-    if (window.scrollY > 0) return;
+    if (refreshing) return;
     if (document.getElementById('lightbox').classList.contains('open')) return;
+    if (getScrollTop() > 2) return;
     startY = e.touches[0].clientY;
+    currentDy = 0;
     pulling = true;
   }, { passive:true });
 
   document.addEventListener('touchmove', e => {
     if (!pulling || refreshing) return;
-    const dy = e.touches[0].clientY - startY;
-    if (dy <= 0) { indicator.classList.remove('visible','releasing'); return; }
-    // 阻止頁面跟著滾動
-    if (dy > 10) e.preventDefault();
+    currentDy = e.touches[0].clientY - startY;
+    if (currentDy <= 0) {
+      indicator.classList.remove('visible', 'releasing');
+      return;
+    }
+    e.preventDefault();
     indicator.classList.add('visible');
-    if (dy >= THRESHOLD) {
+    if (currentDy >= THRESHOLD) {
       indicator.classList.add('releasing');
-      text.textContent = '放開更新';
+      text.textContent = '放開更新 ↑';
     } else {
       indicator.classList.remove('releasing');
-      text.textContent = '下拉更新';
+      text.textContent = `下拉更新 (${Math.round(currentDy / THRESHOLD * 100)}%)`;
     }
   }, { passive:false });
 
-  document.addEventListener('touchend', e => {
-    if (!pulling || refreshing) return;
+  document.addEventListener('touchend', () => {
+    if (!pulling) return;
     pulling = false;
-    const dy = e.changedTouches[0].clientY - startY;
-    if (dy >= THRESHOLD) {
+    if (refreshing) return;
+    if (currentDy >= THRESHOLD) {
       refreshing = true;
       text.textContent = '更新中...';
       spinner.classList.add('spin');
-      // 重新載入資料
       loadFromSheets().then(() => {
         applyFilters();
-        indicator.classList.remove('visible','releasing');
-        spinner.classList.remove('spin');
-        text.textContent = '下拉更新';
-        refreshing = false;
+        setTimeout(() => {
+          indicator.classList.remove('visible', 'releasing');
+          spinner.classList.remove('spin');
+          text.textContent = '下拉更新';
+          refreshing = false;
+        }, 400);
       });
     } else {
-      indicator.classList.remove('visible','releasing');
+      indicator.classList.remove('visible', 'releasing');
     }
+    currentDy = 0;
   }, { passive:true });
 })();
 
