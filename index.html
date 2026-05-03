@@ -411,12 +411,34 @@
     .lb-back-no-owner { color:rgba(255,255,255,0.5); font-size:0.85rem; font-style:italic; }
 
     #lightbox-name { color:#fff; font-size:1.2rem; font-weight:700; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
-    #lightbox-close { position:absolute; top:18px; right:22px; color:#fff; font-size:2rem; cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s; }
+    #lightbox-close { position:absolute; top:18px; right:22px; color:#fff; font-size:2rem; cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s; background:none; border:none; }
     #lightbox-close:hover { opacity:1; }
-    #lightbox-prev, #lightbox-next { position:absolute; top:50%; transform:translateY(-50%); color:#fff; font-size:2.2rem; cursor:pointer; opacity:0.7; transition:opacity 0.2s; user-select:none; padding:10px; }
-    #lightbox-prev { left:16px; }
-    #lightbox-next { right:16px; }
-    #lightbox-prev:hover, #lightbox-next:hover { opacity:1; }
+
+    /* 圖片區域（含左右箭頭） */
+    #lightbox-img-area {
+      position:relative; display:flex; align-items:center; gap:0;
+    }
+    #lightbox-prev, #lightbox-next {
+      background:rgba(255,255,255,0.12);
+      border:1.5px solid rgba(255,255,255,0.3);
+      color:#fff;
+      font-size:1.8rem;
+      line-height:1;
+      cursor:pointer;
+      opacity:0.85;
+      transition:opacity 0.2s, background 0.2s, transform 0.15s;
+      user-select:none;
+      border-radius:50%;
+      width:44px; height:44px;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+    }
+    #lightbox-prev { margin-right:10px; }
+    #lightbox-next { margin-left:10px; }
+    #lightbox-prev:hover, #lightbox-next:hover { opacity:1; background:rgba(255,255,255,0.22); transform:scale(1.08); }
+    #lightbox-prev:active, #lightbox-next:active { transform:scale(0.95); }
 
     /* ── RWD ── */
     @media(max-width:900px) { .flower-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } .skeleton-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } }
@@ -425,7 +447,9 @@
       nav a{padding:5px 10px;font-size:0.82rem;}
       .flower-grid{grid-template-columns:1fr;gap:12px;}
       .skeleton-grid{grid-template-columns:1fr;}
-      #lightbox-prev{left:4px;} #lightbox-next{right:4px;}
+      #lightbox-prev, #lightbox-next { width:36px; height:36px; font-size:1.4rem; }
+      #lightbox-prev { margin-right:6px; }
+      #lightbox-next { margin-left:6px; }
       /* 天條單排，nav 文字縮短 */
       header { height:60px; flex-wrap:nowrap; padding:0 12px; gap:6px; }
       .guild-name { font-size:0.95rem; }
@@ -483,6 +507,23 @@
     }
     .lb-thumb:hover { opacity:0.85; }
     .lb-thumb.active { border-color:#fff; opacity:1; }
+
+    /* ── Back to Top ── */
+    #back-to-top {
+      position:fixed; bottom:28px; right:22px; z-index:900;
+      width:44px; height:44px; border-radius:50%;
+      background:linear-gradient(135deg,#e96a1e,#c2510b);
+      color:#fff; font-size:1.3rem; line-height:1;
+      border:none; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 16px rgba(233,106,30,0.45);
+      opacity:0; pointer-events:none;
+      transition:opacity 0.3s, transform 0.3s;
+      transform:translateY(12px);
+    }
+    #back-to-top.visible { opacity:1; pointer-events:auto; transform:translateY(0); }
+    #back-to-top:hover { background:linear-gradient(135deg,#f07a2e,#d4610e); transform:translateY(-2px); }
+    #back-to-top:active { transform:scale(0.93); }
   </style>
 </head>
 <body>
@@ -499,30 +540,34 @@
 <!-- Lightbox -->
 <div id="lightbox" onclick="handleLightboxClick(event)">
   <span id="lightbox-close" onclick="closeLightbox()">✕</span>
-  <span id="lightbox-prev" onclick="shiftLightbox(-1);event.stopPropagation()">&#8249;</span>
-  <div id="lightbox-tilt-wrap" onclick="toggleLightboxFlip(event)">
-    <div id="lightbox-flip-inner">
-      <div id="lightbox-front">
-        <img id="lightbox-img" src="" alt="">
-        <div id="lightbox-shine"></div>
-        <div id="lightbox-hint">🔄 點擊查看資訊</div>
-      </div>
-      <div id="lightbox-back" class="lb-back-仙">
-        <div id="lightbox-back-bg"></div>
-        <div id="lightbox-back-overlay"></div>
-        <div id="lightbox-back-content">
-          <div class="lb-back-name" id="lb-back-name"></div>
-          <div class="lb-back-meta" id="lb-back-meta"></div>
-          <div class="lb-back-owners-title">擁有者</div>
-          <div class="lb-back-owners" id="lb-back-owners"></div>
+  <div id="lightbox-img-area">
+    <button id="lightbox-prev" onclick="shiftLightbox(-1);event.stopPropagation()" aria-label="上一張">&#8249;</button>
+    <div id="lightbox-tilt-wrap" onclick="toggleLightboxFlip(event)">
+      <div id="lightbox-flip-inner">
+        <div id="lightbox-front">
+          <img id="lightbox-img" src="" alt="">
+          <div id="lightbox-shine"></div>
+          <div id="lightbox-hint">🔄 點擊查看資訊</div>
+        </div>
+        <div id="lightbox-back" class="lb-back-仙">
+          <div id="lightbox-back-bg"></div>
+          <div id="lightbox-back-overlay"></div>
+          <div id="lightbox-back-content">
+            <div class="lb-back-name" id="lb-back-name"></div>
+            <div class="lb-back-meta" id="lb-back-meta"></div>
+            <div class="lb-back-owners-title">擁有者</div>
+            <div class="lb-back-owners" id="lb-back-owners"></div>
+          </div>
         </div>
       </div>
     </div>
+    <button id="lightbox-next" onclick="shiftLightbox(1);event.stopPropagation()" aria-label="下一張">&#8250;</button>
   </div>
   <div id="lightbox-name"></div>
   <div id="lightbox-thumbs"></div>
-  <span id="lightbox-next" onclick="shiftLightbox(1);event.stopPropagation()">&#8250;</span>
 </div>
+
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="回到頂部">&#8679;</button>
 
 <main>
   <div id="flower-page" class="page active">
@@ -1088,6 +1133,10 @@ document.addEventListener('keydown', e => {
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
   }, { passive:true });
+  lb.addEventListener('touchmove', e => {
+    // 阻止 lightbox 開啟時底層頁面滾動
+    e.preventDefault();
+  }, { passive:false });
   lb.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
@@ -1096,6 +1145,14 @@ document.addEventListener('keydown', e => {
     }
   }, { passive:true });
 })();
+
+// ── 15. Back to Top ──
+(function initBackToTop() {
+  const btn = document.getElementById('back-to-top');
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive:true });
+})()
 
 // ── 初始化 ──
 (async () => {
