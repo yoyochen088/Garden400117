@@ -4,1441 +4,176 @@
 <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>璀璨 花卉圖鑑 [400117]</title>
-<!-- PWA -->
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#e96a1e" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="璀璨" />
-<link rel="apple-touch-icon" href="icon.jpg" />
-<script>
-const SHEET_CONFIG = {
-apiKey:  'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg',
-sheetId: '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg',
-ranges:  ['flowers!A1:Z', 'members!A1:Z', 'ownership!A1:Z']
-};
-</script>
+<title>個人花展 - 璀璨</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#e96a1e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="icon.jpg" />
+<link rel="stylesheet" href="style.css" />
+<script src="config.js"></script>
+  <script>
+  // PWA 偵測提前到 head
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    document.documentElement.classList.add('is-pwa');
+  }
+  </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 <style>
-:root {
---pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
---pink-dark:#c2510b; --bg:#fff8f5; --card-bg:#ffffff;
---text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
---shadow:0 2px 12px rgba(233,106,30,0.10); --radius:14px;
+/* 成員快速按鈕 */
+.member-btn {
+padding: 6px 16px;
+border-radius: 20px;
+border: 1.5px solid var(--pink-mid);
+background: #fff;
+color: var(--pink-dark);
+font-size: 0.85rem;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.15s;
+box-shadow: 0 1px 4px rgba(233,106,30,0.1);
 }
-* { box-sizing:border-box; margin:0; padding:0; }
-body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overscroll-behavior-y:none; }
-
-/* ── Header ── */
-header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
-.guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; }
-nav { display:flex; gap:8px; }
-nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
-nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
-main { max-width:1400px; margin:0 auto; padding:24px 16px 48px; }
-.page { display:none; }
-.page.active { display:block; }
-
-/* ── Loading spinner ── */
-.loading { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:1rem; }
-.loading-spinner { display:inline-block; width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--pink); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }
-@keyframes spin { to { transform:rotate(360deg); } }
-
-/* ── Skeleton ── */
-.skeleton-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
-.skeleton-card { background:var(--card-bg); border-radius:var(--radius); border:1.5px solid var(--border); overflow:hidden; }
-.skeleton-img { width:100%; height:200px; background:linear-gradient(90deg,#f0e6df 25%,#fde8d8 50%,#f0e6df 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
-.skeleton-body { padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
-.skeleton-line { height:12px; border-radius:6px; background:linear-gradient(90deg,#f0e6df 25%,#fde8d8 50%,#f0e6df 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
-.skeleton-line.short { width:60%; }
-.skeleton-line.xshort { width:40%; }
-@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-/* ── Controls ── */
-.controls { background:var(--card-bg); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border); }
-.search-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
-.search-box { flex:1; min-width:200px; padding:9px 14px; border:1.5px solid var(--pink-mid); border-radius:24px; font-size:0.95rem; outline:none; transition:border-color 0.2s; background:var(--bg); color:var(--text); }
-.search-box:focus { border-color:var(--pink); }
-
-/* ── 品質 Tab ── */
-.quality-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
-.qtab { padding:6px 16px; border-radius:20px; font-size:0.85rem; font-weight:700; cursor:pointer; border:1.5px solid transparent; transition:all 0.18s; background:var(--bg); color:var(--text-muted); }
-.qtab:hover { opacity:0.85; }
-.qtab.active { color:#fff; }
-.qtab[data-q=""]     { border-color:var(--pink-mid); color:var(--pink-dark); }
-.qtab[data-q=""].active { background:var(--pink); border-color:var(--pink); color:#fff; }
-.qtab[data-q="仙"].active { background:linear-gradient(135deg,#ff4e8a,#ff8c42); border-color:#ff4e8a; color:#fff; }
-.qtab[data-q="華"].active { background:linear-gradient(135deg,#ff8c00,#ffb347); border-color:#ff8c00; color:#fff; }
-.qtab[data-q="珍"].active { background:linear-gradient(135deg,#9b59b6,#c39bd3); border-color:#9b59b6; color:#fff; }
-.qtab[data-q="普"].active { background:linear-gradient(135deg,#4a90d9,#74b9ff); border-color:#4a90d9; color:#fff; }
-.qtab[data-q="凡"].active { background:linear-gradient(135deg,#7f8c6e,#a8b89a); border-color:#7f8c6e; color:#fff; }
-.qtab[data-q="仙"] { border-color:#ff6b9d; color:#ff4e8a; }
-.qtab[data-q="華"] { border-color:#ffb347; color:#ff8c00; }
-.qtab[data-q="珍"] { border-color:#c39bd3; color:#9b59b6; }
-.qtab[data-q="普"] { border-color:#74b9ff; color:#4a90d9; }
-.qtab[data-q="凡"] { border-color:#a8b89a; color:#7f8c6e; }
-
-.filter-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.filter-group { display:flex; flex-direction:column; gap:4px; flex:1; min-width:140px; }
-.filter-group label { font-size:0.78rem; color:var(--text-muted); font-weight:600; padding-left:4px; }
-select { padding:8px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:var(--text); outline:none; cursor:pointer; }
-select:focus { border-color:var(--pink); }
-.btn-reset { padding:8px 18px; background:var(--pink-light); color:var(--pink-dark); border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:background 0.2s; align-self:flex-end; }
-.btn-reset:hover { background:var(--pink-mid); color:#fff; }
-
-.result-count { font-size:0.9rem; color:var(--text-muted); margin-bottom:14px; padding-left:4px; }
-.result-count span { color:var(--pink); font-weight:700; font-size:1rem; }
-
-/* ── 品質分組標題 ── */
-.quality-section-title {
-display:flex; align-items:center; gap:10px;
-margin:24px 0 12px; font-size:1rem; font-weight:700;
-}
-.quality-section-title .qs-badge {
-padding:4px 16px; border-radius:20px; color:#fff; font-size:0.9rem; font-weight:700;
-}
-.quality-section-title .qs-line { flex:1; height:1.5px; opacity:0.3; }
-.quality-section-title .qs-count { font-size:0.82rem; color:var(--text-muted); font-weight:400; }
-.qs-仙 .qs-badge { background:linear-gradient(135deg,#ff4e8a,#ff8c42); }
-.qs-仙 .qs-line  { background:linear-gradient(90deg,#ff4e8a,transparent); }
-.qs-華 .qs-badge { background:linear-gradient(135deg,#ff8c00,#ffb347); }
-.qs-華 .qs-line  { background:linear-gradient(90deg,#ff8c00,transparent); }
-.qs-珍 .qs-badge { background:linear-gradient(135deg,#9b59b6,#c39bd3); }
-.qs-珍 .qs-line  { background:linear-gradient(90deg,#9b59b6,transparent); }
-.qs-普 .qs-badge { background:linear-gradient(135deg,#4a90d9,#74b9ff); }
-.qs-普 .qs-line  { background:linear-gradient(90deg,#4a90d9,transparent); }
-.qs-凡 .qs-badge { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
-.qs-凡 .qs-line  { background:linear-gradient(90deg,#7f8c6e,transparent); }
-
-/* ── 大圖卡片 Grid ── */
-.flower-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
-
-/* ── 卡片入場動畫 ── */
-@keyframes cardIn {
-from { opacity:0; transform:translateY(22px); }
-to   { opacity:1; transform:translateY(0); }
+.member-btn:hover, .member-btn.active {
+background: #c2510b;
+color: #fff;
+border-color: #c2510b;
+box-shadow: 0 2px 8px rgba(233,106,30,0.35);
 }
 
-/* ── 邊框光流 keyframes（各品質） ── */
-@keyframes borderFlow-仙 {
-0%   { background-position: 0% 50%; }
-100% { background-position: 400% 50%; }
+/* 模糊搜尋下拉 */
+.search-wrapper { position: relative; }
+.suggest-list {
+position: absolute;
+top: calc(100% + 4px);
+left: 0; right: 0;
+background: #fff;
+border: 1.5px solid var(--pink-mid);
+border-radius: 12px;
+box-shadow: 0 4px 16px rgba(233,106,30,0.12);
+z-index: 100;
+max-height: 220px;
+overflow-y: auto;
 }
-@keyframes borderFlow-華 {
-0%   { background-position: 0% 50%; }
-100% { background-position: 400% 50%; }
+.suggest-item {
+padding: 10px 16px;
+cursor: pointer;
+font-size: 0.9rem;
+border-bottom: 1px solid var(--pink-light);
+display: flex;
+align-items: center;
+gap: 8px;
 }
-@keyframes borderFlow-珍 {
-0%   { background-position: 0% 50%; }
-100% { background-position: 400% 50%; }
-}
-@keyframes borderFlow-普 {
-0%   { background-position: 0% 50%; }
-100% { background-position: 400% 50%; }
-}
-@keyframes borderFlow-凡 {
-0%   { background-position: 0% 50%; }
-100% { background-position: 400% 50%; }
-}
+.suggest-item:last-child { border-bottom: none; }
+.suggest-item:hover { background: var(--pink-light); }
+.suggest-nick { font-weight: 600; color: var(--pink-dark); }
+.suggest-id { font-size: 0.75rem; color: var(--text-muted); }
+.suggest-role { font-size: 0.72rem; background: var(--pink-light); color: var(--pink-dark); padding: 1px 6px; border-radius: 8px; }
 
-/* ── 粒子 keyframes ── */
-@keyframes particle {
-0%   { transform:translate(0,0) scale(1); opacity:1; }
-100% { transform:translate(var(--px), var(--py)) scale(0); opacity:0; }
-}
+    /* ── PWA 專用 ── */
+    .is-pwa header { display:none; }
+    .is-pwa main { padding-bottom: calc(70px + env(safe-area-inset-bottom) + 16px) !important; }
 
-.flower-card {
-background:var(--card-bg); border-radius:var(--radius);
-border:2px solid var(--border);
-box-shadow:var(--shadow); overflow:visible; display:flex; flex-direction:column;
-transition:box-shadow 0.3s ease, background 0.3s ease;
-animation:cardIn 0.35s ease both;
-position:relative;
-}
-/* 內容區裁切，讓圖片不溢出，但偽元素邊框可以超出 */
-.flower-card .card-thumb,
-.flower-card .quality-bar,
-.flower-card .card-body {
-position:relative; z-index:1;
-}
-.flower-card .card-thumb { overflow:hidden; border-radius:calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0 0; }
-/* overflow:visible 讓粒子可以飛出卡片外，但內容要裁切 */
-.flower-card::before {
-content:''; position:absolute; inset:-2px; border-radius:var(--radius);
-z-index:0; pointer-events:none; opacity:0;
-transition:opacity 0.3s;
-background-size:300% 300%;
-}
-/* 用偽元素做光流邊框 */
-.flower-card:hover::before { opacity:1; }
-
-.flower-card.quality-仙::before {
-background:linear-gradient(90deg,#ff4e8a,#ffb347,#ff8c42,#ff4e8a,#ffe0f0,#ff4e8a);
-background-size:400% 400%;
-animation:borderFlow-仙 2s linear infinite;
-border-radius:calc(var(--radius) + 2px);
-padding:2px;
--webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
--webkit-mask-composite: xor;
-mask-composite: exclude;
-}
-.flower-card.quality-華::before {
-background:linear-gradient(90deg,#ff8c00,#ffb347,#ffe082,#ff8c00,#fff3cd,#ff8c00);
-background-size:400% 400%;
-animation:borderFlow-華 2s linear infinite;
-border-radius:calc(var(--radius) + 2px);
-padding:2px;
--webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
--webkit-mask-composite: xor;
-mask-composite: exclude;
-}
-.flower-card.quality-珍::before {
-background:linear-gradient(90deg,#9b59b6,#c39bd3,#e8d5f5,#9b59b6,#d7bde2,#9b59b6);
-background-size:400% 400%;
-animation:borderFlow-珍 2s linear infinite;
-border-radius:calc(var(--radius) + 2px);
-padding:2px;
--webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
--webkit-mask-composite: xor;
-mask-composite: exclude;
-}
-.flower-card.quality-普::before {
-background:linear-gradient(90deg,#4a90d9,#74b9ff,#d6eaff,#4a90d9,#aed6f1,#4a90d9);
-background-size:400% 400%;
-animation:borderFlow-普 2s linear infinite;
-border-radius:calc(var(--radius) + 2px);
-padding:2px;
--webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
--webkit-mask-composite: xor;
-mask-composite: exclude;
-}
-.flower-card.quality-凡::before {
-background:linear-gradient(90deg,#7f8c6e,#a8b89a,#d5e8d4,#7f8c6e,#c8e6c9,#7f8c6e);
-background-size:400% 400%;
-animation:borderFlow-凡 2s linear infinite;
-border-radius:calc(var(--radius) + 2px);
-padding:2px;
--webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
--webkit-mask-composite: xor;
-mask-composite: exclude;
-}
-
-/* 卡片內容層（蓋在偽元素上） */
-.flower-card > * { position:relative; z-index:1; }
-
-/* hover 背景色漸變（各品質） */
-.flower-card.quality-仙:hover { background:linear-gradient(160deg,#fff0f5,#fff8f5); box-shadow:0 14px 36px rgba(255,78,138,0.28); z-index:10; }
-.flower-card.quality-華:hover { background:linear-gradient(160deg,#fff8ee,#fff8f5); box-shadow:0 14px 36px rgba(255,140,0,0.25); z-index:10; }
-.flower-card.quality-珍:hover { background:linear-gradient(160deg,#f8f0ff,#fff8f5); box-shadow:0 14px 36px rgba(155,89,182,0.22); z-index:10; }
-.flower-card.quality-普:hover { background:linear-gradient(160deg,#f0f7ff,#fff8f5); box-shadow:0 14px 36px rgba(74,144,217,0.22); z-index:10; }
-.flower-card.quality-凡:hover { background:linear-gradient(160deg,#f4f8f0,#fff8f5); box-shadow:0 14px 36px rgba(127,140,110,0.20); z-index:10; }
-
-/* 標題文字放大 */
-.card-title { font-size:1rem; font-weight:700; color:var(--pink-dark); line-height:1.3; transition:font-size 0.25s ease, color 0.25s ease; }
-.flower-card:hover .card-title { font-size:1.1rem; color:var(--pink); }
-
-/* 粒子容器 */
-.card-particles { position:absolute; inset:0; pointer-events:none; z-index:2; overflow:visible; }
-.particle {
-position:absolute; border-radius:50%; opacity:0;
-animation:particle 0.9s ease-out forwards;
-}
-
-.flower-card.quality-仙 { border-color:#ff6b9d; }
-.flower-card.quality-華 { border-color:#ffb347; }
-.flower-card.quality-珍 { border-color:#c39bd3; }
-.flower-card.quality-普 { border-color:#74b9ff; }
-.flower-card.quality-凡 { border-color:#a8b89a; }
-
-/* 大圖區 */
-.card-thumb { width:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; color:var(--pink-mid); position:relative; flex-shrink:0; cursor:zoom-in; }
-.card-thumb img { width:100%; height:auto; display:block; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1), filter 0.3s ease; transform-origin:center 60%; transform:scale(1.5); }
-.flower-card:hover .card-thumb img { transform:scale(1.8); filter:drop-shadow(0 6px 18px rgba(0,0,0,0.4)); }
-
-/* 品質色條 */
-.quality-bar { height:4px; width:100%; flex-shrink:0; }
-.quality-bar-仙 { background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
-.quality-bar-華 { background:linear-gradient(90deg,#ff8c00,#ffb347); }
-.quality-bar-珍 { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
-.quality-bar-普 { background:linear-gradient(90deg,#4a90d9,#74b9ff); }
-.quality-bar-凡 { background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
-
-/* 卡片資訊區 */
-.card-body { padding:12px 14px; flex:1; display:flex; flex-direction:column; gap:7px; }
-.card-meta { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
-.badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:0.75rem; font-weight:600; }
-.badge-score { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
-.badge-obtain { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
-.badge-quality-仙 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
-.badge-quality-華 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
-.badge-quality-珍 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
-.badge-quality-普 { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
-.badge-quality-凡 { background:linear-gradient(135deg,#7f8c6e,#a8b89a); color:#fff; }
-
-/* 擁有者 */
-.owners-section { margin-top:2px; }
-.owners-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
-.owners-list { display:flex; flex-wrap:wrap; gap:4px; }
-.owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:8px; padding:2px 8px; font-size:0.75rem; font-weight:500; border:1px solid var(--border); }
-.no-owner { font-size:0.78rem; color:#bbb; font-style:italic; }
-.owner-count-badge { font-size:0.75rem; color:var(--text-muted); }
-
-.no-result { text-align:center; padding:48px 20px; color:var(--text-muted); font-size:1rem; }
-
-/* ── 成員表格 ── */
-.role-badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:0.8rem; font-weight:700; }
-.role-會長   { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
-.role-副會長 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
-.role-理事   { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
-.role-菁英   { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
-.role-成員   { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
-.id-table-wrap { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); overflow-x:auto; }
-table { width:100%; border-collapse:collapse; font-size:0.92rem; }
-thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
-th { padding:12px 16px; text-align:left; font-weight:600; white-space:nowrap; }
-td { padding:10px 16px; border-bottom:1px solid var(--border); vertical-align:middle; }
-tbody tr:last-child td { border-bottom:none; }
-tbody tr:hover { background:var(--pink-light); }
-
-/* ── Lightbox ── */
-#lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:16px; padding:20px; }
-#lightbox.open { display:flex; }
-
-/* ── Lightbox flip card ── */
-#lightbox-tilt-wrap {
-position:relative; display:inline-block;
-perspective:1000px;
-border-radius:12px;
-cursor:pointer;
-}
-#lightbox-flip-inner {
-position:relative;
-transform-style:preserve-3d;
--webkit-transform-style:preserve-3d;
-transition:transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
--webkit-transition:-webkit-transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
-border-radius:12px;
-}
-#lightbox-tilt-wrap.flipped #lightbox-flip-inner {
-transform:rotateY(180deg);
--webkit-transform:rotateY(180deg);
-}
-
-/* 正面 */
-#lightbox-front {
-position:relative;
-display:block;
-backface-visibility:hidden;
--webkit-backface-visibility:hidden;
-border-radius:12px;
-line-height:0;
--webkit-transform:rotateY(0deg);
-transform:rotateY(0deg);
-}
-#lightbox-img {
-max-width:90vw; max-height:75vh; width:auto; height:auto;
-border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.5);
-transition:opacity 0.2s;
-display:block; position:relative; z-index:1;
-}
-#lightbox-shine {
-position:absolute; inset:0; border-radius:12px; z-index:2;
-pointer-events:none;
-background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0%, transparent 70%);
-transition:background 0.08s ease-out;
-mix-blend-mode:screen;
-}
-/* 點擊提示 */
-#lightbox-hint {
-position:absolute; bottom:10px; right:12px; z-index:5;
-background:rgba(0,0,0,0.45); color:#fff;
-font-size:0.72rem; padding:3px 10px; border-radius:10px;
-pointer-events:none; opacity:1; transition:opacity 0.3s;
-line-height:1.4;
-}
-#lightbox-tilt-wrap.flipped #lightbox-hint { opacity:0; }
-
-/* 背面 — 與正面同尺寸，絕對定位疊在正面上 */
-#lightbox-back {
-position:absolute; inset:0;
-backface-visibility:hidden;
--webkit-backface-visibility:hidden;
-transform:rotateY(180deg);
--webkit-transform:rotateY(180deg);
-border-radius:12px;
-box-shadow:0 8px 40px rgba(0,0,0,0.5);
-}
-#lightbox-back-bg {
-position:absolute; inset:0;
-background-size:cover; background-position:center;
-filter:blur(3px) saturate(75%) brightness(0.85);
-transform:scale(1.04);
-border-radius:12px;
-overflow:hidden;
-}
-#lightbox-back-overlay {
-position:absolute; inset:0;
-background:rgba(0,0,0,0.12);
-border-radius:12px;
-}
-#lightbox-back-content {
-position:absolute; inset:0;
-display:flex; flex-direction:column;
-align-items:center; justify-content:center;
-gap:12px; padding:24px 20px;
-z-index:2;
-}
-.lb-back-name {
-font-size:1.3rem; font-weight:800; color:#fff;
-text-shadow:0 2px 10px rgba(0,0,0,0.7);
-text-align:center; line-height:1.3;
-}
-.lb-back-meta { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
-.lb-back-badge {
-padding:4px 14px; border-radius:12px; font-size:0.85rem; font-weight:700;
-background:rgba(255,255,255,0.2); color:#fff;
-border:1.5px solid rgba(255,255,255,0.35);
-text-shadow:0 1px 4px rgba(0,0,0,0.4);
-}
-.lb-back-owners-title {
-font-size:0.8rem; color:rgba(255,255,255,0.75); font-weight:600; text-align:center;
-}
-.lb-back-owners { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; max-width:320px; }
-.lb-back-owner-tag {
-background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.92);
-border-radius:10px; padding:3px 10px; font-size:0.8rem;
-border:1px solid rgba(255,255,255,0.25);
-}
-.lb-back-no-owner { color:rgba(255,255,255,0.5); font-size:0.85rem; font-style:italic; }
-
-#lightbox-name { color:#fff; font-size:1.2rem; font-weight:700; text-align:center; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
-#lightbox-close { position:absolute; top:18px; right:22px; color:#fff; font-size:2rem; cursor:pointer; line-height:1; opacity:0.8; transition:opacity 0.2s; background:none; border:none; }
-#lightbox-close:hover { opacity:1; }
-
-/* 圖片區域（含左右箭頭） */
-#lightbox-img-area {
-position:relative; display:inline-flex; align-items:center; justify-content:center;
-}
-#lightbox-prev, #lightbox-next {
-position:absolute; top:50%; transform:translateY(-50%);
-background:rgba(0,0,0,0.35);
-border:1.5px solid rgba(255,255,255,0.3);
-color:#fff;
-font-size:1.8rem;
-line-height:1;
-cursor:pointer;
-opacity:0.85;
-transition:opacity 0.2s, background 0.2s, transform 0.15s;
-user-select:none;
-border-radius:50%;
-width:44px; height:44px;
-display:flex; align-items:center; justify-content:center;
-backdrop-filter:blur(4px);
--webkit-backdrop-filter:blur(4px);
-z-index:10;
-}
-#lightbox-prev { left:10px; }
-#lightbox-next { right:10px; }
-#lightbox-prev:hover, #lightbox-next:hover { opacity:1; background:rgba(0,0,0,0.55); transform:translateY(-50%) scale(1.08); }
-#lightbox-prev:active, #lightbox-next:active { transform:translateY(-50%) scale(0.95); }
-
-/* ── RWD ── */
-@media(max-width:900px) { .flower-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } .skeleton-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } }
-@media(max-width:600px) {
-.guild-name{font-size:1rem;}
-nav a{padding:5px 10px;font-size:0.82rem;}
-.flower-grid{grid-template-columns:1fr;gap:12px;}
-.skeleton-grid{grid-template-columns:1fr;}
-#lightbox-prev, #lightbox-next { width:36px; height:36px; font-size:1.4rem; }
-#lightbox-prev { left:6px; margin-right:0; }
-#lightbox-next { right:6px; margin-left:0; }
-/* 天條單排，nav 文字縮短 */
-header { height:60px; flex-wrap:nowrap; padding:0 12px; gap:6px; }
-.guild-name { font-size:0.95rem; }
-nav { gap:5px; flex-shrink:0; }
-nav a { font-size:0.78rem; padding:4px 8px; }
-nav a[data-short]::before { content:attr(data-short); }
-nav a[data-short] span { display:none; }
-/* 品質 Tab — 縮小讓一排放得下 */
-.quality-tabs { gap:4px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
-.qtab { padding:5px 10px; font-size:0.78rem; white-space:nowrap; flex-shrink:0; }
-/* 下拉篩選 — 兩欄並排 */
-.filter-row { gap:6px; }
-.filter-group { min-width:calc(50% - 3px); flex:1 1 calc(50% - 3px); }
-.filter-group label { font-size:0.72rem; }
-select { padding:6px 8px; font-size:0.82rem; }
-.btn-reset { width:100%; }
-/* 熱力圖欄位手機隱藏 */
-.member-bar-col { display:none; }
-}
-
-/* ══════════════════════════════════════
-      11. 成員擁有熱力圖（成員頁）
-   ══════════════════════════════════════ */
-.member-bar-wrap { display:flex; align-items:center; gap:8px; }
-.member-bar-bg { flex:1; background:#f5ede8; border-radius:4px; height:8px; overflow:hidden; min-width:60px; }
-.member-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#e96a1e,#f4a46a); transition:width 0.7s ease; }
-.member-bar-count { font-size:0.75rem; color:var(--text-muted); white-space:nowrap; }
-
-/* ══════════════════════════════════════
-      12. 花朵普及度長條圖
-   ══════════════════════════════════════ */
-.popularity-row { display:flex; align-items:center; gap:6px; margin-top:4px; }
-.popularity-bar-bg { flex:1; background:#f0e8e0; border-radius:4px; height:7px; overflow:hidden; }
-.popularity-bar-fill { height:100%; border-radius:4px; transition:width 0.6s ease; }
-.pop-仙 { background:linear-gradient(90deg,#ff4e8a,#ff8c42); }
-.pop-華 { background:linear-gradient(90deg,#ff8c00,#ffb347); }
-.pop-珍 { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
-.pop-普 { background:linear-gradient(90deg,#4a90d9,#74b9ff); }
-.pop-凡 { background:linear-gradient(90deg,#7f8c6e,#a8b89a); }
-.popularity-label { font-size:0.7rem; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
-
-/* ══════════════════════════════════════
-      13. Lightbox 縮圖列
-   ══════════════════════════════════════ */
-#lightbox-thumbs {
-display:flex; gap:6px; overflow-x:auto; max-width:90vw;
-padding:4px 2px; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.3) transparent;
-}
-#lightbox-thumbs::-webkit-scrollbar { height:4px; }
-#lightbox-thumbs::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.3); border-radius:2px; }
-.lb-thumb {
-width:52px; height:36px; object-fit:cover; border-radius:5px; cursor:pointer;
-border:2px solid transparent; opacity:0.55; transition:opacity 0.2s, border-color 0.2s;
-flex-shrink:0;
-}
-.lb-thumb:hover { opacity:0.85; }
-.lb-thumb.active { border-color:#fff; opacity:1; }
-
-/* ── Back to Top ── */
-#back-to-top {
-position:fixed; bottom:28px; right:22px; z-index:900;
-width:44px; height:44px; border-radius:50%;
-background:linear-gradient(135deg,#e96a1e,#c2510b);
-color:#fff; font-size:1.3rem; line-height:1;
-border:none; cursor:pointer;
-display:flex; align-items:center; justify-content:center;
-box-shadow:0 4px 16px rgba(233,106,30,0.45);
-opacity:0; pointer-events:none;
-transition:opacity 0.3s, transform 0.3s;
-transform:translateY(12px);
-}
-#back-to-top.visible { opacity:1; pointer-events:auto; transform:translateY(0); }
-#back-to-top:hover { background:linear-gradient(135deg,#f07a2e,#d4610e); transform:translateY(-2px); }
-#back-to-top:active { transform:scale(0.93); }
-
-    /* ── PWA 偵測 ── */
-    /* body.is-pwa 時套用 PWA 專屬樣式 */
-
-    /* PWA：隱藏頂部 header */
-    body.is-pwa header { display:none; }
-
-    /* PWA：main 底部留空間給底部導覽列 + safe area */
-    body.is-pwa main {
-      padding-bottom: calc(70px + env(safe-area-inset-bottom));
-    }
-
-    /* ── 底部導覽列（PWA 專用） ── */
-    #bottom-nav {
-      display:none;
-    }
-    body.is-pwa #bottom-nav {
+    /* 底部導覽列 */
+    #bottom-nav { display:none; }
+    .is-pwa #bottom-nav {
       display:flex;
       position:fixed; bottom:0; left:0; right:0; z-index:200;
       background:#fff;
-      border-top:1px solid var(--border);
+      border-top:1px solid #f8d5b0;
       box-shadow:0 -2px 12px rgba(233,106,30,0.10);
       padding-bottom: env(safe-area-inset-bottom);
     }
     .bnav-item {
       flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
       gap:3px; padding:10px 0 8px;
-      color:var(--text-muted); font-size:0.7rem; font-weight:600;
+      color:#9e6b7e; font-size:0.7rem; font-weight:600;
       cursor:pointer; border:none; background:none;
       transition:color 0.18s;
       -webkit-tap-highlight-color:transparent;
       user-select:none;
     }
     .bnav-item .bnav-icon { font-size:1.4rem; line-height:1; transition:transform 0.2s; }
-    .bnav-item.active { color:var(--pink); }
+    .bnav-item.active { color:#e96a1e; }
     .bnav-item.active .bnav-icon { transform:scale(1.15); }
     .bnav-item:active .bnav-icon { transform:scale(0.9); }
-
-    /* ── 頁面切換動畫 ── */
-    .page {
-      display:none;
-      animation:none;
-    }
-    .page.active {
-      display:block;
-    }
-    .page.page-enter {
-      animation:pageSlideIn 0.28s cubic-bezier(0.4,0,0.2,1) both;
-    }
-    @keyframes pageSlideIn {
-      from { opacity:0; transform:translateY(14px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-
-    /* PWA：safe area 頂部（status bar 下方留白） */
-    body.is-pwa #ptr-indicator {
-      top: env(safe-area-inset-top);
-    }
-
-    /* ── Splash Screen ── */
-    #splash {
-      position:fixed; inset:0; z-index:99999;
-      background:linear-gradient(160deg, #c2510b 0%, #e96a1e 45%, #f4a46a 100%);
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:24px;
-      transition:opacity 0.6s ease, visibility 0.6s ease;
-    }
-    #splash.hide {
-      opacity:0; visibility:hidden; pointer-events:none;
-    }
-    /* icon 縮放出現 */
-    #splash-icon {
-      width:110px; height:110px; border-radius:28px;
-      box-shadow:0 8px 32px rgba(0,0,0,0.3);
-      object-fit:cover;
-      opacity:0; transform:scale(0.5);
-      animation:splashIconIn 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.2s forwards;
-    }
-    @keyframes splashIconIn {
-      to { opacity:1; transform:scale(1); }
-    }
-    /* 文字容器 */
-    #splash-title {
-      display:flex; gap:4px; align-items:center;
-    }
-    /* 每個字逐一亮起 */
-    .splash-char {
-      font-size:2.4rem; font-weight:800; color:#fff;
-      text-shadow:0 2px 16px rgba(255,255,255,0.4);
-      opacity:0; transform:translateY(10px);
-      animation:splashCharIn 0.4s ease forwards;
-      letter-spacing:2px;
-    }
-    .splash-char:nth-child(1) { animation-delay:0.55s; }
-    .splash-char:nth-child(2) { animation-delay:0.72s; }
-    /* 副標 */
-    #splash-sub {
-      font-size:0.85rem; color:rgba(255,255,255,0.75);
-      font-weight:500; letter-spacing:3px;
-      opacity:0;
-      animation:splashCharIn 0.4s ease 0.95s forwards;
-    }
-    @keyframes splashCharIn {
-      to { opacity:1; transform:translateY(0); }
-    }
-    /* 底部光暈 */
-    #splash::after {
-      content:'';
-      position:absolute; bottom:-60px; left:50%; transform:translateX(-50%);
-      width:280px; height:280px; border-radius:50%;
-      background:radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
-      animation:splashGlow 1.5s ease-in-out 0.3s infinite alternate;
-    }
-    @keyframes splashGlow {
-      from { opacity:0.5; transform:translateX(-50%) scale(0.9); }
-      to   { opacity:1;   transform:translateX(-50%) scale(1.1); }
-    }
-
-/* ── Pull to Refresh ── */
-#ptr-indicator {
-position:fixed; top:0; left:0; right:0; z-index:9999;
-display:flex; align-items:center; justify-content:center; gap:8px;
-height:0; overflow:hidden;
-background:linear-gradient(135deg,#c2510b,#e96a1e);
-color:#fff; font-size:0.9rem; font-weight:600;
-transition:height 0.15s ease;
-pointer-events:none;
-}
-#ptr-indicator.visible { height:52px; }
-#ptr-indicator.releasing { background:linear-gradient(135deg,#e96a1e,#f4a46a); }
-#ptr-spinner {
-width:20px; height:20px; border:2.5px solid rgba(255,255,255,0.4);
-border-top-color:#fff; border-radius:50%;
-}
-#ptr-spinner.spin { animation:spin 0.7s linear infinite; }
 </style>
 </head>
 <body>
 
-<!-- Splash Screen -->
-<div id="splash">
-  <img id="splash-icon" src="icon.jpg" alt="璀璨">
-  <div id="splash-title">
-    <span class="splash-char">璀</span>
-    <span class="splash-char">璨</span>
-  </div>
-  <div id="splash-sub">花卉圖鑑</div>
-</div>
-
-<div id="ptr-indicator">
-<div id="ptr-spinner"></div>
-<span id="ptr-text">下拉更新</span>
-</div>
-
+<!-- Header（與 index.html 相同） -->
 <header>
 <div class="guild-name">璀璨 <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
 <nav>
-<a href="#" class="active" data-short="圖鑑" onclick="showPage('flower-page',this)"><span>花卉圖鑑</span></a>
-<a href="#" data-short="成員" onclick="showPage('id-page',this)"><span>公會成員</span></a>
-<a href="flower-showcase.html" data-short="花展"><span>個人花展</span></a>
+<a href="index.html" data-short="圖鑑"><span>花卉圖鑑</span></a>
+<a href="index.html#id-page" data-short="成員"><span>公會成員</span></a>
+<a href="flower-showcase.html" class="active" data-short="花展"><span>個人花展</span></a>
 </nav>
 </header>
 
 <!-- 底部導覽列（PWA 專用） -->
 <nav id="bottom-nav">
-  <button class="bnav-item active" data-page="flower-page" onclick="showPagePWA('flower-page',this)">
+  <button class="bnav-item" onclick="location.href='index.html'">
     <span class="bnav-icon">🌸</span>
     <span>花卉圖鑑</span>
   </button>
-  <button class="bnav-item" data-page="id-page" onclick="showPagePWA('id-page',this)">
+  <button class="bnav-item" onclick="location.href='index.html'">
     <span class="bnav-icon">👥</span>
     <span>公會成員</span>
   </button>
-  <button class="bnav-item" onclick="location.href='flower-showcase.html'">
+  <button class="bnav-item active">
     <span class="bnav-icon">🖼️</span>
     <span>個人花展</span>
   </button>
 </nav>
 
-<!-- Lightbox -->
-<div id="lightbox" onclick="handleLightboxClick(event)">
-<span id="lightbox-close" onclick="closeLightbox()">✕</span>
-<div id="lightbox-img-area">
-<button id="lightbox-prev" onclick="shiftLightbox(-1);event.stopPropagation()" aria-label="上一張">&#8249;</button>
-<div id="lightbox-tilt-wrap" onclick="toggleLightboxFlip(event)">
-<div id="lightbox-flip-inner">
-<div id="lightbox-front">
-<img id="lightbox-img" src="" alt="">
-<div id="lightbox-shine"></div>
-<div id="lightbox-hint">🔄 點擊查看資訊</div>
-</div>
-<div id="lightbox-back" class="lb-back-仙">
-<div id="lightbox-back-bg"></div>
-<div id="lightbox-back-overlay"></div>
-<div id="lightbox-back-content">
-<div class="lb-back-name" id="lb-back-name"></div>
-<div class="lb-back-meta" id="lb-back-meta"></div>
-<div class="lb-back-owners-title">擁有者</div>
-<div class="lb-back-owners" id="lb-back-owners"></div>
-</div>
-</div>
-</div>
-</div>
-<button id="lightbox-next" onclick="shiftLightbox(1);event.stopPropagation()" aria-label="下一張">&#8250;</button>
-</div>
-<div id="lightbox-name"></div>
-<div id="lightbox-thumbs"></div>
+<main style="padding:0 0 80px;">
+
+<!-- 載入中 -->
+<div id="loading" class="loading">
+<div class="loading-spinner"></div><br>載入資料中...
 </div>
 
-<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="回到頂部">&#8679;</button>
-
-<main>
-<div id="flower-page" class="page active">
-<!-- Skeleton 載入中 -->
-<div id="flowerLoading">
-<div class="skeleton-grid" id="skeletonGrid"></div>
+<!-- 搜尋列 -->
+<div id="search-area" style="display:none;margin-bottom:24px;padding:20px 16px 0;max-width:800px;margin-left:auto;margin-right:auto;">
+<div class="search-bar">
+<div class="search-wrapper">
+<input id="searchInput" type="text" placeholder="輸入成員暱稱（模糊搜尋）..."
+oninput="onSearchInput()" onkeydown="onSearchKey(event)"
+autocomplete="off" />
+<div class="suggest-list" id="suggestList" style="display:none;"></div>
+</div>
+<button class="btn btn-primary" onclick="searchSelected()">🔍 查詢</button>
+</div>
+<!-- 成員快速按鈕 -->
+<div id="memberBtns" style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;"></div>
 </div>
 
-<div id="flowerContent" style="display:none;">
-<div class="controls">
-<div class="search-row">
-<input class="search-box" id="searchInput" type="text" placeholder="🔍 搜尋花名 / 擁有者..." oninput="applyFilters()" />
-</div>
-<!-- 品質快速 Tab -->
-<div class="quality-tabs" id="qualityTabs">
-<button class="qtab active" data-q="" onclick="setQTab(this)">全部</button>
-<button class="qtab" data-q="仙" onclick="setQTab(this)">仙</button>
-<button class="qtab" data-q="華" onclick="setQTab(this)">華</button>
-<button class="qtab" data-q="珍" onclick="setQTab(this)">珍</button>
-<button class="qtab" data-q="普" onclick="setQTab(this)">普</button>
-<button class="qtab" data-q="凡" onclick="setQTab(this)">凡</button>
-</div>
-<div class="filter-row">
-<div class="filter-group">
-<label>競賽分</label>
-<select id="filterScore" onchange="applyFilters()">
-<option value="">全部</option>
-<option value="30">30</option>
-<option value="28">28</option>
-<option value="25">25</option>
-<option value="23">23</option>
-<option value="21">21</option>
-<option value="14">14</option>            
-</select>
-</div>
-<div class="filter-group">
-<label>取得方式</label>
-<select id="filterObtain" onchange="applyFilters()">
-<option value="">全部</option>
-<option value="等級">等級</option><option value="活動">活動</option>
-<option value="花圃">花圃</option><option value="花坊">花坊</option>
-<option value="VIP">VIP</option><option value="週花">週花</option>
-<option value="星河映蕊">星河映蕊</option><option value="花靈商店">花靈商店</option>
-<option value="精靈花">精靈花</option><option value="卡冊">卡冊</option>
-<option value="心聯盟">心聯盟</option><option value="累積儲值">累積儲值</option>
-</select>
-</div>
-<div class="filter-group">
-<label>排序</label>
-<select id="sortBy" onchange="applyFilters()">
-<option value="">預設</option>
-<option value="score_asc">競賽分 低→高</option>
-<option value="score_desc">競賽分 高→低</option>
-<option value="pop_asc">擁有數 少→多</option>
-<option value="pop_desc">擁有數 多→少</option>
-</select>
-</div>
-<button class="btn-reset" onclick="resetFilters()">重置</button>
+<!-- 花展卡片（截圖區域）-->
+<div id="showcase-card" style="display:none;">
+<div class="user-header">
+<div class="user-avatar" id="user-initial">?</div>
+<div class="user-info">
+<div class="user-name" id="user-name"></div>
+<div class="user-stats">
+<div id="user-gameid" style="color:var(--text-muted);font-size:0.78rem;"></div>
+<div id="user-total" style="font-size:0.85rem;color:var(--pink-dark);font-weight:600;margin-top:2px;"></div>
 </div>
 </div>
-<div class="result-count" id="resultCount"></div>
-<div id="flowerGrid"></div>
+<div class="guild-badge">
+璀璨<br>
+<span style="font-size:0.7rem;opacity:0.85;">400117</span>
 </div>
+</div>
+<div id="quality-sections"></div>
 </div>
 
-<div id="id-page" class="page">
-<div id="memberLoading" class="loading">
-<div class="loading-spinner"></div><br>載入成員資料中...
-</div>
-<div id="memberContent" style="display:none;">
-<div class="id-table-wrap">
-<table>
-<thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
-<tbody id="idTableBody"></tbody>
-</table>
-</div>
-</div>
-</div>
 </main>
 
-<script>
-const QUALITY_ORDER = {'仙':0,'華':1,'珍':2,'普':3,'凡':4};
-const ROLE_ORDER    = {'會長':0,'副會長':1,'理事':2,'菁英':3,'成員':4};
-const QUALITY_LIST  = ['仙','華','珍','普','凡'];
+<!-- 底部浮動按鈕 -->
+<div class="fab-bar">
+<button class="btn btn-primary" id="downloadBtn" style="display:none;" onclick="downloadImage()">📥 下載圖片</button>
+</div>
 
-let FLOWERS = [], MEMBERS = [], OWNERSHIP = [];
-let currentList = [];   // 目前篩選後的花卉（供 lightbox 左右切換）
-let lightboxIdx = 0;
-let activeQTab  = '';   // 目前品質 tab
-
-// ── Skeleton 佔位 ──
-(function buildSkeleton() {
-const n = 12;
-document.getElementById('skeletonGrid').innerHTML = Array.from({length:n}).map(() => `
-   <div class="skeleton-card">
-     <div class="skeleton-img"></div>
-     <div class="skeleton-body">
-       <div class="skeleton-line"></div>
-       <div class="skeleton-line short"></div>
-       <div class="skeleton-line xshort"></div>
-     </div>
-   </div>`).join('');
-})();
-
-// ── 載入資料 ──
-async function loadFromSheets() {
-const { apiKey, sheetId, ranges } = SHEET_CONFIG;
-const rangeParam = ranges.map(r => `ranges=${encodeURIComponent(r)}`).join('&');
-const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?${rangeParam}&key=${apiKey}`;
-try {
-const res = await fetch(url);
-if (!res.ok) throw new Error(`HTTP ${res.status}`);
-const data = await res.json();
-const [flowersSheet, membersSheet, ownershipSheet] = data.valueRanges;
-
-const fHeaders = flowersSheet.values[0];
-FLOWERS = flowersSheet.values.slice(1).map(row => {
-const f = {};
-fHeaders.forEach((h, i) => { f[h.toLowerCase()] = row[i] || ''; });
-f.id = Number(f.id); f.score = Number(f.score); f.order = Number(f.order) || 999;
-f.owners = [];
-return f;
-});
-
-const mHeaders = membersSheet.values[0];
-MEMBERS = membersSheet.values.slice(1).map(row => {
-const m = {};
-mHeaders.forEach((h, i) => { m[h.toLowerCase()] = row[i] || ''; });
-m.gameId   = m.gameid || m.gameId || '';
-m.nickname = m.nickname || '';
-m.note     = m.note || '成員';
-m.left     = (m.left || '').toLowerCase() === 'true';
-return m;
-}).filter(m => !m.left);
-
-const oHeaders = ownershipSheet.values[0];
-OWNERSHIP = ownershipSheet.values.slice(1).map(row => {
-const o = {};
-oHeaders.forEach((h, i) => { o[h.toLowerCase()] = row[i] || ''; });
-return o;
-});
-
-const flowerMap = {};
-FLOWERS.forEach(f => { flowerMap[f.id] = f; });
-OWNERSHIP.forEach(o => {
-const gameId = o.gameid || o.gameId || Object.values(o)[0] || '';
-const fid    = Number(o.flowerid || o.flowerId || Object.values(o)[1] || '');
-if (flowerMap[fid] && gameId) flowerMap[fid].owners.push(gameId);
-});
-
-return true;
-} catch(e) {
-return false;
-}
-}
-
-function buildGameIdMap() {
-const map = {};
-// 只加入在職成員（left !== true）
-MEMBERS.forEach(m => {
-if (m.gameId && !m.left) map[m.gameId] = { nick: m.nickname || m.gameId, role: m.note || '成員' };
-});
-return map;
-}
-
-// ── 頁面切換 ──
-function showPage(pageId, link) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active','page-enter'));
-document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  link.classList.add('active');
-  const target = document.getElementById(pageId);
-  target.classList.add('active','page-enter');
-  if (link) link.classList.add('active');
-if (pageId === 'id-page') renderIdTable();
-}
-
-// PWA 底部導覽列專用
-function showPagePWA(pageId, btn) {
-  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  showPage(pageId, null);
-}
-
-// ── 品質 Tab ──
-function setQTab(btn) {
-document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
-btn.classList.add('active');
-activeQTab = btn.dataset.q;
-applyFilters();
-}
-
-// ── 篩選 ──
-function applyFilters() {
-const gameIdMap   = buildGameIdMap();
-// 只顯示在職成員，left 成員直接過濾掉
-const ownerDisplay = id => gameIdMap[id] ? gameIdMap[id].nick : null;
-const ownerRole    = id => (gameIdMap[id] ? gameIdMap[id].role : '');
-const q      = document.getElementById('searchInput').value.trim().toLowerCase();
-const score  = document.getElementById('filterScore').value;
-const obtain = document.getElementById('filterObtain').value;
-const sort   = document.getElementById('sortBy').value;
-
-let list = FLOWERS.filter(f => {
-const ownerNames = f.owners.map(ownerDisplay).filter(Boolean);
-const matchQ = !q || f.name.toLowerCase().includes(q) || ownerNames.some(o => o.toLowerCase().includes(q));
-return matchQ
-&& (!activeQTab || f.quality === activeQTab)
-&& (!score  || String(f.score) === score)
-&& (!obtain || f.obtain === obtain);
-});
-
-if (sort === 'score_asc')  list.sort((a,b) => a.score - b.score);
-if (sort === 'score_desc') list.sort((a,b) => b.score - a.score);
-if (sort === 'pop_asc')    list.sort((a,b) => a.owners.length - b.owners.length);
-if (sort === 'pop_desc')   list.sort((a,b) => b.owners.length - a.owners.length);
-if (!sort) list.sort((a,b) => {
-const qd = (QUALITY_ORDER[a.quality]??9) - (QUALITY_ORDER[b.quality]??9);
-return qd !== 0 ? qd : (a.order??999) - (b.order??999);
-});
-
-currentList = list;
-renderFlowers(list, ownerDisplay, ownerRole);
-}
-
-function resetFilters() {
-document.getElementById('searchInput').value = '';
-document.getElementById('filterScore').value = '';
-document.getElementById('filterObtain').value = '';
-document.getElementById('sortBy').value = '';
-// 重置 tab 到全部
-document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
-document.querySelector('.qtab[data-q=""]').classList.add('active');
-activeQTab = '';
-applyFilters();
-}
-
-// ── 數字計數動畫 ──
-function animateCount(el, target) {
-const start = parseInt(el.textContent) || 0;
-if (start === target) return;
-const dur = Math.min(600, Math.abs(target - start) * 8);
-const step = (target - start) / (dur / 16);
-let cur = start;
-const tick = () => {
-cur += step;
-const done = step > 0 ? cur >= target : cur <= target;
-el.textContent = done ? target : Math.round(cur);
-if (!done) requestAnimationFrame(tick);
-};
-requestAnimationFrame(tick);
-}
-
-// ── 渲染花卉（含品質分組 + stagger 動畫）──
-function renderFlowers(list, ownerDisplay, ownerRole) {
-const countEl = document.getElementById('resultCount');
-const countSpan = countEl.querySelector('span') || (() => {
-countEl.innerHTML = '共找到 <span>0</span> 種花';
-return countEl.querySelector('span');
-})();
-animateCount(countSpan, list.length);
-
-const grid = document.getElementById('flowerGrid');
-if (list.length === 0) {
-grid.innerHTML = '<div class="no-result">🌸 找不到符合條件的花卉</div>';
-return;
-}
-
-// 決定是否分組（無品質篩選時分組）
-const grouped = !activeQTab;
-let html = '';
-let globalIdx = 0;
-
-if (grouped) {
-const byQ = {};
-QUALITY_LIST.forEach(q => { byQ[q] = list.filter(f => f.quality === q); });
-QUALITY_LIST.forEach(q => {
-const group = byQ[q];
-if (!group.length) return;
-html += `<div class="quality-section-title qs-${q}">
-       <span class="qs-badge">${q}</span>
-       <div class="qs-line"></div>
-       <span class="qs-count">${group.length} 種</span>
-     </div>
-     <div class="flower-grid">`;
-group.forEach(f => {
-html += buildCard(f, ownerDisplay, ownerRole, globalIdx++);
-});
-html += '</div>';
-});
-} else {
-html = '<div class="flower-grid">';
-list.forEach(f => { html += buildCard(f, ownerDisplay, ownerRole, globalIdx++); });
-html += '</div>';
-}
-
-grid.innerHTML = html;
-}
-
-function buildCard(f, ownerDisplay, ownerRole, idx) {
-const ownerNames = f.owners.map(ownerDisplay).filter(Boolean);
-const ownerTags = ownerNames.length
-? ownerNames.map(name => `<span class="owner-tag">${name}</span>`).join('')
-: '<span class="no-owner">尚無人擁有</span>';
-
-const thumbContent = f.img
-? `<img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.parentElement.innerHTML='🌸'">`
-: '🌸';
-
-// 12. 普及度長條圖（相對於全公會成員數）
-const cnt = ownerNames.length;
-const total = MEMBERS.length || 1;
-const pct = Math.round(cnt / total * 100);
-
-const delay = Math.min(idx * 50, 800);
-
-return `
-   <div class="flower-card quality-${f.quality}" style="animation-delay:${delay}ms"
-         onclick="openLightboxByIdx(${idx})"
-        onmouseenter="spawnParticles(this,'${f.quality}')">
-     <div class="card-particles"></div>
-      <div class="card-thumb">${thumbContent}</div>
-      <div class="card-thumb" onclick="openLightboxByIdx(${idx})">${thumbContent}</div>
-     <div class="quality-bar quality-bar-${f.quality}"></div>
-     <div class="card-body">
-       <div class="card-title">${f.name}</div>
-       <div class="card-meta">
-         <span class="badge badge-quality-${f.quality}">${f.quality}</span>
-         <span class="badge badge-score">⭐ ${f.score}</span>
-         <span class="badge badge-obtain">${f.obtain}</span>
-       </div>
-       <div class="popularity-row">
-         <div class="popularity-bar-bg">
-           <div class="popularity-bar-fill pop-${f.quality}" style="width:${pct}%"></div>
-         </div>
-         <span class="popularity-label">${cnt}/${total} 人 (${pct}%)</span>
-       </div>
-       <div class="owners-section">
-         <div class="owners-label">擁有者 <span class="owner-count-badge">(${cnt} 人)</span></div>
-         <div class="owners-list">${ownerTags}</div>
-       </div>
-     </div>
-   </div>`;
-}
-
-// ── 粒子特效 ──
-const PARTICLE_COLORS = {
-'仙': ['#ff4e8a','#ffb3d1','#ff8c42','#ffe0f0','#fff'],
-'華': ['#ff8c00','#ffb347','#ffe082','#fff3cd','#fff'],
-'珍': ['#9b59b6','#c39bd3','#e8d5f5','#d7bde2','#fff'],
-'普': ['#4a90d9','#74b9ff','#d6eaff','#aed6f1','#fff'],
-'凡': ['#7f8c6e','#a8b89a','#d5e8d4','#c8e6c9','#fff'],
-};
-function spawnParticles(card, quality) {
-const container = card.querySelector('.card-particles');
-if (!container) return;
-container.innerHTML = '';
-const colors = PARTICLE_COLORS[quality] || PARTICLE_COLORS['凡'];
-const count = 12;
-for (let i = 0; i < count; i++) {
-const p = document.createElement('div');
-p.className = 'particle';
-const size = 4 + Math.random() * 6;
-const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.8;
-const dist = 30 + Math.random() * 50;
-const px = Math.round(Math.cos(angle) * dist);
-const py = Math.round(Math.sin(angle) * dist);
-const color = colors[Math.floor(Math.random() * colors.length)];
-const delay = Math.random() * 0.3;
-const startX = 20 + Math.random() * 60; // % of card width
-const startY = 20 + Math.random() * 60;
-p.style.cssText = `
-     width:${size}px; height:${size}px;
-     background:${color};
-     left:${startX}%; top:${startY}%;
-     --px:${px}px; --py:${py}px;
-     animation-delay:${delay}s;
-     box-shadow:0 0 4px ${color};
-   `;
-container.appendChild(p);
-}
-}
-
-// ── 11. 成員擁有熱力圖 ──
-function renderIdTable() {
-// 計算每位成員擁有花卉數
-const ownerCount = {};
-OWNERSHIP.forEach(o => {
-const id = o.gameid || o.gameId || Object.values(o)[0] || '';
-if (id) ownerCount[id] = (ownerCount[id] || 0) + 1;
-});
-const maxOwned = Math.max(...Object.values(ownerCount), 1);
-
-const sorted = MEMBERS.slice().sort((a,b) => (ROLE_ORDER[a.note]??9) - (ROLE_ORDER[b.note]??9));
-document.getElementById('idTableBody').innerHTML = sorted.map((m,i) => {
-const cnt = ownerCount[m.gameId] || 0;
-const pct = Math.round(cnt / maxOwned * 100);
-return `<tr>
-     <td>${i+1}</td>
-     <td>${m.nickname}</td>
-     <td>${m.gameId}</td>
-     <td><span class="role-badge role-${m.note||'成員'}">${m.note||'成員'}</span></td>
-     <td class="member-bar-col">
-       <div class="member-bar-wrap">
-         <div class="member-bar-bg"><div class="member-bar-fill" style="width:${pct}%"></div></div>
-         <span class="member-bar-count">${cnt} 種</span>
-       </div>
-     </td>
-   </tr>`;
-}).join('');
-document.getElementById('memberLoading').style.display = 'none';
-document.getElementById('memberContent').style.display = 'block';
-}
-
-// ── 13. Lightbox 縮圖列 ──
-function renderLightboxThumbs() {
-const strip = document.getElementById('lightbox-thumbs');
-strip.innerHTML = currentList.map((f, i) => {
-if (!f.img) return '';
-return `<img class="lb-thumb${i===lightboxIdx?' active':''}" src="${f.img}" alt="${f.name}" loading="lazy" onclick="jumpLightbox(${i});event.stopPropagation()">`;
-}).join('');
-}
-
-function jumpLightbox(idx) {
-if (!currentList[idx] || !currentList[idx].img) return;
-lightboxIdx = idx;
-showLightboxItem();
-updateThumbActive();
-}
-
-function updateThumbActive() {
-document.querySelectorAll('.lb-thumb').forEach((el, i) => {
-el.classList.toggle('active', i === lightboxIdx);
-});
-// 捲動到當前縮圖
-const strip = document.getElementById('lightbox-thumbs');
-const active = strip.querySelector('.lb-thumb.active');
-if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
-}
-
-// ── Lightbox ──
-function openLightboxByIdx(idx) {
-if (!currentList[idx] || !currentList[idx].img) return;
-lightboxIdx = idx;
-showLightboxItem();
-renderLightboxThumbs();
-document.getElementById('lightbox').classList.add('open');
-}
-
-function showLightboxItem() {
-const f = currentList[lightboxIdx];
-if (!f) return;
-const imgEl = document.getElementById('lightbox-img');
-imgEl.style.opacity = '0';
-imgEl.style.width = '';
-imgEl.style.height = '';
-imgEl.src = f.img || '';
-imgEl.alt = f.name || '';
-document.getElementById('lightbox-name').textContent = f.name || '';
-
-// 重置翻轉狀態
-document.getElementById('lightbox-tilt-wrap').classList.remove('flipped');
-
-// 填入背面資訊
-const gameIdMap = buildGameIdMap();
-const ownerNames = (f.owners || []).map(id => gameIdMap[id] ? gameIdMap[id].nick : null).filter(Boolean);
-document.getElementById('lb-back-name').textContent = f.name || '';
-document.getElementById('lb-back-meta').innerHTML = `
-   <span class="lb-back-badge">${f.quality || ''}</span>
-   <span class="lb-back-badge">⭐ ${f.score || 0}</span>
-   <span class="lb-back-badge">${f.obtain || ''}</span>`;
-document.getElementById('lb-back-owners').innerHTML = ownerNames.length
-? ownerNames.map(n => `<span class="lb-back-owner-tag">${n}</span>`).join('')
-: '<span class="lb-back-no-owner">尚無人擁有</span>';
-// 背面背景：用正面圖片模糊降飽和
-const back = document.getElementById('lightbox-back');
-back.className = `lb-back-${f.quality || '凡'}`;
-const backBg = document.getElementById('lightbox-back-bg');
-if (f.img) backBg.style.backgroundImage = `url('${f.img.replace(/'/g,"\\'")}')`;
-else backBg.style.backgroundImage = 'none';
-
-imgEl.onload = () => {
-const targetW = Math.min(370, window.innerWidth * 0.88);
-const ratio = imgEl.naturalHeight / imgEl.naturalWidth;
-imgEl.style.width  = Math.round(targetW) + 'px';
-imgEl.style.height = Math.round(targetW * ratio) + 'px';
-imgEl.style.opacity = '1';
-};
-document.getElementById('lightbox-prev').style.opacity = lightboxIdx > 0 ? '0.7' : '0.2';
-document.getElementById('lightbox-next').style.opacity = lightboxIdx < currentList.length - 1 ? '0.7' : '0.2';
-}
-
-function toggleLightboxFlip(e) {
-// 不攔截左右箭頭點擊
-if (e.target.id === 'lightbox-prev' || e.target.id === 'lightbox-next') return;
-e.stopPropagation();
-document.getElementById('lightbox-tilt-wrap').classList.toggle('flipped');
-}
-
-// 手機 touch 翻轉
-(function initFlipTouch() {
-const wrap = document.getElementById('lightbox-tilt-wrap');
-let touchMoved = false;
-wrap.addEventListener('touchstart', () => { touchMoved = false; }, { passive:true });
-wrap.addEventListener('touchmove',  () => { touchMoved = true;  }, { passive:true });
-wrap.addEventListener('touchend', e => {
-if (touchMoved) return; // 滑動不觸發翻轉
-if (e.target.id === 'lightbox-prev' || e.target.id === 'lightbox-next') return;
-e.preventDefault();
-wrap.classList.toggle('flipped');
-});
-})();
-
-function shiftLightbox(dir) {
-const next = lightboxIdx + dir;
-if (next < 0 || next >= currentList.length) return;
-let i = next;
-while (i >= 0 && i < currentList.length && !currentList[i].img) i += dir;
-if (i < 0 || i >= currentList.length) return;
-lightboxIdx = i;
-showLightboxItem();
-updateThumbActive();
-}
-
-function closeLightbox() {
-document.getElementById('lightbox').classList.remove('open');
-document.getElementById('lightbox-img').src = '';
-const wrap = document.getElementById('lightbox-tilt-wrap');
-wrap.classList.remove('flipped');
-wrap.style.transform = '';
-}
-
-// ── 花卡 3D tilt ──
-(function initCardTilt() {
-const MAX_TILT = 12;
-document.addEventListener('mousemove', e => {
-const card = e.target.closest('.flower-card');
-if (!card) return;
-// 停止入場動畫，讓 inline transform 生效
-card.style.animation = 'none';
-const rect = card.getBoundingClientRect();
-const cx = rect.left + rect.width  / 2;
-const cy = rect.top  + rect.height / 2;
-const dx = (e.clientX - cx) / (rect.width  / 2);
-const dy = (e.clientY - cy) / (rect.height / 2);
-const rotY =  dx * MAX_TILT;
-const rotX = -dy * MAX_TILT;
-card.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-});
-document.addEventListener('mouseout', e => {
-const card = e.target.closest('.flower-card');
-if (card && !card.contains(e.relatedTarget)) {
-card.style.transform = '';
-}
-});
-})();
-
-function handleLightboxClick(e) {
-if (e.target === document.getElementById('lightbox')) closeLightbox();
-}
-
-document.addEventListener('keydown', e => {
-if (!document.getElementById('lightbox').classList.contains('open')) return;
-if (e.key === 'Escape')      closeLightbox();
-if (e.key === 'ArrowLeft')   shiftLightbox(-1);
-if (e.key === 'ArrowRight')  shiftLightbox(1);
-});
-
-// ── 14. 觸控滑動（手機） ──
-(function initTouchSwipe() {
-const lb = document.getElementById('lightbox');
-let touchStartX = 0, touchStartY = 0;
-lb.addEventListener('touchstart', e => {
-touchStartX = e.touches[0].clientX;
-touchStartY = e.touches[0].clientY;
-}, { passive:true });
-lb.addEventListener('touchmove', e => {
-// 阻止 lightbox 開啟時底層頁面滾動
-e.preventDefault();
-}, { passive:false });
-lb.addEventListener('touchend', e => {
-const dx = e.changedTouches[0].clientX - touchStartX;
-const dy = e.changedTouches[0].clientY - touchStartY;
-if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
-shiftLightbox(dx < 0 ? 1 : -1);
-}
-}, { passive:true });
-})();
-
-// ── 15. Back to Top ──
-(function initBackToTop() {
-const btn = document.getElementById('back-to-top');
-window.addEventListener('scroll', () => {
-btn.classList.toggle('visible', window.scrollY > 300);
-}, { passive:true });
-})();
-
-// ── PWA 模式偵測 ──
-(function detectPWA() {
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches
-             || window.navigator.standalone === true;
-  if (isPWA) {
-    document.body.classList.add('is-pwa');
-  }
-})();
-
-// ── 16. Pull to Refresh ──
-(function initPullToRefresh() {
-const indicator = document.getElementById('ptr-indicator');
-const spinner   = document.getElementById('ptr-spinner');
-const text      = document.getElementById('ptr-text');
-const THRESHOLD = 75;
-let startY = 0, currentDy = 0, pulling = false, refreshing = false;
-
-function getScrollTop() {
-return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-}
-
-// passive:false 讓 touchstart 也能在需要時 preventDefault
-document.addEventListener('touchstart', e => {
-if (refreshing) return;
-if (document.getElementById('lightbox').classList.contains('open')) return;
-if (getScrollTop() > 2) return;
-startY = e.touches[0].clientY;
-currentDy = 0;
-pulling = true;
-}, { passive:false });
-
-document.addEventListener('touchmove', e => {
-if (!pulling || refreshing) return;
-currentDy = e.touches[0].clientY - startY;
-if (currentDy <= 0) {
-indicator.classList.remove('visible', 'releasing');
-return;
-}
-// 必須在 non-passive listener 裡才能成功 preventDefault
-e.preventDefault();
-indicator.classList.add('visible');
-if (currentDy >= THRESHOLD) {
-indicator.classList.add('releasing');
-text.textContent = '放開更新 ↑';
-} else {
-indicator.classList.remove('releasing');
-text.textContent = `下拉更新 (${Math.round(currentDy / THRESHOLD * 100)}%)`;
-}
-}, { passive:false });
-
-document.addEventListener('touchend', () => {
-if (!pulling) return;
-pulling = false;
-if (refreshing) return;
-if (currentDy >= THRESHOLD) {
-refreshing = true;
-text.textContent = '更新中...';
-spinner.classList.add('spin');
-loadFromSheets().then(() => {
-applyFilters();
-setTimeout(() => {
-indicator.classList.remove('visible', 'releasing');
-spinner.classList.remove('spin');
-text.textContent = '下拉更新';
-refreshing = false;
-}, 400);
-});
-} else {
-indicator.classList.remove('visible', 'releasing');
-}
-currentDy = 0;
-}, { passive:true });
-})();
-
-// ── 初始化 ──
-(async () => {
-const ok = await loadFromSheets();
-document.getElementById('flowerLoading').style.display = 'none';
-if (ok) {
-document.getElementById('flowerContent').style.display = 'block';
-applyFilters();
-} else {
-document.getElementById('flowerContent').style.display = 'block';
-document.getElementById('flowerGrid').innerHTML =
-'<div class="no-result">⚠️ 無法載入資料，請確認 API Key 和 Sheet 設定</div>';
-}
-  // Splash 淡出：資料載入完成後，至少顯示 1.4 秒再消失
-  const splashMinTime = 1400;
-  const elapsed = performance.now();
-  const remaining = Math.max(0, splashMinTime - elapsed);
-  setTimeout(() => {
-    const splash = document.getElementById('splash');
-    splash.classList.add('hide');
-    splash.addEventListener('transitionend', () => splash.remove(), { once:true });
-  }, remaining);
-})();
-</script>
-<script>
-// ── PWA Service Worker 註冊 ──
-if ('serviceWorker' in navigator) {
-window.addEventListener('load', () => {
-navigator.serviceWorker.register('/service-worker.js')
-.catch(() => {});
-});
-}
-</script>
+<script src="flower-showcase.js"></script>
 </body>
 </html>
