@@ -1190,6 +1190,7 @@ document.addEventListener('keydown', e => {
     return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
   }
 
+  // passive:false 讓 touchstart 也能在需要時 preventDefault
   document.addEventListener('touchstart', e => {
     if (refreshing) return;
     if (document.getElementById('lightbox').classList.contains('open')) return;
@@ -1197,7 +1198,7 @@ document.addEventListener('keydown', e => {
     startY = e.touches[0].clientY;
     currentDy = 0;
     pulling = true;
-  }, { passive:true });
+  }, { passive:false });
 
   document.addEventListener('touchmove', e => {
     if (!pulling || refreshing) return;
@@ -1206,6 +1207,7 @@ document.addEventListener('keydown', e => {
       indicator.classList.remove('visible', 'releasing');
       return;
     }
+    // 必須在 non-passive listener 裡才能成功 preventDefault
     e.preventDefault();
     indicator.classList.add('visible');
     if (currentDy >= THRESHOLD) {
