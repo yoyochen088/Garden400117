@@ -18,14 +18,6 @@ apiKey:  'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg',
 sheetId: '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg',
 ranges:  ['flowers!A1:Z', 'members!A1:Z', 'ownership!A1:Z']
 };
-// PWA 偵測提前到 head，避免 splash 閃爍
-if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-  document.documentElement.classList.add('is-pwa');
-  // 本次 session 已顯示過 splash，直接跳過
-  if (sessionStorage.getItem('splashShown')) {
-    document.documentElement.classList.add('splash-skip');
-  }
-}
 </script>
 <style>
 :root {
@@ -534,20 +526,15 @@ transform:translateY(12px);
 #back-to-top.visible { opacity:1; pointer-events:auto; transform:translateY(0); }
 #back-to-top:hover { background:linear-gradient(135deg,#f07a2e,#d4610e); transform:translateY(-2px); }
 #back-to-top:active { transform:scale(0.93); }
-/* PWA：back-to-top 往上移，避免被底部導覽列遮住 */
-.is-pwa #back-to-top {
-  bottom: calc(80px + env(safe-area-inset-bottom) + 12px);
-  z-index:190;
-}
 
     /* ── PWA 偵測 ── */
-    /* .is-pwa 時套用 PWA 專屬樣式 */
+    /* body.is-pwa 時套用 PWA 專屬樣式 */
 
     /* PWA：隱藏頂部 header */
-    .is-pwa header { display:none; }
+    body.is-pwa header { display:none; }
 
     /* PWA：main 底部留空間給底部導覽列 + safe area */
-    .is-pwa main {
+    body.is-pwa main {
       padding-bottom: calc(70px + env(safe-area-inset-bottom));
     }
 
@@ -555,7 +542,7 @@ transform:translateY(12px);
     #bottom-nav {
       display:none;
     }
-    .is-pwa #bottom-nav {
+    body.is-pwa #bottom-nav {
       display:flex;
       position:fixed; bottom:0; left:0; right:0; z-index:200;
       background:#fff;
@@ -594,7 +581,7 @@ transform:translateY(12px);
     }
 
     /* PWA：safe area 頂部（status bar 下方留白） */
-    .is-pwa #ptr-indicator {
+    body.is-pwa #ptr-indicator {
       top: env(safe-area-inset-top);
     }
 
@@ -602,12 +589,10 @@ transform:translateY(12px);
     #splash {
       position:fixed; inset:0; z-index:99999;
       background:linear-gradient(160deg, #c2510b 0%, #e96a1e 45%, #f4a46a 100%);
-      display:none; flex-direction:column; align-items:center; justify-content:center;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
       gap:24px;
       transition:opacity 0.6s ease, visibility 0.6s ease;
     }
-    .is-pwa #splash { display:flex; }
-    .splash-skip #splash { display:none !important; }
     #splash.hide {
       opacity:0; visibility:hidden; pointer-events:none;
     }
@@ -918,12 +903,15 @@ return map;
 
 // ── 頁面切換 ──
 function showPage(pageId, link) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active','page-enter'));
-  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  link.classList.add('active');
   const target = document.getElementById(pageId);
   target.classList.add('active','page-enter');
   if (link) link.classList.add('active');
-  if (pageId === 'id-page') renderIdTable();
+if (pageId === 'id-page') renderIdTable();
 }
 
 // PWA 底部導覽列專用
@@ -1067,8 +1055,10 @@ const delay = Math.min(idx * 50, 800);
 
 return `
    <div class="flower-card quality-${f.quality}" style="animation-delay:${delay}ms"
+         onclick="openLightboxByIdx(${idx})"
         onmouseenter="spawnParticles(this,'${f.quality}')">
      <div class="card-particles"></div>
+      <div class="card-thumb">${thumbContent}</div>
       <div class="card-thumb" onclick="openLightboxByIdx(${idx})">${thumbContent}</div>
      <div class="quality-bar quality-bar-${f.quality}"></div>
      <div class="card-body">
@@ -1349,7 +1339,6 @@ btn.classList.toggle('visible', window.scrollY > 300);
   const isPWA = window.matchMedia('(display-mode: standalone)').matches
              || window.navigator.standalone === true;
   if (isPWA) {
-    document.documentElement.classList.add('is-pwa');
     document.body.classList.add('is-pwa');
   }
 })();
@@ -1432,17 +1421,14 @@ document.getElementById('flowerGrid').innerHTML =
 '<div class="no-result">⚠️ 無法載入資料，請確認 API Key 和 Sheet 設定</div>';
 }
   // Splash 淡出：資料載入完成後，至少顯示 1.4 秒再消失
-  const splash = document.getElementById('splash');
-  if (splash) {
-    const splashMinTime = 1400;
-    const elapsed = performance.now();
-    const remaining = Math.max(0, splashMinTime - elapsed);
-    setTimeout(() => {
-      splash.classList.add('hide');
-      splash.addEventListener('transitionend', () => splash.remove(), { once:true });
-      sessionStorage.setItem('splashShown', '1');
-    }, remaining);
-  }
+  const splashMinTime = 1400;
+  const elapsed = performance.now();
+  const remaining = Math.max(0, splashMinTime - elapsed);
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    splash.classList.add('hide');
+    splash.addEventListener('transitionend', () => splash.remove(), { once:true });
+  }, remaining);
 })();
 </script>
 <script>
