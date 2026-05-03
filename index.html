@@ -1070,10 +1070,8 @@ const delay = Math.min(idx * 50, 800);
 
 return `
    <div class="flower-card quality-${f.quality}" style="animation-delay:${delay}ms"
-         onclick="openLightboxByIdx(${idx})"
         onmouseenter="spawnParticles(this,'${f.quality}')">
      <div class="card-particles"></div>
-      <div class="card-thumb">${thumbContent}</div>
       <div class="card-thumb" onclick="openLightboxByIdx(${idx})">${thumbContent}</div>
      <div class="quality-bar quality-bar-${f.quality}"></div>
      <div class="card-body">
