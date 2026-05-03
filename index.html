@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>璀璨 花卉圖鑑 [400117]</title>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
@@ -526,6 +526,123 @@
     #back-to-top:hover { background:linear-gradient(135deg,#f07a2e,#d4610e); transform:translateY(-2px); }
     #back-to-top:active { transform:scale(0.93); }
 
+    /* ── PWA 偵測 ── */
+    /* body.is-pwa 時套用 PWA 專屬樣式 */
+
+    /* PWA：隱藏頂部 header */
+    body.is-pwa header { display:none; }
+
+    /* PWA：main 底部留空間給底部導覽列 + safe area */
+    body.is-pwa main {
+      padding-bottom: calc(70px + env(safe-area-inset-bottom));
+    }
+
+    /* ── 底部導覽列（PWA 專用） ── */
+    #bottom-nav {
+      display:none;
+    }
+    body.is-pwa #bottom-nav {
+      display:flex;
+      position:fixed; bottom:0; left:0; right:0; z-index:200;
+      background:#fff;
+      border-top:1px solid var(--border);
+      box-shadow:0 -2px 12px rgba(233,106,30,0.10);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bnav-item {
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:3px; padding:10px 0 8px;
+      color:var(--text-muted); font-size:0.7rem; font-weight:600;
+      cursor:pointer; border:none; background:none;
+      transition:color 0.18s;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+    }
+    .bnav-item .bnav-icon { font-size:1.4rem; line-height:1; transition:transform 0.2s; }
+    .bnav-item.active { color:var(--pink); }
+    .bnav-item.active .bnav-icon { transform:scale(1.15); }
+    .bnav-item:active .bnav-icon { transform:scale(0.9); }
+
+    /* ── 頁面切換動畫 ── */
+    .page {
+      display:none;
+      animation:none;
+    }
+    .page.active {
+      display:block;
+    }
+    .page.page-enter {
+      animation:pageSlideIn 0.28s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    @keyframes pageSlideIn {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* PWA：safe area 頂部（status bar 下方留白） */
+    body.is-pwa #ptr-indicator {
+      top: env(safe-area-inset-top);
+    }
+
+    /* ── Splash Screen ── */
+    #splash {
+      position:fixed; inset:0; z-index:99999;
+      background:linear-gradient(160deg, #c2510b 0%, #e96a1e 45%, #f4a46a 100%);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:24px;
+      transition:opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #splash.hide {
+      opacity:0; visibility:hidden; pointer-events:none;
+    }
+    /* icon 縮放出現 */
+    #splash-icon {
+      width:110px; height:110px; border-radius:28px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+      object-fit:cover;
+      opacity:0; transform:scale(0.5);
+      animation:splashIconIn 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.2s forwards;
+    }
+    @keyframes splashIconIn {
+      to { opacity:1; transform:scale(1); }
+    }
+    /* 文字容器 */
+    #splash-title {
+      display:flex; gap:4px; align-items:center;
+    }
+    /* 每個字逐一亮起 */
+    .splash-char {
+      font-size:2.4rem; font-weight:800; color:#fff;
+      text-shadow:0 2px 16px rgba(255,255,255,0.4);
+      opacity:0; transform:translateY(10px);
+      animation:splashCharIn 0.4s ease forwards;
+      letter-spacing:2px;
+    }
+    .splash-char:nth-child(1) { animation-delay:0.55s; }
+    .splash-char:nth-child(2) { animation-delay:0.72s; }
+    /* 副標 */
+    #splash-sub {
+      font-size:0.85rem; color:rgba(255,255,255,0.75);
+      font-weight:500; letter-spacing:3px;
+      opacity:0;
+      animation:splashCharIn 0.4s ease 0.95s forwards;
+    }
+    @keyframes splashCharIn {
+      to { opacity:1; transform:translateY(0); }
+    }
+    /* 底部光暈 */
+    #splash::after {
+      content:'';
+      position:absolute; bottom:-60px; left:50%; transform:translateX(-50%);
+      width:280px; height:280px; border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+      animation:splashGlow 1.5s ease-in-out 0.3s infinite alternate;
+    }
+    @keyframes splashGlow {
+      from { opacity:0.5; transform:translateX(-50%) scale(0.9); }
+      to   { opacity:1;   transform:translateX(-50%) scale(1.1); }
+    }
+
     /* ── Pull to Refresh ── */
     #ptr-indicator {
       position:fixed; top:0; left:0; right:0; z-index:9999;
@@ -547,6 +664,16 @@
 </head>
 <body>
 
+<!-- Splash Screen -->
+<div id="splash">
+  <img id="splash-icon" src="icon.jpg" alt="璀璨">
+  <div id="splash-title">
+    <span class="splash-char">璀</span>
+    <span class="splash-char">璨</span>
+  </div>
+  <div id="splash-sub">花卉圖鑑</div>
+</div>
+
 <div id="ptr-indicator">
   <div id="ptr-spinner"></div>
   <span id="ptr-text">下拉更新</span>
@@ -560,6 +687,22 @@
     <a href="flower-showcase.html" data-short="花展"><span>個人花展</span></a>
   </nav>
 </header>
+
+<!-- 底部導覽列（PWA 專用） -->
+<nav id="bottom-nav">
+  <button class="bnav-item active" data-page="flower-page" onclick="showPagePWA('flower-page',this)">
+    <span class="bnav-icon">🌸</span>
+    <span>花卉圖鑑</span>
+  </button>
+  <button class="bnav-item" data-page="id-page" onclick="showPagePWA('id-page',this)">
+    <span class="bnav-icon">👥</span>
+    <span>公會成員</span>
+  </button>
+  <button class="bnav-item" onclick="location.href='flower-showcase.html'">
+    <span class="bnav-icon">🖼️</span>
+    <span>個人花展</span>
+  </button>
+</nav>
 
 <!-- Lightbox -->
 <div id="lightbox" onclick="handleLightboxClick(event)">
@@ -759,11 +902,19 @@ function buildGameIdMap() {
 
 // ── 頁面切換 ──
 function showPage(pageId, link) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active','page-enter'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  link.classList.add('active');
+  const target = document.getElementById(pageId);
+  target.classList.add('active','page-enter');
+  if (link) link.classList.add('active');
   if (pageId === 'id-page') renderIdTable();
+}
+
+// PWA 底部導覽列專用
+function showPagePWA(pageId, btn) {
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  showPage(pageId, null);
 }
 
 // ── 品質 Tab ──
@@ -900,10 +1051,9 @@ function buildCard(f, ownerDisplay, ownerRole, idx) {
 
   return `
     <div class="flower-card quality-${f.quality}" style="animation-delay:${delay}ms"
-         onclick="openLightboxByIdx(${idx})"
          onmouseenter="spawnParticles(this,'${f.quality}')">
       <div class="card-particles"></div>
-      <div class="card-thumb">${thumbContent}</div>
+      <div class="card-thumb" onclick="openLightboxByIdx(${idx})">${thumbContent}</div>
       <div class="quality-bar quality-bar-${f.quality}"></div>
       <div class="card-body">
         <div class="card-title">${f.name}</div>
@@ -1178,6 +1328,15 @@ document.addEventListener('keydown', e => {
   }, { passive:true });
 })();
 
+// ── PWA 模式偵測 ──
+(function detectPWA() {
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches
+             || window.navigator.standalone === true;
+  if (isPWA) {
+    document.body.classList.add('is-pwa');
+  }
+})();
+
 // ── 16. Pull to Refresh ──
 (function initPullToRefresh() {
   const indicator = document.getElementById('ptr-indicator');
@@ -1255,6 +1414,15 @@ document.addEventListener('keydown', e => {
     document.getElementById('flowerGrid').innerHTML =
       '<div class="no-result">⚠️ 無法載入資料，請確認 API Key 和 Sheet 設定</div>';
   }
+  // Splash 淡出：資料載入完成後，至少顯示 1.4 秒再消失
+  const splashMinTime = 1400;
+  const elapsed = performance.now();
+  const remaining = Math.max(0, splashMinTime - elapsed);
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    splash.classList.add('hide');
+    splash.addEventListener('transitionend', () => splash.remove(), { once:true });
+  }, remaining);
 })();
 </script>
 <script>
