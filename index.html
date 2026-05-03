@@ -918,15 +918,12 @@ return map;
 
 // ── 頁面切換 ──
 function showPage(pageId, link) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active','page-enter'));
-document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  link.classList.add('active');
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   const target = document.getElementById(pageId);
   target.classList.add('active','page-enter');
   if (link) link.classList.add('active');
-if (pageId === 'id-page') renderIdTable();
+  if (pageId === 'id-page') renderIdTable();
 }
 
 // PWA 底部導覽列專用
