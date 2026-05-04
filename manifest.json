@@ -4,7 +4,7 @@
   "description": "璀璨公會花卉圖鑑，查詢花種競賽分、取得方式與擁有成員。",
   "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#e96a1e",
+  "background_color": "#fff8f5",
   "theme_color": "#e96a1e",
   "orientation": "portrait-primary",
   "lang": "zh-TW",
