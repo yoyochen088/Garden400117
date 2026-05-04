@@ -5,7 +5,7 @@
 //  - Google Sheets API     → Network First（優先用網路，失敗才用快取）
 // ════════════════════════════════════════════
 
-const CACHE_NAME = 'cuican-v6';
+const CACHE_NAME = 'cuican-v7';
 const STATIC_ASSETS = [
   '/index.html',
   '/editor.html',
@@ -55,7 +55,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 靜態資源 → Cache First
+  // 靜態資源 → index.html 用 Network First，其他用 Cache First
+  if (url.pathname === '/index.html' || url.pathname === '/') {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
   event.respondWith(cacheFirst(event.request));
 });
 
