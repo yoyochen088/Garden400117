@@ -416,37 +416,30 @@ border:1px solid rgba(255,255,255,0.25);
 
 /* 圖片區域（含左右箭頭） */
 #lightbox-img-area {
-      position:relative; display:flex; align-items:center; gap:0;
-      position:relative; display:inline-flex; align-items:center; justify-content:center;
+  position:relative; display:inline-flex; align-items:center; justify-content:center;
 }
 #lightbox-prev, #lightbox-next {
-      background:rgba(255,255,255,0.12);
-      position:absolute; top:50%; transform:translateY(-50%);
-      background:rgba(0,0,0,0.35);
-border:1.5px solid rgba(255,255,255,0.3);
-color:#fff;
-font-size:1.8rem;
-line-height:1;
-cursor:pointer;
-opacity:0.85;
-transition:opacity 0.2s, background 0.2s, transform 0.15s;
-user-select:none;
-border-radius:50%;
-width:44px; height:44px;
-display:flex; align-items:center; justify-content:center;
-      flex-shrink:0;
-backdrop-filter:blur(4px);
--webkit-backdrop-filter:blur(4px);
-      z-index:10;
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:rgba(0,0,0,0.35);
+  border:1.5px solid rgba(255,255,255,0.3);
+  color:#fff;
+  font-size:1.8rem;
+  line-height:1;
+  cursor:pointer;
+  opacity:0.85;
+  transition:opacity 0.2s, background 0.2s, transform 0.15s;
+  user-select:none;
+  border-radius:50%;
+  width:44px; height:44px;
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  z-index:10;
 }
-    #lightbox-prev { margin-right:10px; }
-    #lightbox-next { margin-left:10px; }
-    #lightbox-prev:hover, #lightbox-next:hover { opacity:1; background:rgba(255,255,255,0.22); transform:scale(1.08); }
-    #lightbox-prev:active, #lightbox-next:active { transform:scale(0.95); }
-    #lightbox-prev { left:10px; }
-    #lightbox-next { right:10px; }
-    #lightbox-prev:hover, #lightbox-next:hover { opacity:1; background:rgba(0,0,0,0.55); transform:translateY(-50%) scale(1.08); }
-    #lightbox-prev:active, #lightbox-next:active { transform:translateY(-50%) scale(0.95); }
+#lightbox-prev { left:10px; }
+#lightbox-next { right:10px; }
+#lightbox-prev:hover, #lightbox-next:hover { opacity:1; background:rgba(0,0,0,0.55); transform:translateY(-50%) scale(1.08); }
+#lightbox-prev:active, #lightbox-next:active { transform:translateY(-50%) scale(0.95); }
 
 /* ── RWD ── */
 @media(max-width:900px) { .flower-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } .skeleton-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } }
@@ -456,10 +449,8 @@ nav a{padding:5px 10px;font-size:0.82rem;}
 .flower-grid{grid-template-columns:1fr;gap:12px;}
 .skeleton-grid{grid-template-columns:1fr;}
 #lightbox-prev, #lightbox-next { width:36px; height:36px; font-size:1.4rem; }
-      #lightbox-prev { margin-right:6px; }
-      #lightbox-next { margin-left:6px; }
-      #lightbox-prev { left:6px; margin-right:0; }
-      #lightbox-next { right:6px; margin-left:0; }
+#lightbox-prev { left:6px; }
+#lightbox-next { right:6px; }
 /* 天條單排，nav 文字縮短 */
 header { height:60px; flex-wrap:nowrap; padding:0 12px; gap:6px; }
 .guild-name { font-size:0.95rem; }
@@ -909,10 +900,9 @@ const delay = Math.min(idx * 50, 800);
 
 return `
    <div class="flower-card quality-${f.quality}" style="animation-delay:${delay}ms"
-        onclick="openLightboxByIdx(${idx})"
         onmouseenter="spawnParticles(this,'${f.quality}')">
      <div class="card-particles"></div>
-     <div class="card-thumb">${thumbContent}</div>
+     <div class="card-thumb" onclick="openLightboxByIdx(${idx})">${thumbContent}</div>
      <div class="quality-bar quality-bar-${f.quality}"></div>
      <div class="card-body">
        <div class="card-title">${f.name}</div>
