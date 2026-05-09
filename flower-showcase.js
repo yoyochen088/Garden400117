@@ -138,6 +138,22 @@ async function quickSelect(gameId) {
   }
 }
 
+// ── 下拉選單選擇成員 ──
+async function onMemberSelect() {
+  const sel = document.getElementById('memberPicker');
+  const gameId = sel.value;
+  if (!gameId) {
+    document.getElementById('showcase-card').style.display = 'none';
+    document.getElementById('downloadBtn').style.display = 'none';
+    return;
+  }
+  const member = allMembers.find(m => (m.gameId || m.gameid) === gameId);
+  if (!member) return;
+  const flowers = getMemberFlowers(member.gameId || member.gameid);
+  await renderShowcase(member, flowers);
+  document.getElementById('downloadBtn').style.display = '';
+}
+
 // ── 模糊搜尋 ──
 let selectedMember = null;
 
@@ -512,20 +528,23 @@ async function downloadImage() {
   try {
     await loadData();
     loadingEl.style.display = 'none';
-    // ── 成員快速按鈕 ──
-  const btns = document.getElementById('memberBtns');
-  btns.innerHTML = allMembers.map(m => `
-    <button class="member-btn" onclick="quickSelect('${m.gameId || m.gameid}')">${m.nickname}</button>
-  `).join('');
-  document.getElementById('search-area').style.display = '';
+    // ── 填入成員下拉選單 ──
+    const sel = document.getElementById('memberPicker');
+    sel.innerHTML = '<option value="">── 請選擇成員 ──</option>' +
+      allMembers.map(m =>
+        `<option value="${m.gameId || m.gameid}">${m.nickname || m.gameId || m.gameid}</option>`
+      ).join('');
+    document.getElementById('search-area').style.display = '';
 
     // 支援 URL 參數 ?user=暱稱
     const params = new URLSearchParams(location.search);
     const userParam = params.get('user');
     if (userParam) {
-      document.getElementById('searchInput').value = userParam;
-      selectedMember = findMember(userParam);
-      if (selectedMember) searchSelected();
+      const member = findMember(userParam);
+      if (member) {
+        sel.value = member.gameId || member.gameid;
+        await onMemberSelect();
+      }
     }
   } catch(e) {
     loadingEl.innerHTML = `<div style="color:#c2185b;">⚠️ 資料載入失敗：${e.message}</div>`;
