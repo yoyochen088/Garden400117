@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>競賽計算機 - 璀璨</title>
-  <script src="config.js"></script>
   <style>
     :root {
       --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
@@ -75,7 +74,14 @@
     .btn-calc { width:100%; padding:12px; background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:opacity 0.2s; margin-top:4px; }
     .btn-calc:hover { opacity:0.88; }
 
-    /* ── 切換模式 ── */
+    /* ── 最高分選擇 ── */
+    .max-score-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .max-score-btn { padding:6px 14px; border-radius:20px; font-size:0.85rem; font-weight:700; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; }
+    .max-score-btn.active { background:var(--pink); border-color:var(--pink); color:#fff; }
+
+    /* ── 進階加成 ── */
+    .bonus-btn { padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; margin:4px 4px 0 0; }
+    .bonus-btn.active { background:var(--pink-light); border-color:var(--pink); }
     .mode-toggle { display:flex; gap:8px; margin-bottom:16px; }
     .mode-btn { flex:1; padding:8px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; }
     .mode-btn.active { background:var(--pink); border-color:var(--pink); color:#fff; }
@@ -144,29 +150,32 @@
     <div class="card-title">⚙️ 基本設定</div>
     <div class="form-row">
       <div class="form-group">
-        <label>成員</label>
-        <select id="memberPicker">
-          <option value="">── 請選擇成員 ──</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label>任務上限</label>
-        <select id="taskLimit">
+        <select id="taskLimit" onchange="updateTitleBadges()">
           <option value="18">18 個</option>
           <option value="24" selected>24 個</option>
         </select>
       </div>
-    </div>
-    <div class="form-row" style="margin-top:12px;">
       <div class="form-group">
         <label>目前競賽積分</label>
-        <input type="number" id="currentScore" placeholder="例：1192" min="0" />
+        <input type="number" id="currentScore" placeholder="例：1192" min="0" oninput="updateTitleBadges()" />
       </div>
       <div class="form-group">
         <label>已解任務次數</label>
-        <input type="number" id="doneCount" placeholder="例：22" min="0" />
+        <input type="number" id="doneCount" placeholder="例：22" min="0" oninput="updateTitleBadges()" />
       </div>
     </div>
+    <div style="margin-top:14px;">
+      <div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">最高可接加倍任務分數</div>
+      <div class="max-score-btns">
+        <button class="max-score-btn" data-score="28" onclick="setMaxScore(28)">28</button>
+        <button class="max-score-btn" data-score="46" onclick="setMaxScore(46)">46</button>
+        <button class="max-score-btn" data-score="50" onclick="setMaxScore(50)">50</button>
+        <button class="max-score-btn" data-score="56" onclick="setMaxScore(56)">56</button>
+        <button class="max-score-btn active" data-score="60" onclick="setMaxScore(60)">60</button>
+      </div>
+    </div>
+    <div id="bonusWrap" style="margin-top:12px;"></div>
   </div>
 
   <!-- 目標稱號 -->
@@ -183,8 +192,8 @@
 
   <!-- 計算模式 -->
   <div class="mode-toggle">
-    <button class="mode-btn active" id="modeMin" onclick="setMode('min')">📉 最少任務數優先</button>
-    <button class="mode-btn" id="modeMax" onclick="setMode('max')">🏅 最高分任務最少優先</button>
+    <button class="mode-btn active" id="modeMin" onclick="setMode('min')">✨ 最少任務數達標</button>
+    <button class="mode-btn" id="modeMax" onclick="setMode('max')">📋 接滿剩餘名額</button>
   </div>
 
   <button class="btn-calc" onclick="calculate()">🔢 計算推薦接法</button>
@@ -192,11 +201,10 @@
   <!-- 結果 -->
   <div id="result" style="margin-top:20px;">
     <div class="result-header">
-      <div class="name" id="res-name"></div>
       <div class="stats">
         <div class="stat">📊 <span id="res-score"></span></div>
-        <div class="stat">📌 <span id="res-limit"></span></div>
-        <div class="stat">📋 <span id="res-remain"></span></div>
+        <div class="stat">� <span id="res-limit"></span></div>
+        <div class="stat">� <span id="res-remain"></span></div>
         <div class="stat">🎯 <span id="res-max-task"></span></div>
       </div>
       <div class="progress-wrap">
@@ -223,40 +231,178 @@ const TITLES = [
   { name:'王者花匠', min:1400, max:99999},
 ];
 
-// ── 一般任務分數 ──
-const BASE_SCORES = [14, 21, 23, 25, 28, 30];
-// ── 加倍任務分數（含進階加成）──
-const DOUBLE_SCORES = [28, 42, 46, 50, 56, 57, 58, 60, 61, 62];
-// ── 所有可接任務分數（合併去重排序）──
-const ALL_SCORES = [...new Set([...BASE_SCORES, ...DOUBLE_SCORES])].sort((a,b)=>a-b);
+// ── 任務分數（與 BOT 一致）──
+const NORMAL_SCORES  = [14, 21, 23, 25, 28, 30];
+const DOUBLED_BASE   = [28, 42, 46, 50, 56, 60];
+const MAX_SINGLE = 62; // 最高進階加成
 
 let selectedTitleEl = null;
 let currentMode = 'min';
-let allMembers = [];
+let selectedMaxScore = 60;
+let selectedBonus = 0;
 
-// ── 載入成員 ──
-async function loadMembers() {
-  try {
-    const { apiKey, sheetId } = SHEET_CONFIG;
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/members!A1:E?key=${apiKey}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const rows = (data.values || []).slice(1)
-      .filter(r => (r[3] || '').toLowerCase() !== 'true')
-      .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
-    allMembers = rows;
-    const sel = document.getElementById('memberPicker');
-    sel.innerHTML = '<option value="">── 請選擇成員 ──</option>' +
-      rows.map(m => `<option value="${m.gameId}">${m.nickname || m.gameId}</option>`).join('');
-  } catch(e) {
-    // 載入失敗不影響計算功能
+// ── 依 maxScore 和 bonus 建立可用分數清單（與 BOT 一致）──
+function buildAllScores(maxScore, bonus) {
+  const doubled = [28, 42, 46, 50].filter(s => s <= maxScore);
+  if (maxScore >= 56) {
+    if (bonus & 1) doubled.push(57);
+    if (bonus & 2) doubled.push(58);
+    if (!(bonus & 1) && !(bonus & 2)) doubled.push(56);
   }
+  if (maxScore >= 60) {
+    if (bonus & 4) doubled.push(61);
+    if (bonus & 8) doubled.push(62);
+    if (!(bonus & 4) && !(bonus & 8)) doubled.push(60);
+  }
+  const all = [...new Set([...NORMAL_SCORES, ...doubled])].sort((a,b)=>a-b);
+  return all;
+}
+
+// ── 核心計算（與 BOT recommend_combinations 一致）──
+// 恰好用完 remainingSlots 個任務，找出所有達標組合
+function recommendCombinations(currentScore, targetScore, remainingSlots, maxScore, bonus) {
+  const need = targetScore - currentScore;
+  if (need <= 0) return [];
+
+  const allScores = buildAllScores(maxScore, bonus);
+  const seen = new Set();
+  const results = [];
+
+  // 枚舉兩種分數的組合 (sa <= sb)，恰好用完 remainingSlots 個任務
+  for (let i = 0; i < allScores.length; i++) {
+    const sa = allScores[i];
+    for (let j = i; j < allScores.length; j++) {
+      const sb = allScores[j];
+      for (let cb = 0; cb <= remainingSlots; cb++) {
+        const ca = remainingSlots - cb;
+        const total = ca * sa + cb * sb;
+        if (total >= need) {
+          let combo;
+          if (sa === sb)    combo = { a: sa, ca: ca+cb, b: 0, cb: 0 };
+          else if (ca === 0) combo = { a: sb, ca: cb,   b: 0, cb: 0 };
+          else if (cb === 0) combo = { a: sa, ca: ca,   b: 0, cb: 0 };
+          else               combo = { a: sa, ca,       b: sb, cb };
+
+          const key = `${combo.a},${combo.ca},${combo.b},${combo.cb}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            results.push({ ...combo, total, finalScore: currentScore + total, taskCount: remainingSlots });
+          }
+        }
+      }
+    }
+  }
+
+  if (results.length === 0) return null;
+
+  // 排序：最高分任務數最少優先，次要總分最低（與 BOT 一致）
+  const topScore = Math.max(...results.flatMap(r => [r.a, r.b].filter(s=>s>0)));
+
+  if (currentMode === 'max') {
+    results.sort((x, y) => {
+      const xTop = (x.a === topScore ? x.ca : 0) + (x.b === topScore ? x.cb : 0);
+      const yTop = (y.a === topScore ? y.ca : 0) + (y.b === topScore ? y.cb : 0);
+      return xTop - yTop || x.total - y.total;
+    });
+  } else {
+    // 最少任務數優先 → 這裡所有組合任務數相同（都是 remainingSlots），改為總分最低優先
+    results.sort((x, y) => x.total - y.total);
+  }
+
+  return results;
+}
+
+// ── 最少任務數模式：從 1 個任務開始找最少能達標的組合 ──
+function findMinTaskCombos(currentScore, targetScore, remaining, maxScore, bonus) {
+  const need = targetScore - currentScore;
+  if (need <= 0) return { minCount: 0, combos: [] };
+
+  const allScores = buildAllScores(maxScore, bonus);
+  const maxSingle = Math.max(...allScores);
+
+  // 從最少任務數開始找
+  for (let n = 1; n <= remaining; n++) {
+    // 最多 n 個任務能得的最高分
+    if (n * maxSingle < need) continue;
+
+    const seen = new Set();
+    const results = [];
+
+    // 枚舉兩種分數的組合，恰好 n 個任務
+    for (let i = 0; i < allScores.length; i++) {
+      const sa = allScores[i];
+      for (let j = i; j < allScores.length; j++) {
+        const sb = allScores[j];
+        for (let cb = 0; cb <= n; cb++) {
+          const ca = n - cb;
+          const total = ca * sa + cb * sb;
+          if (total >= need) {
+            let combo;
+            if (sa === sb)     combo = { a: sa, ca: ca+cb, b: 0,  cb: 0 };
+            else if (ca === 0) combo = { a: sb, ca: cb,    b: 0,  cb: 0 };
+            else if (cb === 0) combo = { a: sa, ca: ca,    b: 0,  cb: 0 };
+            else               combo = { a: sa, ca,        b: sb, cb };
+
+            const key = `${combo.a},${combo.ca},${combo.b},${combo.cb}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              results.push({ ...combo, total, finalScore: currentScore + total, taskCount: n });
+            }
+          }
+        }
+      }
+    }
+
+    if (results.length > 0) {
+      // 排序：最高分任務數最少優先，次要總分最低
+      const topScore = Math.max(...results.flatMap(r => [r.a, r.b].filter(s=>s>0)));
+      results.sort((x, y) => {
+        const xTop = (x.a === topScore ? x.ca : 0) + (x.b === topScore ? x.cb : 0);
+        const yTop = (y.a === topScore ? y.ca : 0) + (y.b === topScore ? y.cb : 0);
+        return xTop - yTop || x.total - y.total;
+      });
+      return { minCount: n, combos: results };
+    }
+  }
+
+  return null; // 無法達標
 }
 
 function selectTitle(el) {
+  if (el.classList.contains('disabled')) return;
   document.querySelectorAll('.title-badge').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   selectedTitleEl = el;
+}
+
+// ── 即時更新稱號按鈕狀態 ──
+function updateTitleBadges() {
+  const score = parseInt(document.getElementById('currentScore').value) || 0;
+  const done = parseInt(document.getElementById('doneCount').value) || 0;
+  const limit = parseInt(document.getElementById('taskLimit').value) || 24;
+  const remaining = Math.max(0, limit - done);
+  const allScores = buildAllScores(selectedMaxScore, selectedBonus);
+  const maxSingle = Math.max(...allScores);
+  const maxPossible = score + remaining * maxSingle;
+
+  document.querySelectorAll('.title-badge').forEach(el => {
+    const min = parseInt(el.dataset.min);
+    const alreadyDone = score >= min;
+    const reachable = maxPossible >= min;
+
+    if (alreadyDone) {
+      el.classList.add('disabled'); el.style.opacity='0.35'; el.style.cursor='not-allowed';
+      el.title = `已達成（目前 ${score} 分）`;
+    } else if (!reachable) {
+      el.classList.add('disabled'); el.style.opacity='0.3'; el.style.cursor='not-allowed';
+      el.title = `本期無法達成（最多可得 ${maxPossible} 分）`;
+    } else {
+      el.classList.remove('disabled'); el.style.opacity=''; el.style.cursor='pointer'; el.title='';
+    }
+    if (el.classList.contains('selected') && el.classList.contains('disabled')) {
+      el.classList.remove('selected'); selectedTitleEl = null;
+    }
+  });
 }
 
 function setMode(mode) {
@@ -265,89 +411,67 @@ function setMode(mode) {
   document.getElementById('modeMax').classList.toggle('active', mode === 'max');
 }
 
-function getCurrentTitle(score) {
-  for (let i = TITLES.length - 1; i >= 0; i--) {
-    if (score >= TITLES[i].min) return TITLES[i];
-  }
-  return TITLES[0];
+function setMaxScore(score) {
+  selectedMaxScore = score;
+  document.querySelectorAll('.max-score-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.score) === score));
+  // 若選了低於 56 的分數，清除進階加成
+  if (score < 56) { selectedBonus = 0; renderBonusButtons(); }
+  renderBonusButtons();
+  updateTitleBadges();
 }
 
-// ── 核心計算：找出所有能達標的組合 ──
-function findCombos(currentScore, remaining, targetMin, targetMax) {
-  const need = targetMin - currentScore;
-  if (need <= 0) return []; // 已達標
+function toggleBonus(bit) {
+  selectedBonus ^= (1 << bit);
+  renderBonusButtons();
+  updateTitleBadges();
+}
 
-  const results = [];
+function renderBonusButtons() {
+  const wrap = document.getElementById('bonusWrap');
+  if (selectedMaxScore < 56) { wrap.style.display='none'; return; }
+  wrap.style.display='';
+  const options = [];
+  if (selectedMaxScore >= 56) options.push([0,'56+1（57分）'],[1,'56+2（58分）']);
+  if (selectedMaxScore >= 60) options.push([2,'60+1（61分）'],[3,'60+2（62分）']);
+  wrap.innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">進階加成（可複選）</div>' +
+    options.map(([bit, label]) => {
+      const checked = !!(selectedBonus & (1 << bit));
+      return `<button class="bonus-btn${checked?' active':''}" onclick="toggleBonus(${bit})">${checked?'✅':'⬜'} ${label}</button>`;
+    }).join('');
+}
 
-  // 枚舉所有可能的任務組合（最多 remaining 個）
-  // 用遞迴 DFS，從高分到低分
-  const scores = [...ALL_SCORES].sort((a,b) => b-a);
-
-  function dfs(idx, count, total, combo) {
-    if (total >= need) {
-      // 達標，記錄這個組合
-      const finalScore = currentScore + total;
-      const inRange = finalScore <= targetMax;
-      results.push({
-        combo: [...combo],
-        total,
-        finalScore,
-        taskCount: count,
-        inRange,
-        maxScore: combo.length > 0 ? combo[0] : 0,
-      });
-      return;
-    }
-    if (count >= remaining) return;
-    if (idx >= scores.length) return;
-
-    for (let i = idx; i < scores.length; i++) {
-      combo.push(scores[i]);
-      dfs(i, count + 1, total + scores[i], combo);
-      combo.pop();
-    }
-  }
-
-  dfs(0, 0, 0, []);
-
-  // 去重（相同組合只保留一個）
-  const seen = new Set();
-  const unique = results.filter(r => {
-    const key = [...r.combo].sort((a,b)=>b-a).join(',');
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-
-  return unique;
+function getCurrentTitle(score) {
+  let t = TITLES[0];
+  for (const title of TITLES) { if (score >= title.min) t = title; }
+  return t;
 }
 
 function calculate() {
-  const score = parseInt(document.getElementById('currentScore').value) || 0;
-  const done = parseInt(document.getElementById('doneCount').value) || 0;
+  const score = parseInt(document.getElementById('currentScore').value);
+  const done  = parseInt(document.getElementById('doneCount').value);
   const limit = parseInt(document.getElementById('taskLimit').value) || 24;
-  const remaining = Math.max(0, limit - done);
 
-  if (!selectedTitleEl) { alert('請選擇目標稱號'); return; }
+  if (isNaN(score) || score < 0) { alert('請輸入目前競賽積分'); return; }
+  if (isNaN(done)  || done  < 0) { alert('請輸入已解任務次數'); return; }
+  if (done > limit)              { alert(`已解次數不能超過任務上限 ${limit}`); return; }
+  if (!selectedTitleEl)          { alert('請選擇目標稱號'); return; }
 
+  const remaining = limit - done;
   const targetMin = parseInt(selectedTitleEl.dataset.min);
   const targetMax = parseInt(selectedTitleEl.dataset.max);
   const targetName = selectedTitleEl.dataset.name;
 
-  const memberSel = document.getElementById('memberPicker');
-  const memberName = memberSel.value
-    ? (allMembers.find(m => m.gameId === memberSel.value)?.nickname || memberSel.value)
-    : '（未選擇成員）';
-
   const currentTitle = getCurrentTitle(score);
   const need = Math.max(0, targetMin - score);
+  const allScores = buildAllScores(selectedMaxScore, selectedBonus);
+  const maxSingle = Math.max(...allScores);
+  const maxPossible = score + remaining * maxSingle;
 
   // 填入 header
-  document.getElementById('res-name').textContent = `👤 ${memberName}`;
   document.getElementById('res-score').textContent = `總分：${score} 分`;
   document.getElementById('res-limit').textContent = `任務上限：${limit} 個`;
   document.getElementById('res-remain').textContent = `剩餘可接：${remaining} 個`;
-  document.getElementById('res-max-task').textContent = `最高可接：${ALL_SCORES[ALL_SCORES.length-1]} 分任務`;
+  document.getElementById('res-max-task').textContent = `最高可接：${selectedMaxScore} 分任務`;
 
   // 進度條
   const titleIdx = TITLES.findIndex(t => t.name === currentTitle.name);
@@ -365,57 +489,63 @@ function calculate() {
   const resultEl = document.getElementById('result');
   resultEl.style.display = 'block';
 
-  // 已達標
   if (score >= targetMin) {
     document.getElementById('res-target').textContent = `✅ 已達成「${targetName}」！目前 ${score} 分`;
     document.getElementById('res-combos').innerHTML = '';
     return;
   }
 
+  if (maxPossible < targetMin) {
+    document.getElementById('res-target').textContent = `🎯 目標：${targetName}（還差 ${need} 分）`;
+    document.getElementById('res-combos').innerHTML =
+      `<div class="no-result">😢 本期最多可得 ${maxPossible} 分，無法達成「${targetName}」</div>`;
+    return;
+  }
+
   document.getElementById('res-target').textContent =
-    `🎯 目標：${targetName}（還差 ${need} 分，剩餘可接 ${remaining} 個任務）`;
+    `🎯 目標：${targetName}（還差 ${need} 分，剩餘 ${remaining} 個任務全部接完）`;
 
   if (remaining === 0) {
-    document.getElementById('res-combos').innerHTML = '<div class="no-result">⚠️ 本期任務已達上限，無法再接任務</div>';
+    document.getElementById('res-combos').innerHTML = '<div class="no-result">⚠️ 本期任務已達上限</div>';
     return;
   }
 
-  const combos = findCombos(score, remaining, targetMin, targetMax);
+  let combos, modeLabel;
 
-  if (combos.length === 0) {
-    document.getElementById('res-combos').innerHTML =
-      `<div class="no-result">😢 剩餘 ${remaining} 個任務無法達成「${targetName}」<br>建議調整目標或下期繼續努力</div>`;
-    return;
-  }
-
-  // 排序
-  let sorted;
   if (currentMode === 'min') {
-    // 最少任務數優先，同任務數則總分低優先（剛好達標）
-    sorted = combos.sort((a, b) => a.taskCount - b.taskCount || a.total - b.total);
+    // 最少任務數模式
+    const result = findMinTaskCombos(score, targetMin, remaining, selectedMaxScore, selectedBonus);
+    if (!result) {
+      document.getElementById('res-combos').innerHTML =
+        `<div class="no-result">😢 找不到合適的組合，建議調整目標</div>`;
+      return;
+    }
+    combos = result.combos;
+    document.getElementById('res-target').textContent =
+      `🎯 目標：${targetName}（還差 ${need} 分）✨ 最少只需 ${result.minCount} 個任務即可達成！`;
+    modeLabel = `最少 ${result.minCount} 個任務`;
   } else {
-    // 最高分任務最少優先：先按最高分任務數量少排，再按總分低排
-    sorted = combos.sort((a, b) => {
-      const aHighCount = a.combo.filter(s => s >= 56).length;
-      const bHighCount = b.combo.filter(s => s >= 56).length;
-      return aHighCount - bHighCount || a.total - b.total;
-    });
+    // 最高分任務最少優先模式（恰好用完所有剩餘名額）
+    combos = recommendCombinations(score, targetMin, remaining, selectedMaxScore, selectedBonus);
+    if (!combos || combos.length === 0) {
+      document.getElementById('res-combos').innerHTML =
+        `<div class="no-result">😢 找不到合適的組合，建議調整目標</div>`;
+      return;
+    }
+    document.getElementById('res-target').textContent =
+      `🎯 目標：${targetName}（還差 ${need} 分，接滿 ${remaining} 個任務）`;
+    modeLabel = `接滿 ${remaining} 個任務`;
   }
 
-  // 只顯示前 6 個
-  const top = sorted.slice(0, 6);
-
+  const top = combos.slice(0, 6);
   document.getElementById('res-combos').innerHTML = top.map((c, i) => {
-    // 整理任務描述
-    const taskMap = {};
-    c.combo.forEach(s => { taskMap[s] = (taskMap[s] || 0) + 1; });
-    const taskDesc = Object.entries(taskMap)
-      .sort((a,b) => b[0]-a[0])
-      .map(([s, n]) => `${n} 個 ${s} 分`)
-      .join('、');
+    let taskDesc = '';
+    if (c.b > 0) taskDesc = `${c.ca} 個 ${c.a} 分 + ${c.cb} 個 ${c.b} 分`;
+    else         taskDesc = `${c.ca} 個 ${c.a} 分`;
 
-    const badge = c.inRange ? `達成 ${targetName}` : `超出範圍（${c.finalScore} 分）`;
-    const badgeStyle = c.inRange ? '' : 'background:#fff3e0;color:#e65100;';
+    const inRange = c.finalScore <= targetMax;
+    const badge = inRange ? `達成 ${targetName}` : `超出範圍（${c.finalScore} 分）`;
+    const badgeStyle = inRange ? '' : 'background:#fff3e0;color:#e65100;';
 
     return `<div class="combo-item">
       <div class="combo-rank">${i+1}</div>
@@ -446,7 +576,7 @@ function goEditor() {
 }
 
 // ── 初始化 ──
-loadMembers();
+renderBonusButtons();
 </script>
 </body>
 </html>
