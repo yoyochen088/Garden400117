@@ -22,8 +22,15 @@
     .subtitle { text-align:center; color:#9e6b7e; font-size:0.85rem; margin-bottom:20px; }
     .page-content { padding:0 16px; }
     .member-select { display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; background:#fff; border-radius:var(--radius); padding:14px 16px; border:1px solid var(--border); box-shadow:var(--shadow); }
-    .member-select label { font-size:0.9rem; font-weight:600; color:var(--pink-dark); }
+    .member-select label { font-size:0.9rem; font-weight:600; color:var(--pink-dark); white-space:nowrap; }
     .member-select select, .member-select input { padding:7px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:#3d1a2e; outline:none; cursor:pointer; }
+    #memberPicker { flex:1; min-width:0; }
+    @media(max-width:600px) {
+      .member-select { gap:8px; }
+      #memberPicker { width:100%; flex:1 1 100%; }
+      #qualityFilter { flex:1; }
+      #flowerSearch { flex:2; min-width:0; width:auto !important; }
+    }
     .flower-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; }
     .flower-check { background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; cursor:pointer; transition:border-color 0.2s, background 0.2s; }
     .flower-check:hover { border-color:var(--pink-mid); background:var(--pink-light); }
