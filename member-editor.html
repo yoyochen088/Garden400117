@@ -40,7 +40,7 @@
     .q-凡 { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
     .check-icon { font-size:1.1rem; flex-shrink:0; opacity:0; transition:opacity 0.15s; }
     .flower-check.owned .check-icon { opacity:1; }
-    .loading { text-align:center; padding:40px; color:#9e6b7e; }
+    .loading { text-align:center; padding:40px; color:#9e6b7e; grid-column: 1 / -1; }
     .bottom-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); padding:10px 12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; box-shadow:0 -2px 10px rgba(233,106,30,0.08); }
     .btn { padding:9px 18px; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; transition:opacity 0.2s; }
     .btn:hover { opacity:0.85; }
@@ -74,6 +74,7 @@
   <div style="font-size:1.1rem;font-weight:700;letter-spacing:2px;">♡璀璨♡ 花卉擁有管理</div>
   <nav style="display:flex;gap:6px;flex-wrap:nowrap;">
     <a href="index.html" data-short="圖鑑" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>花卉圖鑑</span></a>
+    <a href="index.html#id-page" data-short="成員" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>公會成員</span></a>
     <a href="flower-showcase.html" data-short="花展" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>個人花展</span></a>
     <a href="member-editor.html" class="active" data-short="擁有" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.25);white-space:nowrap;"><span>花卉擁有</span></a>
     <a href="#" data-short="管理" onclick="goEditor();return false;" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>管理</span></a>
@@ -237,22 +238,20 @@ async function saveToSheet() {
 
   btn.innerHTML = '⏳ 儲存中...'; btn.disabled = true;
   progress.classList.add('show');
-
-  // 進度條動畫：模擬進度
-  let pct = 0;
+  fill.style.transition = 'none';
   fill.style.width = '0%';
-  label.textContent = `正在儲存 ${m.nickname} 的花單...`;
-
-  // 快速到 30%
-  await setProgress(fill, 30, 200);
   label.textContent = `傳送資料中（新增 ${toAdd.length}、移除 ${toRemove.length} 筆）...`;
 
-  try {
-    // 慢慢推到 80%，等待 Apps Script 回應
-    const progressInterval = setInterval(() => {
-      if (pct < 80) { pct += 2; fill.style.width = pct + '%'; }
-    }, 150);
+  // 用 JS interval 從 0 慢慢推到 85%，等待回應
+  let pct = 0;
+  const progressInterval = setInterval(() => {
+    if (pct < 85) {
+      pct += 1;
+      fill.style.width = pct + '%';
+    }
+  }, 80);
 
+  try {
     await new Promise((resolve) => {
       const params = encodeURIComponent(JSON.stringify({ action: 'updateOwnership', gameId: m.gameId, toAdd, toRemove }));
       const img = new Image();
@@ -262,22 +261,27 @@ async function saveToSheet() {
 
     clearInterval(progressInterval);
 
-    // 完成：衝到 100%
-    await setProgress(fill, 100, 300);
+    // 完成：直接跳到 100%（加回 transition 讓它順滑）
+    fill.style.transition = 'width 0.3s ease';
+    fill.style.width = '100%';
     label.textContent = `✅ 儲存完成！`;
 
     setTimeout(() => {
       progress.classList.remove('show');
+      fill.style.transition = 'none';
       fill.style.width = '0%';
     }, 1200);
 
     originalOwned = new Set(owned);
   } catch(e) {
+    clearInterval(progressInterval);
+    fill.style.transition = 'width 0.3s ease';
     fill.style.width = '100%';
     fill.style.background = '#e74c3c';
     label.textContent = '❌ 儲存失敗：' + e.message;
     setTimeout(() => {
       progress.classList.remove('show');
+      fill.style.transition = 'none';
       fill.style.background = '';
       fill.style.width = '0%';
     }, 2500);
@@ -285,21 +289,6 @@ async function saveToSheet() {
   } finally {
     btn.innerHTML = '💾 儲存'; btn.disabled = false;
   }
-}
-
-function setProgress(fill, target, duration) {
-  return new Promise(resolve => {
-    const start = parseFloat(fill.style.width) || 0;
-    const diff = target - start;
-    const steps = 20;
-    const interval = duration / steps;
-    let step = 0;
-    const timer = setInterval(() => {
-      step++;
-      fill.style.width = (start + diff * (step / steps)) + '%';
-      if (step >= steps) { clearInterval(timer); resolve(); }
-    }, interval);
-  });
 }
 
 document.getElementById('memberPicker').addEventListener('change', loadOwned);
