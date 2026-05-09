@@ -19,7 +19,7 @@
       --shadow:0 2px 12px rgba(233,106,30,0.10); --radius:14px;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
-    html { margin:0; padding:0; }
+    html, body { margin:0; padding:0; }
     body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
     /* ── Header ── */
@@ -1145,8 +1145,10 @@ function closeLightbox() {
   wrap.style.transform = '';
 }
 
-// ── 花卡 3D tilt ──
+// ── 花卡 3D tilt（僅桌機）──
 (function initCardTilt() {
+  // 觸控裝置不啟用
+  if (window.matchMedia('(hover: none)').matches) return;
   const MAX_TILT = 12;
   document.addEventListener('mousemove', e => {
     const card = e.target.closest('.flower-card');
