@@ -70,10 +70,6 @@
     .tb-4 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
     .tb-5 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
 
-    /* ── 計算按鈕 ── */
-    .btn-calc { width:100%; padding:12px; background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:opacity 0.2s; margin-top:4px; }
-    .btn-calc:hover { opacity:0.88; }
-
     /* ── 最高分選擇 ── */
     .max-score-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
     .max-score-btn { padding:6px 14px; border-radius:20px; font-size:0.85rem; font-weight:700; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; }
@@ -90,8 +86,8 @@
     #result { display:none; }
     .result-header { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; border-radius:var(--radius); padding:16px 20px; margin-bottom:12px; }
     .result-header .name { font-size:1.1rem; font-weight:700; margin-bottom:6px; }
-    .result-header .stats { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; opacity:0.92; }
-    .result-header .stat { display:flex; align-items:center; gap:4px; }
+    .result-header .stats { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; margin-bottom:10px; }
+    .result-header .stat { display:flex; align-items:center; gap:4px; color:#fff; font-weight:600; text-shadow:0 1px 2px rgba(0,0,0,0.3); }
 
     .result-target { background:var(--pink-light); border:1.5px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:12px; font-size:0.9rem; color:var(--pink-dark); font-weight:600; }
 
@@ -108,9 +104,9 @@
 
     /* ── 稱號進度條 ── */
     .progress-wrap { margin-top:12px; }
-    .progress-label { display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:4px; }
-    .progress-track { background:#f0e8e0; border-radius:6px; height:10px; overflow:hidden; }
-    .progress-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#c2510b,#e96a1e); transition:width 0.6s ease; }
+    .progress-label { display:flex; justify-content:space-between; font-size:0.82rem; color:#fff; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.4); margin-bottom:6px; }
+    .progress-track { background:rgba(0,0,0,0.25); border-radius:6px; height:12px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:6px; background:#fff; box-shadow:0 0 6px rgba(255,255,255,0.7); transition:width 0.6s ease; }
   </style>
 </head>
 <body>
@@ -151,28 +147,29 @@
     <div class="form-row">
       <div class="form-group">
         <label>任務上限</label>
-        <select id="taskLimit" onchange="updateTitleBadges()">
+        <select id="taskLimit" onchange="updateTitleBadges();autoCalculate()">
           <option value="18">18 個</option>
           <option value="24" selected>24 個</option>
         </select>
       </div>
       <div class="form-group">
         <label>目前競賽積分</label>
-        <input type="number" id="currentScore" placeholder="例：1192" min="0" oninput="updateTitleBadges()" />
+        <input type="number" id="currentScore" placeholder="例：1192" min="0" oninput="updateTitleBadges();autoCalculate()" />
       </div>
       <div class="form-group">
         <label>已解任務次數</label>
-        <input type="number" id="doneCount" placeholder="例：22" min="0" oninput="updateTitleBadges()" />
+        <input type="number" id="doneCount" placeholder="例：22" min="0" oninput="updateTitleBadges();autoCalculate()" />
       </div>
     </div>
     <div style="margin-top:14px;">
       <div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">最高可接加倍任務分數</div>
       <div class="max-score-btns">
         <button class="max-score-btn" data-score="28" onclick="setMaxScore(28)">28</button>
+        <button class="max-score-btn" data-score="42" onclick="setMaxScore(42)">42</button>
         <button class="max-score-btn" data-score="46" onclick="setMaxScore(46)">46</button>
-        <button class="max-score-btn" data-score="50" onclick="setMaxScore(50)">50</button>
+        <button class="max-score-btn active" data-score="50" onclick="setMaxScore(50)">50</button>
         <button class="max-score-btn" data-score="56" onclick="setMaxScore(56)">56</button>
-        <button class="max-score-btn active" data-score="60" onclick="setMaxScore(60)">60</button>
+        <button class="max-score-btn" data-score="60" onclick="setMaxScore(60)">60</button>
       </div>
     </div>
     <div id="bonusWrap" style="margin-top:12px;"></div>
@@ -191,21 +188,19 @@
   </div>
 
   <!-- 計算模式 -->
-  <div class="mode-toggle">
-    <button class="mode-btn active" id="modeMin" onclick="setMode('min')">✨ 最少任務數達標</button>
-    <button class="mode-btn" id="modeMax" onclick="setMode('max')">📋 接滿剩餘名額</button>
+  <div class="mode-toggle" style="display:none;">
+    <button class="mode-btn active" id="modeMax" onclick="setMode('max')">接滿剩餘任務</button>
+    <button class="mode-btn" id="modeMin" onclick="setMode('min')">最少任務數達標</button>
   </div>
-
-  <button class="btn-calc" onclick="calculate()">🔢 計算推薦接法</button>
 
   <!-- 結果 -->
   <div id="result" style="margin-top:20px;">
     <div class="result-header">
       <div class="stats">
-        <div class="stat">📊 <span id="res-score"></span></div>
-        <div class="stat">� <span id="res-limit"></span></div>
-        <div class="stat">� <span id="res-remain"></span></div>
-        <div class="stat">🎯 <span id="res-max-task"></span></div>
+        <div class="stat">&#x1F4CA; 總分：<span id="res-score"></span></div>
+        <div class="stat">&#x1F4CB; 任務上限：<span id="res-limit"></span></div>
+        <div class="stat">&#x23F3; 剩餘可接：<span id="res-remain"></span></div>
+        <div class="stat">&#x1F3AF; 最高可接：<span id="res-max-task"></span></div>
       </div>
       <div class="progress-wrap">
         <div class="progress-label">
@@ -237,8 +232,8 @@ const DOUBLED_BASE   = [28, 42, 46, 50, 56, 60];
 const MAX_SINGLE = 62; // 最高進階加成
 
 let selectedTitleEl = null;
-let currentMode = 'min';
-let selectedMaxScore = 60;
+let currentMode = 'max';
+let selectedMaxScore = 50;
 let selectedBonus = 0;
 
 // ── 依 maxScore 和 bonus 建立可用分數清單（與 BOT 一致）──
@@ -373,6 +368,7 @@ function selectTitle(el) {
   document.querySelectorAll('.title-badge').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   selectedTitleEl = el;
+  autoCalculate();
 }
 
 // ── 即時更新稱號按鈕狀態 ──
@@ -390,14 +386,12 @@ function updateTitleBadges() {
     const alreadyDone = score >= min;
     const reachable = maxPossible >= min;
 
-    if (alreadyDone) {
-      el.classList.add('disabled'); el.style.opacity='0.35'; el.style.cursor='not-allowed';
-      el.title = `已達成（目前 ${score} 分）`;
-    } else if (!reachable) {
+    if (!reachable && !alreadyDone) {
       el.classList.add('disabled'); el.style.opacity='0.3'; el.style.cursor='not-allowed';
       el.title = `本期無法達成（最多可得 ${maxPossible} 分）`;
     } else {
-      el.classList.remove('disabled'); el.style.opacity=''; el.style.cursor='pointer'; el.title='';
+      el.classList.remove('disabled'); el.style.opacity=''; el.style.cursor='pointer';
+      el.title = alreadyDone ? `已達成（目前 ${score} 分）` : '';
     }
     if (el.classList.contains('selected') && el.classList.contains('disabled')) {
       el.classList.remove('selected'); selectedTitleEl = null;
@@ -409,21 +403,38 @@ function setMode(mode) {
   currentMode = mode;
   document.getElementById('modeMin').classList.toggle('active', mode === 'min');
   document.getElementById('modeMax').classList.toggle('active', mode === 'max');
+  // 若已有結果，切換時自動重新計算
+  if (document.getElementById('result').style.display === 'block') {
+    calculate();
+  }
+}
+
+// 靜默自動計算：條件齊全才觸發，不跳 alert
+function autoCalculate() {
+  const score = parseInt(document.getElementById('currentScore').value);
+  const done  = parseInt(document.getElementById('doneCount').value);
+  const limit = parseInt(document.getElementById('taskLimit').value) || 24;
+  if (isNaN(score) || score < 0) return;
+  if (isNaN(done)  || done  < 0) return;
+  if (done > limit) return;
+  if (!selectedTitleEl) return;
+  calculate();
 }
 
 function setMaxScore(score) {
   selectedMaxScore = score;
   document.querySelectorAll('.max-score-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.score) === score));
-  // 若選了低於 56 的分數，清除進階加成
   if (score < 56) { selectedBonus = 0; renderBonusButtons(); }
   renderBonusButtons();
   updateTitleBadges();
+  autoCalculate();
 }
 
 function toggleBonus(bit) {
   selectedBonus ^= (1 << bit);
   renderBonusButtons();
   updateTitleBadges();
+  autoCalculate();
 }
 
 function renderBonusButtons() {
@@ -468,19 +479,20 @@ function calculate() {
   const maxPossible = score + remaining * maxSingle;
 
   // 填入 header
-  document.getElementById('res-score').textContent = `總分：${score} 分`;
-  document.getElementById('res-limit').textContent = `任務上限：${limit} 個`;
-  document.getElementById('res-remain').textContent = `剩餘可接：${remaining} 個`;
-  document.getElementById('res-max-task').textContent = `最高可接：${selectedMaxScore} 分任務`;
+  document.getElementById('res-score').textContent = `${score} 分`;
+  document.getElementById('res-limit').textContent = `${limit} 個`;
+  document.getElementById('res-remain').textContent = `${remaining} 個`;
+  document.getElementById('res-max-task').textContent = `${selectedMaxScore} 分任務`;
 
   // 進度條
   const titleIdx = TITLES.findIndex(t => t.name === currentTitle.name);
   const nextTitle = TITLES[titleIdx + 1];
   document.getElementById('res-title-label').textContent = `目前：${currentTitle.name}`;
   if (nextTitle) {
-    const pct = Math.min(100, Math.round((score - currentTitle.min) / (nextTitle.min - currentTitle.min) * 100));
-    document.getElementById('res-progress-text').textContent = `${score} / ${nextTitle.min}`;
-    document.getElementById('res-progress-fill').style.width = pct + '%';
+    const rangeEnd = nextTitle.min;
+    const pct = Math.min(100, Math.round(score / rangeEnd * 100));
+    document.getElementById('res-progress-text').textContent = `${score} / ${rangeEnd}`;
+    document.getElementById('res-progress-fill').style.width = Math.max(pct, 2) + '%';
   } else {
     document.getElementById('res-progress-text').textContent = `${score} 分`;
     document.getElementById('res-progress-fill').style.width = '100%';
@@ -522,7 +534,7 @@ function calculate() {
     }
     combos = result.combos;
     document.getElementById('res-target').textContent =
-      `🎯 目標：${targetName}（還差 ${need} 分）✨ 最少只需 ${result.minCount} 個任務即可達成！`;
+      `🎯 目標：${targetName}（還差 ${need} 分）✨ 最少再接 ${result.minCount} 個任務即可達成！`;
     modeLabel = `最少 ${result.minCount} 個任務`;
   } else {
     // 最高分任務最少優先模式（恰好用完所有剩餘名額）
@@ -540,8 +552,15 @@ function calculate() {
   const top = combos.slice(0, 6);
   document.getElementById('res-combos').innerHTML = top.map((c, i) => {
     let taskDesc = '';
-    if (c.b > 0) taskDesc = `${c.ca} 個 ${c.a} 分 + ${c.cb} 個 ${c.b} 分`;
-    else         taskDesc = `${c.ca} 個 ${c.a} 分`;
+    if (c.b > 0) {
+      // 高分放前面
+      const [highScore, highCount, lowScore, lowCount] = c.b > c.a
+        ? [c.b, c.cb, c.a, c.ca]
+        : [c.a, c.ca, c.b, c.cb];
+      taskDesc = `${highCount} 個 ${highScore} 分 + ${lowCount} 個 ${lowScore} 分`;
+    } else {
+      taskDesc = `${c.ca} 個 ${c.a} 分`;
+    }
 
     const inRange = c.finalScore <= targetMax;
     const badge = inRange ? `達成 ${targetName}` : `超出範圍（${c.finalScore} 分）`;
@@ -569,10 +588,16 @@ function closeMobileNav() {
   document.getElementById('nav-overlay').classList.remove('show');
   document.getElementById('hamburger').classList.remove('open');
 }
-function goEditor() {
+async function goEditor() {
   const pw = prompt('請輸入管理密碼：');
-  if (pw === '390926') { location.href = 'editor.html'; }
-  else if (pw !== null) { alert('密碼錯誤'); }
+  if (!pw) return;
+  try {
+    const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw: pw }));
+    const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
+    const data = await res.json();
+    if (data.ok) { location.href = 'editor.html'; }
+    else { alert('密碼錯誤'); }
+  } catch(e) { alert('驗證失敗，請稍後再試'); }
 }
 
 // ── 初始化 ──
