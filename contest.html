@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>競賽計算機 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
   <style>
     :root {
       --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
@@ -147,7 +148,7 @@
     <div class="form-row">
       <div class="form-group">
         <label>任務上限</label>
-        <select id="taskLimit" onchange="updateTitleBadges();autoCalculate()">
+        <select id="taskLimit" onchange="updateTitleBadges();autoCalculate()" oninput="updateTitleBadges();autoCalculate()">
           <option value="18">18 個</option>
           <option value="24" selected>24 個</option>
         </select>
@@ -393,9 +394,7 @@ function updateTitleBadges() {
       el.classList.remove('disabled'); el.style.opacity=''; el.style.cursor='pointer';
       el.title = alreadyDone ? `已達成（目前 ${score} 分）` : '';
     }
-    if (el.classList.contains('selected') && el.classList.contains('disabled')) {
-      el.classList.remove('selected'); selectedTitleEl = null;
-    }
+    // 不清除 selectedTitleEl，讓 calculate() 自己顯示無法達成的結果
   });
 }
 
@@ -413,10 +412,8 @@ function setMode(mode) {
 function autoCalculate() {
   const score = parseInt(document.getElementById('currentScore').value);
   const done  = parseInt(document.getElementById('doneCount').value);
-  const limit = parseInt(document.getElementById('taskLimit').value) || 24;
   if (isNaN(score) || score < 0) return;
   if (isNaN(done)  || done  < 0) return;
-  if (done > limit) return;
   if (!selectedTitleEl) return;
   calculate();
 }
@@ -464,8 +461,21 @@ function calculate() {
 
   if (isNaN(score) || score < 0) { alert('請輸入目前競賽積分'); return; }
   if (isNaN(done)  || done  < 0) { alert('請輸入已解任務次數'); return; }
-  if (done > limit)              { alert(`已解次數不能超過任務上限 ${limit}`); return; }
   if (!selectedTitleEl)          { alert('請選擇目標稱號'); return; }
+  if (done > limit) {
+    const resultEl = document.getElementById('result');
+    resultEl.style.display = 'block';
+    document.getElementById('res-score').textContent = `${score} 分`;
+    document.getElementById('res-limit').textContent = `${limit} 個`;
+    document.getElementById('res-remain').textContent = `0 個`;
+    document.getElementById('res-max-task').textContent = `${selectedMaxScore} 分任務`;
+    document.getElementById('res-title-label').textContent = '';
+    document.getElementById('res-progress-text').textContent = '';
+    document.getElementById('res-progress-fill').style.width = '0%';
+    document.getElementById('res-target').textContent = `⚠️ 已解任務次數（${done}）超過任務上限（${limit}），請確認輸入`;
+    document.getElementById('res-combos').innerHTML = '';
+    return;
+  }
 
   const remaining = limit - done;
   const targetMin = parseInt(selectedTitleEl.dataset.min);
