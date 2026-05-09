@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>競賽計算機 - 璀璨</title>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
+      --pink-dark:#c2510b; --bg:#fff8f5; --card-bg:#ffffff;
+      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
+      --shadow:0 2px 12px rgba(233,106,30,0.10); --radius:14px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html, body { margin:0; padding:0; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+
+    /* ── Header ── */
+    header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
+    .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; }
+    nav { display:flex; gap:8px; }
+    nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
+    nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
+
+    /* ── 漢堡選單 ── */
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; }
+    .hamburger span { display:block; width:22px; height:2px; background:#fff; border-radius:2px; transition:all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+    #nav-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:150; }
+    #nav-overlay.show { display:block; }
+    #mobile-nav { position:fixed; top:0; right:-260px; width:240px; height:100vh; background:linear-gradient(160deg,#c2510b,#e96a1e); z-index:200; padding:70px 20px 30px; display:flex; flex-direction:column; gap:8px; transition:right 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.2); }
+    #mobile-nav.open { right:0; }
+    #mobile-nav a { color:#fff; text-decoration:none; padding:12px 16px; border-radius:12px; font-size:1rem; font-weight:600; border:1.5px solid rgba(255,255,255,0.3); transition:background 0.2s; display:flex; align-items:center; gap:10px; }
+    #mobile-nav a:hover, #mobile-nav a.active { background:rgba(255,255,255,0.2); }
+    #mobile-nav .nav-close { position:absolute; top:16px; right:16px; background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
+
+    @media(max-width:600px) {
+      .guild-name { font-size:1rem; }
+      nav { display:none; }
+      .hamburger { display:flex; }
+    }
+
+    /* ── 主內容 ── */
+    main { max-width:700px; margin:0 auto; padding:24px 16px; }
+    h1 { text-align:center; color:var(--pink-dark); font-size:1.3rem; margin-bottom:4px; }
+    .subtitle { text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:24px; }
+
+    /* ── 卡片 ── */
+    .card { background:var(--card-bg); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border); }
+    .card-title { font-size:0.85rem; font-weight:700; color:var(--pink-dark); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+
+    /* ── 表單元素 ── */
+    .form-row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+    .form-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:120px; }
+    .form-group label { font-size:0.78rem; color:var(--text-muted); font-weight:600; }
+    select, input[type=number] { padding:8px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:var(--text); outline:none; width:100%; }
+    select:focus, input:focus { border-color:var(--pink); }
+
+    /* ── 稱號顯示 ── */
+    .title-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .title-badge { padding:5px 14px; border-radius:20px; font-size:0.82rem; font-weight:700; cursor:pointer; border:2px solid transparent; transition:all 0.18s; opacity:0.5; }
+    .title-badge.selected { opacity:1; transform:scale(1.05); }
+    .title-badge:hover { opacity:0.85; }
+    .tb-0 { background:#f0f0f0; color:#888; border-color:#ddd; }
+    .tb-1 { background:linear-gradient(135deg,#cd7f32,#e8a96a); color:#fff; }
+    .tb-2 { background:linear-gradient(135deg,#9e9e9e,#d4d4d4); color:#fff; }
+    .tb-3 { background:linear-gradient(135deg,#f4c430,#ffd700); color:#5a4000; }
+    .tb-4 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .tb-5 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
+
+    /* ── 計算按鈕 ── */
+    .btn-calc { width:100%; padding:12px; background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; transition:opacity 0.2s; margin-top:4px; }
+    .btn-calc:hover { opacity:0.88; }
+
+    /* ── 切換模式 ── */
+    .mode-toggle { display:flex; gap:8px; margin-bottom:16px; }
+    .mode-btn { flex:1; padding:8px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; }
+    .mode-btn.active { background:var(--pink); border-color:var(--pink); color:#fff; }
+
+    /* ── 結果區 ── */
+    #result { display:none; }
+    .result-header { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; border-radius:var(--radius); padding:16px 20px; margin-bottom:12px; }
+    .result-header .name { font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+    .result-header .stats { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; opacity:0.92; }
+    .result-header .stat { display:flex; align-items:center; gap:4px; }
+
+    .result-target { background:var(--pink-light); border:1.5px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:12px; font-size:0.9rem; color:var(--pink-dark); font-weight:600; }
+
+    .combo-list { display:flex; flex-direction:column; gap:8px; }
+    .combo-item { background:var(--card-bg); border:1.5px solid var(--border); border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:12px; transition:border-color 0.2s; }
+    .combo-item:hover { border-color:var(--pink-mid); }
+    .combo-rank { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; font-size:0.8rem; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .combo-detail { flex:1; }
+    .combo-tasks { font-size:0.9rem; font-weight:600; color:var(--text); }
+    .combo-score { font-size:0.82rem; color:var(--text-muted); margin-top:2px; }
+    .combo-badge { font-size:0.75rem; padding:2px 8px; border-radius:8px; background:var(--pink-light); color:var(--pink-dark); font-weight:600; flex-shrink:0; }
+
+    .no-result { text-align:center; padding:32px; color:var(--text-muted); font-size:0.95rem; }
+
+    /* ── 稱號進度條 ── */
+    .progress-wrap { margin-top:12px; }
+    .progress-label { display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:4px; }
+    .progress-track { background:#f0e8e0; border-radius:6px; height:10px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#c2510b,#e96a1e); transition:width 0.6s ease; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="guild-name">璀璨 <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
+  <nav>
+    <a href="index.html">花卉圖鑑</a>
+    <a href="index.html#id-page">公會成員</a>
+    <a href="flower-showcase.html">個人花展</a>
+    <a href="member-editor.html">花卉擁有</a>
+    <a href="contest.html" class="active">競賽</a>
+    <a href="#" onclick="goEditor();return false;">管理</a>
+  </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div id="nav-overlay" onclick="closeMobileNav()"></div>
+<div id="mobile-nav">
+  <button class="nav-close" onclick="closeMobileNav()">✕</button>
+  <a href="index.html">🌸 花卉圖鑑</a>
+  <a href="index.html#id-page">👥 公會成員</a>
+  <a href="flower-showcase.html">🖼️ 個人花展</a>
+  <a href="member-editor.html">✅ 花卉擁有</a>
+  <a href="contest.html" class="active">🏆 競賽計算機</a>
+  <a href="#" onclick="closeMobileNav();goEditor();">⚙️ 管理</a>
+</div>
+
+<main>
+  <h1>🏆 競賽計算機</h1>
+  <p class="subtitle">計算最短路徑達成目標稱號</p>
+
+  <!-- 成員與設定 -->
+  <div class="card">
+    <div class="card-title">⚙️ 基本設定</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>成員</label>
+        <select id="memberPicker">
+          <option value="">── 請選擇成員 ──</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>任務上限</label>
+        <select id="taskLimit">
+          <option value="18">18 個</option>
+          <option value="24" selected>24 個</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:12px;">
+      <div class="form-group">
+        <label>目前競賽積分</label>
+        <input type="number" id="currentScore" placeholder="例：1192" min="0" />
+      </div>
+      <div class="form-group">
+        <label>已解任務次數</label>
+        <input type="number" id="doneCount" placeholder="例：22" min="0" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 目標稱號 -->
+  <div class="card">
+    <div class="card-title">🎯 目標稱號</div>
+    <div class="title-badges" id="titleBadges">
+      <div class="title-badge tb-1" data-min="500" data-max="699" data-name="青銅花匠" onclick="selectTitle(this)">青銅花匠<br><small>500–699</small></div>
+      <div class="title-badge tb-2" data-min="700" data-max="999" data-name="白銀花匠" onclick="selectTitle(this)">白銀花匠<br><small>700–999</small></div>
+      <div class="title-badge tb-3" data-min="1000" data-max="1299" data-name="黃金花匠" onclick="selectTitle(this)">黃金花匠<br><small>1000–1299</small></div>
+      <div class="title-badge tb-4" data-min="1300" data-max="1399" data-name="大師花匠" onclick="selectTitle(this)">大師花匠<br><small>1300–1399</small></div>
+      <div class="title-badge tb-5" data-min="1400" data-max="99999" data-name="王者花匠" onclick="selectTitle(this)">王者花匠<br><small>1400+</small></div>
+    </div>
+  </div>
+
+  <!-- 計算模式 -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeMin" onclick="setMode('min')">📉 最少任務數優先</button>
+    <button class="mode-btn" id="modeMax" onclick="setMode('max')">🏅 最高分任務最少優先</button>
+  </div>
+
+  <button class="btn-calc" onclick="calculate()">🔢 計算推薦接法</button>
+
+  <!-- 結果 -->
+  <div id="result" style="margin-top:20px;">
+    <div class="result-header">
+      <div class="name" id="res-name"></div>
+      <div class="stats">
+        <div class="stat">📊 <span id="res-score"></span></div>
+        <div class="stat">📌 <span id="res-limit"></span></div>
+        <div class="stat">📋 <span id="res-remain"></span></div>
+        <div class="stat">🎯 <span id="res-max-task"></span></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="res-title-label"></span>
+          <span id="res-progress-text"></span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="res-progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="result-target" id="res-target"></div>
+    <div class="combo-list" id="res-combos"></div>
+  </div>
+</main>
+
+<script>
+// ── 稱號資料 ──
+const TITLES = [
+  { name:'無稱號',   min:0,    max:499  },
+  { name:'青銅花匠', min:500,  max:699  },
+  { name:'白銀花匠', min:700,  max:999  },
+  { name:'黃金花匠', min:1000, max:1299 },
+  { name:'大師花匠', min:1300, max:1399 },
+  { name:'王者花匠', min:1400, max:99999},
+];
+
+// ── 一般任務分數 ──
+const BASE_SCORES = [14, 21, 23, 25, 28, 30];
+// ── 加倍任務分數（含進階加成）──
+const DOUBLE_SCORES = [28, 42, 46, 50, 56, 57, 58, 60, 61, 62];
+// ── 所有可接任務分數（合併去重排序）──
+const ALL_SCORES = [...new Set([...BASE_SCORES, ...DOUBLE_SCORES])].sort((a,b)=>a-b);
+
+let selectedTitleEl = null;
+let currentMode = 'min';
+let allMembers = [];
+
+// ── 載入成員 ──
+async function loadMembers() {
+  try {
+    const { apiKey, sheetId } = SHEET_CONFIG;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/members!A1:E?key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const rows = (data.values || []).slice(1)
+      .filter(r => (r[3] || '').toLowerCase() !== 'true')
+      .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
+    allMembers = rows;
+    const sel = document.getElementById('memberPicker');
+    sel.innerHTML = '<option value="">── 請選擇成員 ──</option>' +
+      rows.map(m => `<option value="${m.gameId}">${m.nickname || m.gameId}</option>`).join('');
+  } catch(e) {
+    // 載入失敗不影響計算功能
+  }
+}
+
+function selectTitle(el) {
+  document.querySelectorAll('.title-badge').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTitleEl = el;
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeMin').classList.toggle('active', mode === 'min');
+  document.getElementById('modeMax').classList.toggle('active', mode === 'max');
+}
+
+function getCurrentTitle(score) {
+  for (let i = TITLES.length - 1; i >= 0; i--) {
+    if (score >= TITLES[i].min) return TITLES[i];
+  }
+  return TITLES[0];
+}
+
+// ── 核心計算：找出所有能達標的組合 ──
+function findCombos(currentScore, remaining, targetMin, targetMax) {
+  const need = targetMin - currentScore;
+  if (need <= 0) return []; // 已達標
+
+  const results = [];
+
+  // 枚舉所有可能的任務組合（最多 remaining 個）
+  // 用遞迴 DFS，從高分到低分
+  const scores = [...ALL_SCORES].sort((a,b) => b-a);
+
+  function dfs(idx, count, total, combo) {
+    if (total >= need) {
+      // 達標，記錄這個組合
+      const finalScore = currentScore + total;
+      const inRange = finalScore <= targetMax;
+      results.push({
+        combo: [...combo],
+        total,
+        finalScore,
+        taskCount: count,
+        inRange,
+        maxScore: combo.length > 0 ? combo[0] : 0,
+      });
+      return;
+    }
+    if (count >= remaining) return;
+    if (idx >= scores.length) return;
+
+    for (let i = idx; i < scores.length; i++) {
+      combo.push(scores[i]);
+      dfs(i, count + 1, total + scores[i], combo);
+      combo.pop();
+    }
+  }
+
+  dfs(0, 0, 0, []);
+
+  // 去重（相同組合只保留一個）
+  const seen = new Set();
+  const unique = results.filter(r => {
+    const key = [...r.combo].sort((a,b)=>b-a).join(',');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return unique;
+}
+
+function calculate() {
+  const score = parseInt(document.getElementById('currentScore').value) || 0;
+  const done = parseInt(document.getElementById('doneCount').value) || 0;
+  const limit = parseInt(document.getElementById('taskLimit').value) || 24;
+  const remaining = Math.max(0, limit - done);
+
+  if (!selectedTitleEl) { alert('請選擇目標稱號'); return; }
+
+  const targetMin = parseInt(selectedTitleEl.dataset.min);
+  const targetMax = parseInt(selectedTitleEl.dataset.max);
+  const targetName = selectedTitleEl.dataset.name;
+
+  const memberSel = document.getElementById('memberPicker');
+  const memberName = memberSel.value
+    ? (allMembers.find(m => m.gameId === memberSel.value)?.nickname || memberSel.value)
+    : '（未選擇成員）';
+
+  const currentTitle = getCurrentTitle(score);
+  const need = Math.max(0, targetMin - score);
+
+  // 填入 header
+  document.getElementById('res-name').textContent = `👤 ${memberName}`;
+  document.getElementById('res-score').textContent = `總分：${score} 分`;
+  document.getElementById('res-limit').textContent = `任務上限：${limit} 個`;
+  document.getElementById('res-remain').textContent = `剩餘可接：${remaining} 個`;
+  document.getElementById('res-max-task').textContent = `最高可接：${ALL_SCORES[ALL_SCORES.length-1]} 分任務`;
+
+  // 進度條
+  const titleIdx = TITLES.findIndex(t => t.name === currentTitle.name);
+  const nextTitle = TITLES[titleIdx + 1];
+  document.getElementById('res-title-label').textContent = `目前：${currentTitle.name}`;
+  if (nextTitle) {
+    const pct = Math.min(100, Math.round((score - currentTitle.min) / (nextTitle.min - currentTitle.min) * 100));
+    document.getElementById('res-progress-text').textContent = `${score} / ${nextTitle.min}`;
+    document.getElementById('res-progress-fill').style.width = pct + '%';
+  } else {
+    document.getElementById('res-progress-text').textContent = `${score} 分`;
+    document.getElementById('res-progress-fill').style.width = '100%';
+  }
+
+  const resultEl = document.getElementById('result');
+  resultEl.style.display = 'block';
+
+  // 已達標
+  if (score >= targetMin) {
+    document.getElementById('res-target').textContent = `✅ 已達成「${targetName}」！目前 ${score} 分`;
+    document.getElementById('res-combos').innerHTML = '';
+    return;
+  }
+
+  document.getElementById('res-target').textContent =
+    `🎯 目標：${targetName}（還差 ${need} 分，剩餘可接 ${remaining} 個任務）`;
+
+  if (remaining === 0) {
+    document.getElementById('res-combos').innerHTML = '<div class="no-result">⚠️ 本期任務已達上限，無法再接任務</div>';
+    return;
+  }
+
+  const combos = findCombos(score, remaining, targetMin, targetMax);
+
+  if (combos.length === 0) {
+    document.getElementById('res-combos').innerHTML =
+      `<div class="no-result">😢 剩餘 ${remaining} 個任務無法達成「${targetName}」<br>建議調整目標或下期繼續努力</div>`;
+    return;
+  }
+
+  // 排序
+  let sorted;
+  if (currentMode === 'min') {
+    // 最少任務數優先，同任務數則總分低優先（剛好達標）
+    sorted = combos.sort((a, b) => a.taskCount - b.taskCount || a.total - b.total);
+  } else {
+    // 最高分任務最少優先：先按最高分任務數量少排，再按總分低排
+    sorted = combos.sort((a, b) => {
+      const aHighCount = a.combo.filter(s => s >= 56).length;
+      const bHighCount = b.combo.filter(s => s >= 56).length;
+      return aHighCount - bHighCount || a.total - b.total;
+    });
+  }
+
+  // 只顯示前 6 個
+  const top = sorted.slice(0, 6);
+
+  document.getElementById('res-combos').innerHTML = top.map((c, i) => {
+    // 整理任務描述
+    const taskMap = {};
+    c.combo.forEach(s => { taskMap[s] = (taskMap[s] || 0) + 1; });
+    const taskDesc = Object.entries(taskMap)
+      .sort((a,b) => b[0]-a[0])
+      .map(([s, n]) => `${n} 個 ${s} 分`)
+      .join('、');
+
+    const badge = c.inRange ? `達成 ${targetName}` : `超出範圍（${c.finalScore} 分）`;
+    const badgeStyle = c.inRange ? '' : 'background:#fff3e0;color:#e65100;';
+
+    return `<div class="combo-item">
+      <div class="combo-rank">${i+1}</div>
+      <div class="combo-detail">
+        <div class="combo-tasks">接 ${taskDesc}</div>
+        <div class="combo-score">共 +${c.total} 分 → 總分 ${c.finalScore} 分（${c.taskCount} 個任務）</div>
+      </div>
+      <div class="combo-badge" style="${badgeStyle}">${badge}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── 漢堡選單 ──
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+  document.getElementById('nav-overlay').classList.toggle('show');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('show');
+  document.getElementById('hamburger').classList.remove('open');
+}
+function goEditor() {
+  const pw = prompt('請輸入管理密碼：');
+  if (pw === '390926') { location.href = 'editor.html'; }
+  else if (pw !== null) { alert('密碼錯誤'); }
+}
+
+// ── 初始化 ──
+loadMembers();
+</script>
+</body>
+</html>
