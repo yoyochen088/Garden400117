@@ -48,9 +48,8 @@
 
     /* 手機天條縮短文字 */
     @media(max-width:600px) {
-      nav a[data-short]::before { content:attr(data-short); }
-      nav a[data-short] span { display:none; }
-      nav a { padding:5px 8px !important; font-size:0.78rem !important; }
+      nav { display:none !important; }
+      .hamburger { display:flex !important; }
     }
 
     /* ── 進度條 ── */
@@ -79,7 +78,22 @@
     <a href="member-editor.html" class="active" data-short="擁有" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.25);white-space:nowrap;"><span>花卉擁有</span></a>
     <a href="#" data-short="管理" onclick="goEditor();return false;" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>管理</span></a>
   </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單" style="display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;background:none;border:none;">
+    <span style="display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s;"></span>
+    <span style="display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s;"></span>
+    <span style="display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s;"></span>
+  </button>
 </header>
+
+<div id="nav-overlay" onclick="closeMobileNav()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:150;"></div>
+<div id="mobile-nav" style="position:fixed;top:0;right:-260px;width:240px;height:100vh;background:linear-gradient(160deg,#c2510b,#e96a1e);z-index:200;padding:70px 20px 30px;display:flex;flex-direction:column;gap:8px;transition:right 0.3s cubic-bezier(0.4,0,0.2,1);box-shadow:-4px 0 20px rgba(0,0,0,0.2);">
+  <button onclick="closeMobileNav()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;">✕</button>
+  <a href="index.html" style="color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:1rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.3);">🌸 花卉圖鑑</a>
+  <a href="index.html#id-page" style="color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:1rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.3);">👥 公會成員</a>
+  <a href="flower-showcase.html" style="color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:1rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.3);">🖼️ 個人花展</a>
+  <a href="member-editor.html" style="color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:1rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.2);">✅ 花卉擁有</a>
+  <a href="#" onclick="closeMobileNav();goEditor();" style="color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-size:1rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.3);">⚙️ 管理</a>
+</div>
 <div class="page-content">
 <h1>🌸 花卉擁有管理</h1>
 <p class="subtitle">選擇自己暱稱後勾選擁有的花卉，按儲存更新</p>
@@ -121,6 +135,17 @@ function goEditor() {
   } else if (pw !== null) {
     alert('密碼錯誤');
   }
+}
+
+function toggleMobileNav() {
+  const open = document.getElementById('mobile-nav').style.right === '0px';
+  document.getElementById('mobile-nav').style.right = open ? '-260px' : '0px';
+  document.getElementById('nav-overlay').style.display = open ? 'none' : 'block';
+  document.getElementById('hamburger').style.opacity = open ? '1' : '0.7';
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav').style.right = '-260px';
+  document.getElementById('nav-overlay').style.display = 'none';
 }
 
 async function init() {

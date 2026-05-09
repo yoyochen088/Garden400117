@@ -19,6 +19,7 @@
       --shadow:0 2px 12px rgba(233,106,30,0.10); --radius:14px;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
+    html { margin:0; padding:0; }
     body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
     /* ── Header ── */
@@ -27,6 +28,40 @@
     nav { display:flex; gap:8px; }
     nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
     nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
+
+    /* ── 漢堡選單 ── */
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; }
+    .hamburger span { display:block; width:22px; height:2px; background:#fff; border-radius:2px; transition:all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    /* 手機版遮罩 */
+    #nav-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:150; }
+    #nav-overlay.show { display:block; }
+
+    /* 手機版側邊選單 */
+    #mobile-nav {
+      position:fixed; top:0; right:-260px; width:240px; height:100vh;
+      background:linear-gradient(160deg,#c2510b,#e96a1e);
+      z-index:200; padding:70px 20px 30px;
+      display:flex; flex-direction:column; gap:8px;
+      transition:right 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:-4px 0 20px rgba(0,0,0,0.2);
+    }
+    #mobile-nav.open { right:0; }
+    #mobile-nav a {
+      color:#fff; text-decoration:none; padding:12px 16px;
+      border-radius:12px; font-size:1rem; font-weight:600;
+      border:1.5px solid rgba(255,255,255,0.3);
+      transition:background 0.2s;
+      display:flex; align-items:center; gap:10px;
+    }
+    #mobile-nav a:hover, #mobile-nav a.active { background:rgba(255,255,255,0.2); }
+    #mobile-nav .nav-close {
+      position:absolute; top:16px; right:16px;
+      background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;
+    }
 
     main { max-width:1400px; margin:0 auto; padding:24px 16px 48px; }
     .page { display:none; }
@@ -450,9 +485,8 @@
     @media(max-width:900px) { .flower-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } .skeleton-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; } }
     @media(max-width:600px) {
       .guild-name{font-size:1rem;}
-      nav a{padding:5px 10px;font-size:0.82rem;}
-      nav a[data-short]::before { content:attr(data-short); }
-      nav a[data-short] span { display:none; }
+      nav { display:none; }
+      .hamburger { display:flex; }
       .flower-grid{grid-template-columns:1fr;gap:12px;}
       .skeleton-grid{grid-template-columns:1fr;}
       #lightbox-prev{left:6px;} #lightbox-next{right:6px;}
@@ -520,7 +554,21 @@
     <a href="member-editor.html" data-short="擁有"><span>花卉擁有</span></a>
     <a href="#" data-short="管理" onclick="goEditor();return false;"><span>管理</span></a>
   </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
+    <span></span><span></span><span></span>
+  </button>
 </header>
+
+<!-- 手機側邊選單 -->
+<div id="nav-overlay" onclick="closeMobileNav()"></div>
+<div id="mobile-nav">
+  <button class="nav-close" onclick="closeMobileNav()">✕</button>
+  <a href="#" onclick="showPage('flower-page', this); closeMobileNav();">🌸 花卉圖鑑</a>
+  <a href="#" onclick="showPage('id-page', this); closeMobileNav();">👥 公會成員</a>
+  <a href="flower-showcase.html">🖼️ 個人花展</a>
+  <a href="member-editor.html">✅ 花卉擁有</a>
+  <a href="#" onclick="closeMobileNav(); goEditor();">⚙️ 管理</a>
+</div>
 
 <!-- Lightbox -->
 <div id="lightbox" onclick="handleLightboxClick(event)">
@@ -734,6 +782,21 @@ function goEditor() {
   } else if (pw !== null) {
     alert('密碼錯誤');
   }
+}
+
+function toggleMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  const overlay = document.getElementById('nav-overlay');
+  const btn = document.getElementById('hamburger');
+  nav.classList.toggle('open');
+  overlay.classList.toggle('show');
+  btn.classList.toggle('open');
+}
+
+function closeMobileNav() {
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('show');
+  document.getElementById('hamburger').classList.remove('open');
 }
 
 // ── 品質 Tab ──

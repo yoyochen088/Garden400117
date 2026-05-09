@@ -71,7 +71,20 @@
     <a href="member-editor.html" data-short="擁有"><span>花卉擁有</span></a>
     <a href="#" data-short="管理" onclick="goEditor();return false;"><span>管理</span></a>
   </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
+    <span></span><span></span><span></span>
+  </button>
 </header>
+
+<div id="nav-overlay" onclick="closeMobileNav()"></div>
+<div id="mobile-nav">
+  <button class="nav-close" onclick="closeMobileNav()">✕</button>
+  <a href="index.html">🌸 花卉圖鑑</a>
+  <a href="index.html#id-page">👥 公會成員</a>
+  <a href="flower-showcase.html" class="active">🖼️ 個人花展</a>
+  <a href="member-editor.html">✅ 花卉擁有</a>
+  <a href="#" onclick="closeMobileNav(); goEditor();">⚙️ 管理</a>
+</div>
 
 <main style="max-width:800px;margin:0 auto;padding:0 16px 80px;">
 
@@ -123,11 +136,18 @@
 <script>
 function goEditor() {
   const pw = prompt('請輸入管理密碼：');
-  if (pw === '390926') {
-    location.href = 'editor.html';
-  } else if (pw !== null) {
-    alert('密碼錯誤');
-  }
+  if (pw === '390926') { location.href = 'editor.html'; }
+  else if (pw !== null) { alert('密碼錯誤'); }
+}
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+  document.getElementById('nav-overlay').classList.toggle('show');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('show');
+  document.getElementById('hamburger').classList.remove('open');
 }
 </script>
 </body>
