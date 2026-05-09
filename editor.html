@@ -66,14 +66,22 @@
     .btn{padding:9px 18px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:opacity .2s;}
     .btn:hover{opacity:.85;}.btn:disabled{opacity:.5;cursor:not-allowed;}
     .btn-sec{background:var(--pink-light);color:var(--pink-dark);border:1.5px solid var(--pink-mid);}
+    @media(max-width:600px){
+      nav a[data-short]::before { content:attr(data-short); }
+      nav a[data-short] span { display:none; }
+      nav a { padding:5px 8px !important; font-size:0.78rem !important; }
+    }
   </style>
 </head>
 <body>
 <header style="background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%);color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(194,81,11,0.3);">
   <div style="font-size:1.1rem;font-weight:700;letter-spacing:2px;">♡璀璨♡ 管理編輯器</div>
-  <nav style="display:flex;gap:8px;">
-    <a href="index.html" style="color:#fff;text-decoration:none;padding:6px 14px;border-radius:20px;font-size:0.9rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);">花卉圖鑑</a>
-    <a href="flower-showcase.html" style="color:#fff;text-decoration:none;padding:6px 14px;border-radius:20px;font-size:0.9rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);">個人花展</a>
+  <nav style="display:flex;gap:6px;flex-wrap:nowrap;">
+    <a href="index.html" data-short="圖鑑" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>花卉圖鑑</span></a>
+    <a href="index.html#id-page" data-short="成員" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>公會成員</span></a>
+    <a href="flower-showcase.html" data-short="花展" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>個人花展</span></a>
+    <a href="member-editor.html" data-short="擁有" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>花卉擁有</span></a>
+    <a href="editor.html" class="active" data-short="管理" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.25);white-space:nowrap;"><span>管理</span></a>
   </nav>
 </header>
 <div class="page-content">
