@@ -45,14 +45,38 @@
     .btn { padding:9px 18px; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; transition:opacity 0.2s; }
     .btn:hover { opacity:0.85; }
     .btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    /* 手機天條縮短文字 */
+    @media(max-width:600px) {
+      nav a[data-short]::before { content:attr(data-short); }
+      nav a[data-short] span { display:none; }
+      nav a { padding:5px 8px !important; font-size:0.78rem !important; }
+    }
+
+    /* ── 進度條 ── */
+    #save-progress {
+      display:none; position:fixed; bottom:60px; left:0; right:0;
+      padding:10px 16px; background:#fff; border-top:1px solid var(--border);
+      box-shadow:0 -2px 8px rgba(233,106,30,0.08); z-index:200;
+    }
+    #save-progress.show { display:block; }
+    .progress-label { font-size:0.82rem; color:var(--pink-dark); font-weight:600; margin-bottom:6px; text-align:center; }
+    .progress-track { background:#f8d5b0; border-radius:8px; height:10px; overflow:hidden; }
+    .progress-fill {
+      height:100%; border-radius:8px; width:0%;
+      background:linear-gradient(90deg,#c2510b,#e96a1e,#f4a46a);
+      transition:width 0.3s ease;
+    }
   </style>
 </head>
 <body>
 <header style="background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%);color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(194,81,11,0.3);">
   <div style="font-size:1.1rem;font-weight:700;letter-spacing:2px;">♡璀璨♡ 花卉擁有管理</div>
-  <nav style="display:flex;gap:8px;">
-    <a href="index.html" style="color:#fff;text-decoration:none;padding:6px 14px;border-radius:20px;font-size:0.9rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);">花卉圖鑑</a>
-    <a href="flower-showcase.html" style="color:#fff;text-decoration:none;padding:6px 14px;border-radius:20px;font-size:0.9rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);">個人花展</a>
+  <nav style="display:flex;gap:6px;flex-wrap:nowrap;">
+    <a href="index.html" data-short="圖鑑" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>花卉圖鑑</span></a>
+    <a href="flower-showcase.html" data-short="花展" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>個人花展</span></a>
+    <a href="member-editor.html" class="active" data-short="擁有" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.25);white-space:nowrap;"><span>花卉擁有</span></a>
+    <a href="#" data-short="管理" onclick="goEditor();return false;" style="color:#fff;text-decoration:none;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;border:1.5px solid rgba(255,255,255,0.5);white-space:nowrap;"><span>管理</span></a>
   </nav>
 </header>
 <div class="page-content">
@@ -73,6 +97,11 @@
 </div>
 <div id="flowerGrid" class="flower-grid"><div class="loading">載入中...</div></div>
 
+<div id="save-progress">
+  <div class="progress-label" id="progress-label">準備儲存...</div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
 <div class="bottom-bar">
   <button class="btn" style="background:#34a853;color:#fff;" id="saveBtn" onclick="saveToSheet()">💾 儲存</button>
 </div>
@@ -83,6 +112,15 @@ let flowers = [];
 let members = [];
 let owned = new Set();
 let originalOwned = new Set();
+
+function goEditor() {
+  const pw = prompt('請輸入管理密碼：');
+  if (pw === '390926') {
+    location.href = 'editor.html';
+  } else if (pw !== null) {
+    alert('密碼錯誤');
+  }
+}
 
 async function init() {
   // 從 Sheet 讀取 flowers
@@ -108,16 +146,26 @@ async function init() {
     .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', note: r[2]||'成員' }));
 
   const sel = document.getElementById('memberPicker');
-  sel.innerHTML = members.map((m, i) =>
-    `<option value="${i}">${m.nickname || m.gameId}</option>`
-  ).join('');
+  sel.innerHTML = '<option value="">── 請選擇成員 ──</option>' +
+    members.map((m, i) =>
+      `<option value="${i}">${m.nickname || m.gameId}</option>`
+    ).join('');
 
-  await loadOwned();
+  // 不自動載入，等使用者主動選擇
+  document.getElementById('flowerGrid').innerHTML =
+    '<div class="loading" style="color:#9e6b7e;">👆 請先選擇成員，再勾選花卉</div>';
 }
 
 async function loadOwned() {
   const mi = parseInt(document.getElementById('memberPicker').value);
-  if (isNaN(mi) || !members[mi]) return;
+  if (isNaN(mi) || !members[mi]) {
+    owned = new Set();
+    originalOwned = new Set();
+    document.getElementById('flowerGrid').innerHTML =
+      '<div class="loading" style="color:#9e6b7e;">👆 請先選擇成員，再勾選花卉</div>';
+    document.getElementById('ownedCount').textContent = '';
+    return;
+  }
   const m = members[mi];
 
   // 從 Sheet 讀取該成員的 ownership
@@ -183,21 +231,75 @@ async function saveToSheet() {
   if (toAdd.length === 0 && toRemove.length === 0) { alert('沒有任何變動'); return; }
 
   const btn = document.getElementById('saveBtn');
+  const progress = document.getElementById('save-progress');
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+
   btn.innerHTML = '⏳ 儲存中...'; btn.disabled = true;
+  progress.classList.add('show');
+
+  // 進度條動畫：模擬進度
+  let pct = 0;
+  fill.style.width = '0%';
+  label.textContent = `正在儲存 ${m.nickname} 的花單...`;
+
+  // 快速到 30%
+  await setProgress(fill, 30, 200);
+  label.textContent = `傳送資料中（新增 ${toAdd.length}、移除 ${toRemove.length} 筆）...`;
+
   try {
+    // 慢慢推到 80%，等待 Apps Script 回應
+    const progressInterval = setInterval(() => {
+      if (pct < 80) { pct += 2; fill.style.width = pct + '%'; }
+    }, 150);
+
     await new Promise((resolve) => {
       const params = encodeURIComponent(JSON.stringify({ action: 'updateOwnership', gameId: m.gameId, toAdd, toRemove }));
       const img = new Image();
       img.onload = img.onerror = () => resolve();
       img.src = `${APPS_SCRIPT_URL}?data=${params}`;
     });
-    alert(`✅ ${m.nickname} 的花單已儲存！（新增 ${toAdd.length} 筆，移除 ${toRemove.length} 筆）`);
+
+    clearInterval(progressInterval);
+
+    // 完成：衝到 100%
+    await setProgress(fill, 100, 300);
+    label.textContent = `✅ 儲存完成！`;
+
+    setTimeout(() => {
+      progress.classList.remove('show');
+      fill.style.width = '0%';
+    }, 1200);
+
     originalOwned = new Set(owned);
   } catch(e) {
+    fill.style.width = '100%';
+    fill.style.background = '#e74c3c';
+    label.textContent = '❌ 儲存失敗：' + e.message;
+    setTimeout(() => {
+      progress.classList.remove('show');
+      fill.style.background = '';
+      fill.style.width = '0%';
+    }, 2500);
     alert('❌ 儲存失敗：' + e.message);
   } finally {
     btn.innerHTML = '💾 儲存'; btn.disabled = false;
   }
+}
+
+function setProgress(fill, target, duration) {
+  return new Promise(resolve => {
+    const start = parseFloat(fill.style.width) || 0;
+    const diff = target - start;
+    const steps = 20;
+    const interval = duration / steps;
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      fill.style.width = (start + diff * (step / steps)) + '%';
+      if (step >= steps) { clearInterval(timer); resolve(); }
+    }, interval);
+  });
 }
 
 document.getElementById('memberPicker').addEventListener('change', loadOwned);

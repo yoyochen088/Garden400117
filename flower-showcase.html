@@ -65,9 +65,11 @@
 <header>
   <div class="guild-name">璀璨 <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
   <nav>
-    <a href="index.html">花卉圖鑑</a>
-    <a href="index.html#id-page">公會成員</a>
-    <a href="flower-showcase.html" class="active">個人花展</a>
+    <a href="index.html" data-short="圖鑑"><span>花卉圖鑑</span></a>
+    <a href="index.html#id-page" data-short="成員"><span>公會成員</span></a>
+    <a href="flower-showcase.html" class="active" data-short="花展"><span>個人花展</span></a>
+    <a href="member-editor.html" data-short="擁有"><span>花卉擁有</span></a>
+    <a href="#" data-short="管理" onclick="goEditor();return false;"><span>管理</span></a>
   </nav>
 </header>
 
@@ -120,5 +122,15 @@
 </div>
 
 <script src="flower-showcase.js"></script>
+<script>
+function goEditor() {
+  const pw = prompt('請輸入管理密碼：');
+  if (pw === '390926') {
+    location.href = 'editor.html';
+  } else if (pw !== null) {
+    alert('密碼錯誤');
+  }
+}
+</script>
 </body>
 </html>

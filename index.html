@@ -451,6 +451,8 @@
     @media(max-width:600px) {
       .guild-name{font-size:1rem;}
       nav a{padding:5px 10px;font-size:0.82rem;}
+      nav a[data-short]::before { content:attr(data-short); }
+      nav a[data-short] span { display:none; }
       .flower-grid{grid-template-columns:1fr;gap:12px;}
       .skeleton-grid{grid-template-columns:1fr;}
       #lightbox-prev{left:6px;} #lightbox-next{right:6px;}
@@ -512,9 +514,11 @@
 <header>
   <div class="guild-name">璀璨 <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
   <nav>
-    <a href="#" class="active" onclick="showPage('flower-page',this)">花卉圖鑑</a>
-    <a href="#" onclick="showPage('id-page',this)">公會成員</a>
-    <a href="flower-showcase.html">個人花展</a>
+    <a href="#" class="active" data-short="圖鑑" onclick="showPage('flower-page',this)"><span>花卉圖鑑</span></a>
+    <a href="#" data-short="成員" onclick="showPage('id-page',this)"><span>公會成員</span></a>
+    <a href="flower-showcase.html" data-short="花展"><span>個人花展</span></a>
+    <a href="member-editor.html" data-short="擁有"><span>花卉擁有</span></a>
+    <a href="#" data-short="管理" onclick="goEditor();return false;"><span>管理</span></a>
   </nav>
 </header>
 
@@ -719,8 +723,17 @@ function showPage(pageId, link) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
-  link.classList.add('active');
+  if (link) link.classList.add('active');
   if (pageId === 'id-page') renderIdTable();
+}
+
+function goEditor() {
+  const pw = prompt('請輸入管理密碼：');
+  if (pw === '390926') {
+    location.href = 'editor.html';
+  } else if (pw !== null) {
+    alert('密碼錯誤');
+  }
 }
 
 // ── 品質 Tab ──
@@ -1144,6 +1157,10 @@ document.addEventListener('keydown', e => {
     document.getElementById('flowerContent').style.display = 'block';
     document.getElementById('flowerGrid').innerHTML =
       '<div class="no-result">⚠️ 無法載入資料，請確認 API Key 和 Sheet 設定</div>';
+  }
+  // 從 showcase 點「公會成員」跳轉時自動切換
+  if (window.location.hash === '#id-page') {
+    showPage('id-page', document.querySelector('nav a[onclick*="id-page"]'));
   }
 })();
 </script>
