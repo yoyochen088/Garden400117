@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>競賽計算機 v2 - 璀璨</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <title>蝡嗉魚閮?璈?v2 - ???/title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>?</text></svg>" />
+  <script src="config.js"></script>
   <style>
     :root {
       --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
@@ -16,14 +17,15 @@
     html, body { margin:0; padding:0; }
     body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
 
-    /* ── Header ── */
+    /* ?? Header ?? */
     header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
     .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; }
+    .guild-name small { font-weight:400; opacity:0.8; font-size:0.7rem; }
     nav { display:flex; gap:8px; }
     nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
     nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
 
-    /* ── 漢堡選單 ── */
+    /* ?? 瞍Ｗ?詨 ?? */
     .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; }
     .hamburger span { display:block; width:22px; height:2px; background:#fff; border-radius:2px; transition:all 0.3s; }
     .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
@@ -43,23 +45,23 @@
       .hamburger { display:flex; }
     }
 
-    /* ── 主內容 ── */
+    /* ?? 銝餃摰??? */
     main { max-width:700px; margin:0 auto; padding:24px 16px; }
     h1 { text-align:center; color:var(--pink-dark); font-size:1.3rem; margin-bottom:4px; }
     .subtitle { text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:24px; }
 
-    /* ── 卡片 ── */
+    /* ?? ?∠? ?? */
     .card { background:var(--card-bg); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border); }
     .card-title { font-size:0.85rem; font-weight:700; color:var(--pink-dark); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
 
-    /* ── 表單元素 ── */
+    /* ?? 銵典?? ?? */
     .form-row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
     .form-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:120px; }
     .form-group label { font-size:0.78rem; color:var(--text-muted); font-weight:600; }
     select, input[type=number] { padding:8px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:var(--text); outline:none; width:100%; }
     select:focus, input:focus { border-color:var(--pink); }
 
-    /* ── 稱號顯示 ── */
+    /* ?? 蝔梯?憿舐內 ?? */
     .title-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
     .title-badge { padding:5px 14px; border-radius:20px; font-size:0.82rem; font-weight:700; cursor:pointer; border:2px solid transparent; transition:all 0.18s; opacity:0.5; }
     .title-badge.selected { opacity:1; transform:scale(1.05); }
@@ -71,26 +73,26 @@
     .tb-4 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
     .tb-5 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
 
-    /* ── 最高分選擇 ── */
+    /* ?? ?擃??豢? ?? */
     .max-score-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
     .max-score-btn { padding:6px 14px; border-radius:20px; font-size:0.85rem; font-weight:700; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; }
     .max-score-btn.active { background:var(--pink); border-color:var(--pink); color:#fff; }
 
-    /* ── 進階加成 ── */
+    /* ?? ?脤??? ?? */
     .bonus-btn { padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; margin:4px 4px 0 0; }
     .bonus-btn.active { background:var(--pink-light); border-color:var(--pink); }
     .mode-toggle { display:flex; gap:8px; margin-bottom:16px; }
     .mode-btn { flex:1; padding:8px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; border:1.5px solid var(--pink-mid); background:var(--bg); color:var(--pink-dark); transition:all 0.18s; }
     .mode-btn.active { background:var(--pink); border-color:var(--pink); color:#fff; }
 
-    /* ── 計算按鈕 ── */
+    /* ?? 閮??? ?? */
     .btn-row { display:flex; gap:10px; margin-bottom:4px; }
     .btn-calc { flex:1; padding:12px; border:none; border-radius:10px; font-size:0.95rem; font-weight:700; cursor:pointer; transition:opacity 0.2s; }
     .btn-calc-max { background:linear-gradient(135deg,#7a3008,#a84010); color:#fff; }
     .btn-calc-min { background:linear-gradient(135deg,#2d6a4f,#40916c); color:#fff; }
     .btn-calc:hover { opacity:0.88; }
 
-    /* ── 結果區 ── */
+    /* ?? 蝯?? ?? */
     #result { display:none; }
     .result-header { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; border-radius:var(--radius); padding:16px 20px; margin-bottom:12px; transition:background 0.3s; }
     .result-header .name { font-size:1.1rem; font-weight:700; margin-bottom:6px; }
@@ -110,7 +112,7 @@
 
     .no-result { text-align:center; padding:32px; color:var(--text-muted); font-size:0.95rem; }
 
-    /* ── 稱號進度條 ── */
+    /* ?? 蝔梯??脣漲璇??? */
     .progress-wrap { margin-top:12px; }
     .progress-label { display:flex; justify-content:space-between; font-size:0.82rem; color:#fff; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,0.4); margin-bottom:6px; }
     .progress-track { background:rgba(0,0,0,0.25); border-radius:6px; height:12px; overflow:hidden; }
@@ -120,57 +122,57 @@
 <body>
 
 <header>
-  <div class="guild-name">璀璨 <small style="font-size:0.7rem;opacity:0.8;">[400117]</small></div>
+  <div class="guild-name">???<small>[400117]</small></div>
   <nav>
-    <a href="index.html">花卉圖鑑</a>
-    <a href="index.html#id-page">公會成員</a>
-    <a href="flower-showcase.html">個人花展</a>
-    <a href="member-editor.html">花卉擁有</a>
-    <a href="contest.html" class="active">競賽算分</a>
-    <a href="#" onclick="goEditor();return false;">管理</a>
+    <a href="index.html">?勗???</a>
+    <a href="index.html#id-page">?祆??</a>
+    <a href="flower-showcase.html">?犖?勗?</a>
+    <a href="member-editor.html">?勗???</a>
+    <a href="contest.html" class="active">蝡嗉魚蝞?</a>
+    <a href="#" onclick="goEditor();return false;">蝞∠?</a>
   </nav>
-  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="?詨">
     <span></span><span></span><span></span>
   </button>
 </header>
 
 <div id="nav-overlay" onclick="closeMobileNav()"></div>
 <div id="mobile-nav">
-  <button class="nav-close" onclick="closeMobileNav()">✕</button>
-  <a href="index.html">🌸 花卉圖鑑</a>
-  <a href="index.html#id-page">👥 公會成員</a>
-  <a href="flower-showcase.html">🖼️ 個人花展</a>
-  <a href="member-editor.html">✅ 花卉擁有</a>
-  <a href="contest.html" class="active">🏆 競賽算分</a>
-  <a href="#" onclick="closeMobileNav();goEditor();">⚙️ 管理</a>
+  <button class="nav-close" onclick="closeMobileNav()">??/button>
+  <a href="index.html">? ?勗???</a>
+  <a href="index.html#id-page">? ?祆??</a>
+  <a href="flower-showcase.html">?儭??犖?勗?</a>
+  <a href="member-editor.html">???勗???</a>
+  <a href="contest.html" class="active">?? 蝡嗉魚蝞?</a>
+  <a href="#" onclick="closeMobileNav();goEditor();">?? 蝞∠?</a>
 </div>
 
 <main>
-  <h1>🏆 競賽計算機</h1>
-  <p class="subtitle">計算最短路徑達成目標稱號</p>
+  <h1>?? 蝡嗉魚閮?璈?/h1>
+  <p class="subtitle">閮???剛楝敺??璅迂??/p>
 
-  <!-- 成員與設定 -->
+  <!-- ??身摰?-->
   <div class="card">
-    <div class="card-title">⚙️ 基本設定</div>
+    <div class="card-title">?? ?箸閮剖?</div>
     <div class="form-row">
       <div class="form-group">
-        <label>任務上限</label>
+        <label>隞餃?銝?</label>
         <select id="taskLimit" onchange="refresh()" oninput="refresh()">
-          <option value="18">18 個</option>
-          <option value="24" selected>24 個</option>
+          <option value="18">18 ??/option>
+          <option value="24" selected>24 ??/option>
         </select>
       </div>
       <div class="form-group">
-        <label>目前競賽積分</label>
-        <input type="number" id="currentScore" placeholder="例：1192" min="0" oninput="refresh()" />
+        <label>?桀?蝡嗉魚蝛?</label>
+        <input type="number" id="currentScore" placeholder="靘?1192" min="0" oninput="refresh()" />
       </div>
       <div class="form-group">
-        <label>已解任務次數</label>
-        <input type="number" id="doneCount" placeholder="例：22" min="0" oninput="refresh()" />
+        <label>撌脰圾隞餃?甈⊥</label>
+        <input type="number" id="doneCount" placeholder="靘?22" min="0" oninput="refresh()" />
       </div>
     </div>
     <div style="margin-top:14px;">
-      <div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">最高可接加倍任務分數</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">?擃?亙??遙????/div>
       <div class="max-score-btns">
         <button class="max-score-btn" data-score="28" onclick="setMaxScore(28)">28</button>
         <button class="max-score-btn" data-score="42" onclick="setMaxScore(42)">42</button>
@@ -183,37 +185,37 @@
     <div id="bonusWrap" style="margin-top:12px;"></div>
   </div>
 
-  <!-- 目標稱號 -->
+  <!-- ?格?蝔梯? -->
   <div class="card">
-    <div class="card-title">🎯 目標稱號</div>
+    <div class="card-title">? ?格?蝔梯?</div>
     <div class="title-badges" id="titleBadges">
-      <div class="title-badge tb-1" data-min="500" data-max="699" data-name="青銅花匠" onclick="selectTitle(this)">青銅花匠<br><small>500–699</small></div>
-      <div class="title-badge tb-2" data-min="700" data-max="999" data-name="白銀花匠" onclick="selectTitle(this)">白銀花匠<br><small>700–999</small></div>
-      <div class="title-badge tb-3" data-min="1000" data-max="1299" data-name="黃金花匠" onclick="selectTitle(this)">黃金花匠<br><small>1000–1299</small></div>
-      <div class="title-badge tb-4" data-min="1300" data-max="1399" data-name="大師花匠" onclick="selectTitle(this)">大師花匠<br><small>1300–1399</small></div>
-      <div class="title-badge tb-5" data-min="1400" data-max="99999" data-name="王者花匠" onclick="selectTitle(this)">王者花匠<br><small>1400+</small></div>
+      <div class="title-badge tb-1" data-min="500" data-max="699" data-name="???勗?" onclick="selectTitle(this)">???勗?<br><small>500??99</small></div>
+      <div class="title-badge tb-2" data-min="700" data-max="999" data-name="?賡??勗?" onclick="selectTitle(this)">?賡??勗?<br><small>700??99</small></div>
+      <div class="title-badge tb-3" data-min="1000" data-max="1299" data-name="暺??勗?" onclick="selectTitle(this)">暺??勗?<br><small>1000??299</small></div>
+      <div class="title-badge tb-4" data-min="1300" data-max="1399" data-name="憭批葦?勗?" onclick="selectTitle(this)">憭批葦?勗?<br><small>1300??399</small></div>
+      <div class="title-badge tb-5" data-min="1400" data-max="99999" data-name="??? onclick="selectTitle(this)">???br><small>1400+</small></div>
     </div>
   </div>
 
-  <!-- 計算模式 -->
+  <!-- 閮?璅∪? -->
   <div class="mode-toggle" style="display:none;">
-    <button class="mode-btn active" id="modeMax" onclick="setMode('max')">接滿剩餘任務</button>
-    <button class="mode-btn" id="modeMin" onclick="setMode('min')">最少任務數達標</button>
+    <button class="mode-btn active" id="modeMax" onclick="setMode('max')">?交遛?拚?隞餃?</button>
+    <button class="mode-btn" id="modeMin" onclick="setMode('min')">?撠遙???</button>
   </div>
 
   <div class="btn-row">
-    <button class="btn-calc btn-calc-max" onclick="calculateMode('max')">&#x1F4CB; 接滿剩餘任務</button>
-    <button class="btn-calc btn-calc-min" onclick="calculateMode('min')">&#x2728; 最少任務數達標</button>
+    <button class="btn-calc btn-calc-max" onclick="calculateMode('max')">&#x1F4CB; ?交遛?拚?隞餃?</button>
+    <button class="btn-calc btn-calc-min" onclick="calculateMode('min')">&#x2728; ?撠遙???</button>
   </div>
 
-  <!-- 結果 -->
+  <!-- 蝯? -->
   <div id="result" style="margin-top:20px;">
     <div class="result-header">
       <div class="stats">
-        <div class="stat">&#x1F4CA; 總分：<span id="res-score"></span></div>
-        <div class="stat">&#x1F4CB; 任務上限：<span id="res-limit"></span></div>
-        <div class="stat">&#x23F3; 剩餘可接：<span id="res-remain"></span></div>
-        <div class="stat">&#x1F3AF; 最高可接：<span id="res-max-task"></span></div>
+        <div class="stat">&#x1F4CA; 蝮賢?嚗?span id="res-score"></span></div>
+        <div class="stat">&#x1F4CB; 隞餃?銝?嚗?span id="res-limit"></span></div>
+        <div class="stat">&#x23F3; ?拚??舀嚗?span id="res-remain"></span></div>
+        <div class="stat">&#x1F3AF; ?擃?伐?<span id="res-max-task"></span></div>
       </div>
       <div class="progress-wrap">
         <div class="progress-label">
@@ -229,27 +231,27 @@
 </main>
 
 <script>
-// ── 稱號資料 ──
+// ?? 蝔梯?鞈? ??
 const TITLES = [
-  { name:'無稱號',   min:0,    max:499  },
-  { name:'青銅花匠', min:500,  max:699  },
-  { name:'白銀花匠', min:700,  max:999  },
-  { name:'黃金花匠', min:1000, max:1299 },
-  { name:'大師花匠', min:1300, max:1399 },
-  { name:'王者花匠', min:1400, max:99999},
+  { name:'?∠迂??,   min:0,    max:499  },
+  { name:'???勗?', min:500,  max:699  },
+  { name:'?賡??勗?', min:700,  max:999  },
+  { name:'暺??勗?', min:1000, max:1299 },
+  { name:'憭批葦?勗?', min:1300, max:1399 },
+  { name:'???, min:1400, max:99999},
 ];
 
-// ── 任務分數（與 BOT 一致）──
+// ?? 隞餃??嚗? BOT 銝?湛???
 const NORMAL_SCORES  = [14, 21, 23, 25, 28, 30];
 const DOUBLED_BASE   = [28, 42, 46, 50, 56, 60];
-const MAX_SINGLE = 62; // 最高進階加成
+const MAX_SINGLE = 62; // ?擃脤???
 
 let selectedTitleEl = null;
 let currentMode = 'max';
 let selectedMaxScore = 50;
 let selectedBonus = 0;
 
-// ── 依 maxScore 和 bonus 建立可用分數清單（與 BOT 一致）──
+// ?? 靘?maxScore ??bonus 撱箇??舐?皜嚗? BOT 銝?湛???
 function buildAllScores(maxScore, bonus) {
   const doubled = [28, 42, 46, 50].filter(s => s <= maxScore);
   if (maxScore >= 56) {
@@ -266,8 +268,8 @@ function buildAllScores(maxScore, bonus) {
   return all;
 }
 
-// ── 核心計算（與 BOT recommend_combinations 一致）──
-// 恰好用完 remainingSlots 個任務，找出所有達標組合
+// ?? ?詨?閮?嚗? BOT recommend_combinations 銝?湛???
+// ?啣末?典? remainingSlots ?遙???曉???璅???
 function recommendCombinations(currentScore, targetScore, remainingSlots, maxScore, bonus) {
   const need = targetScore - currentScore;
   if (need <= 0) return [];
@@ -276,7 +278,7 @@ function recommendCombinations(currentScore, targetScore, remainingSlots, maxSco
   const seen = new Set();
   const results = [];
 
-  // 枚舉兩種分數的組合 (sa <= sb)，恰好用完 remainingSlots 個任務
+  // ???拍車?????(sa <= sb)嚗憟賜摰?remainingSlots ?遙??
   for (let i = 0; i < allScores.length; i++) {
     const sa = allScores[i];
     for (let j = i; j < allScores.length; j++) {
@@ -303,7 +305,7 @@ function recommendCombinations(currentScore, targetScore, remainingSlots, maxSco
 
   if (results.length === 0) return null;
 
-  // 排序：最高分任務數最少優先，次要總分最低（與 BOT 一致）
+  // ??嚗?擃?隞餃??豢?撠??甈∟?蝮賢??雿???BOT 銝?湛?
   const topScore = Math.max(...results.flatMap(r => [r.a, r.b].filter(s=>s>0)));
 
   if (currentMode === 'max') {
@@ -313,14 +315,14 @@ function recommendCombinations(currentScore, targetScore, remainingSlots, maxSco
       return xTop - yTop || x.total - y.total;
     });
   } else {
-    // 最少任務數優先 → 這裡所有組合任務數相同（都是 remainingSlots），改為總分最低優先
+    // ?撠遙??芸? ???ㄐ????遙??詨?嚗??remainingSlots嚗??寧蝮賢??雿??
     results.sort((x, y) => x.total - y.total);
   }
 
   return results;
 }
 
-// ── 最少任務數模式：從 1 個任務開始找最少能達標的組合 ──
+// ?? ?撠遙?璅∪?嚗? 1 ?遙??憪?撠????????
 function findMinTaskCombos(currentScore, targetScore, remaining, maxScore, bonus) {
   const need = targetScore - currentScore;
   if (need <= 0) return { minCount: 0, combos: [] };
@@ -328,15 +330,15 @@ function findMinTaskCombos(currentScore, targetScore, remaining, maxScore, bonus
   const allScores = buildAllScores(maxScore, bonus);
   const maxSingle = Math.max(...allScores);
 
-  // 從最少任務數開始找
+  // 敺?撠遙?????
   for (let n = 1; n <= remaining; n++) {
-    // 最多 n 個任務能得的最高分
+    // ?憭?n ?遙?敺??擃?
     if (n * maxSingle < need) continue;
 
     const seen = new Set();
     const results = [];
 
-    // 枚舉兩種分數的組合，恰好 n 個任務
+    // ???拍車??????啣末 n ?遙??
     for (let i = 0; i < allScores.length; i++) {
       const sa = allScores[i];
       for (let j = i; j < allScores.length; j++) {
@@ -362,7 +364,7 @@ function findMinTaskCombos(currentScore, targetScore, remaining, maxScore, bonus
     }
 
     if (results.length > 0) {
-      // 排序：最高分任務數最少優先，次要總分最低
+      // ??嚗?擃?隞餃??豢?撠??甈∟?蝮賢??雿?
       const topScore = Math.max(...results.flatMap(r => [r.a, r.b].filter(s=>s>0)));
       results.sort((x, y) => {
         const xTop = (x.a === topScore ? x.ca : 0) + (x.b === topScore ? x.cb : 0);
@@ -373,12 +375,12 @@ function findMinTaskCombos(currentScore, targetScore, remaining, maxScore, bonus
     }
   }
 
-  return null; // 無法達標
+  return null; // ?⊥???
 }
 
 function selectTitle(el) {
   if (el.classList.contains('disabled')) {
-    // disabled 稱號也允許選取，refresh() 會處理顯示
+    // disabled 蝔梯?銋?閮梢??refresh() ???＊蝷?
     document.querySelectorAll('.title-badge').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
     selectedTitleEl = el;
@@ -390,7 +392,7 @@ function selectTitle(el) {
   refresh();
 }
 
-// ── 即時更新稱號按鈕狀態（只更新按鈕，不碰結果區）──
+// ?? ?單??湔蝔梯???????芣?唳???銝１蝯??嚗??
 function updateTitleBadges() {
   const score = parseInt(document.getElementById('currentScore').value) || 0;
   const done = parseInt(document.getElementById('doneCount').value) || 0;
@@ -406,10 +408,10 @@ function updateTitleBadges() {
     const reachable = maxPossible >= min;
     if (!reachable && !alreadyDone) {
       el.classList.add('disabled'); el.style.opacity='0.3'; el.style.cursor='not-allowed';
-      el.title = `本期無法達成（最多可得 ${maxPossible} 分）`;
+      el.title = `?祆??⊥???嚗?憭敺?${maxPossible} ??`;
     } else {
       el.classList.remove('disabled'); el.style.opacity=''; el.style.cursor='pointer';
-      el.title = alreadyDone ? `已達成（目前 ${score} 分）` : '';
+      el.title = alreadyDone ? `撌脤????桀? ${score} ??` : '';
     }
   });
 }
@@ -418,39 +420,39 @@ function setMode(mode) {
   currentMode = mode;
   document.getElementById('modeMin').classList.toggle('active', mode === 'min');
   document.getElementById('modeMax').classList.toggle('active', mode === 'max');
-  // 若已有結果，切換時自動重新計算
+  // ?亙歇??????????啗?蝞?
   if (document.getElementById('result').style.display === 'block') {
     calculate();
   }
 }
 
-// ── 統一刷新：所有輸入變動都呼叫這裡 ──
+// ?? 蝯曹??瑟嚗??撓?亥???澆?ㄐ ??
 function refresh() {
   const score = parseInt(document.getElementById('currentScore').value);
   const done  = parseInt(document.getElementById('doneCount').value);
   const limit = parseInt(document.getElementById('taskLimit').value) || 24;
 
-  // 先更新稱號按鈕狀態（不含超過上限判斷）
+  // ??啁迂??????銝頞?銝??斗嚗?
   updateTitleBadges();
 
-  // 條件不齊全就不計算
+  // 璇辣銝??典停銝?蝞?
   if (isNaN(score) || score < 0) return;
   if (isNaN(done)  || done  < 0) return;
 
-  // 優先判斷：已解次數超過上限
+  // ?芸??斗嚗歇閫?活?貉?????
   if (done > limit) {
     const hdr = document.getElementById('result');
     hdr.style.display = 'block';
     document.querySelector('.result-header').className = 'result-header';
-    document.getElementById('res-score').textContent = `${score} 分`;
-    document.getElementById('res-limit').textContent = `${limit} 個`;
-    document.getElementById('res-remain').textContent = `0 個`;
-    document.getElementById('res-max-task').textContent = `${selectedMaxScore} 分任務`;
+    document.getElementById('res-score').textContent = `${score} ?;
+    document.getElementById('res-limit').textContent = `${limit} ?;
+    document.getElementById('res-remain').textContent = `0 ?;
+    document.getElementById('res-max-task').textContent = `${selectedMaxScore} ?遙?;
     document.getElementById('res-title-label').textContent = '';
     document.getElementById('res-progress-text').textContent = '';
     document.getElementById('res-progress-fill').style.width = '0%';
     document.querySelector('.progress-wrap').style.display = 'none';
-    document.getElementById('res-target').textContent = `❌ 已解任務次數（${done}）超過任務上限（${limit}），請確認輸入`;
+    document.getElementById('res-target').textContent = `??撌脰圾隞餃?甈⊥嚗?{done}嚗??遙????${limit}嚗?隢Ⅱ隤撓?匝;
     document.getElementById('res-combos').innerHTML = '';
     return;
   }
@@ -462,7 +464,7 @@ function refresh() {
 
 function autoCalculate() { refresh(); }
 
-// 按鈕直接指定模式並計算
+// ???湔??璅∪?銝西?蝞?
 function calculateMode(mode) {
   currentMode = mode;
   calculate();
@@ -487,12 +489,12 @@ function renderBonusButtons() {
   if (selectedMaxScore < 56) { wrap.style.display='none'; return; }
   wrap.style.display='';
   const options = [];
-  if (selectedMaxScore >= 56) options.push([0,'56+1（57分）'],[1,'56+2（58分）']);
-  if (selectedMaxScore >= 60) options.push([2,'60+1（61分）'],[3,'60+2（62分）']);
-  wrap.innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">進階加成（可複選）</div>' +
+  if (selectedMaxScore >= 56) options.push([0,'56+1嚗?7??'],[1,'56+2嚗?8??']);
+  if (selectedMaxScore >= 60) options.push([2,'60+1嚗?1??'],[3,'60+2嚗?2??']);
+  wrap.innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;">?脤???嚗銴嚗?/div>' +
     options.map(([bit, label]) => {
       const checked = !!(selectedBonus & (1 << bit));
-      return `<button class="bonus-btn${checked?' active':''}" onclick="toggleBonus(${bit})">${checked?'✅':'⬜'} ${label}</button>`;
+      return `<button class="bonus-btn${checked?' active':''}" onclick="toggleBonus(${bit})">${checked?'??:'漎?} ${label}</button>`;
     }).join('');
 }
 
@@ -507,20 +509,20 @@ function calculate() {
   const done  = parseInt(document.getElementById('doneCount').value);
   const limit = parseInt(document.getElementById('taskLimit').value) || 24;
 
-  if (isNaN(score) || score < 0) { alert('請輸入目前競賽積分'); return; }
-  if (isNaN(done)  || done  < 0) { alert('請輸入已解任務次數'); return; }
-  if (!selectedTitleEl)          { alert('請選擇目標稱號'); return; }
+  if (isNaN(score) || score < 0) { alert('隢撓?亦?奎鞈賜???); return; }
+  if (isNaN(done)  || done  < 0) { alert('隢撓?亙歇閫?遙?活??); return; }
+  if (!selectedTitleEl)          { alert('隢?璅迂??); return; }
   if (done > limit) {
     const resultEl = document.getElementById('result');
     resultEl.style.display = 'block';
-    document.getElementById('res-score').textContent = `${score} 分`;
-    document.getElementById('res-limit').textContent = `${limit} 個`;
-    document.getElementById('res-remain').textContent = `0 個`;
-    document.getElementById('res-max-task').textContent = `${selectedMaxScore} 分任務`;
+    document.getElementById('res-score').textContent = `${score} ?;
+    document.getElementById('res-limit').textContent = `${limit} ?;
+    document.getElementById('res-remain').textContent = `0 ?;
+    document.getElementById('res-max-task').textContent = `${selectedMaxScore} ?遙?;
     document.getElementById('res-title-label').textContent = '';
     document.getElementById('res-progress-text').textContent = '';
     document.getElementById('res-progress-fill').style.width = '0%';
-    document.getElementById('res-target').textContent = `⚠️ 已解任務次數（${done}）超過任務上限（${limit}），請確認輸入`;
+    document.getElementById('res-target').textContent = `?? 撌脰圾隞餃?甈⊥嚗?{done}嚗??遙????${limit}嚗?隢Ⅱ隤撓?匝;
     document.getElementById('res-combos').innerHTML = '';
     return;
   }
@@ -536,22 +538,22 @@ function calculate() {
   const maxSingle = Math.max(...allScores);
   const maxPossible = score + remaining * maxSingle;
 
-  // 填入 header（預設正常橘色）
+  // 憛怠 header嚗?閮剜迤撣豢??莎?
   document.querySelector('.result-header').className = 'result-header';
-  document.getElementById('res-score').textContent = `${score} 分`;
-  document.getElementById('res-limit').textContent = `${limit} 個`;
-  document.getElementById('res-remain').textContent = `${remaining} 個`;
-  document.getElementById('res-max-task').textContent = `${selectedMaxScore} 分任務`;
+  document.getElementById('res-score').textContent = `${score} ?;
+  document.getElementById('res-limit').textContent = `${limit} ?;
+  document.getElementById('res-remain').textContent = `${remaining} ?;
+  document.getElementById('res-max-task').textContent = `${selectedMaxScore} ?遙?;
 
-  // 進度條：顯示到目標稱號的進度
+  // ?脣漲璇?憿舐內?啁璅迂???脣漲
   const titleIdx = TITLES.findIndex(t => t.name === currentTitle.name);
-  document.getElementById('res-title-label').textContent = `${currentTitle.name} → ${targetName} 還差 ${need} 分`;
+  document.getElementById('res-title-label').textContent = `${currentTitle.name} ??${targetName} ?榆 ${need} ?;
   if (score < targetMin) {
     const pct = Math.min(100, Math.round(score / targetMin * 100));
     document.getElementById('res-progress-text').textContent = `${score} / ${targetMin}`;
     document.getElementById('res-progress-fill').style.width = Math.max(pct, 2) + '%';
   } else {
-    document.getElementById('res-progress-text').textContent = `${score} 分`;
+    document.getElementById('res-progress-text').textContent = `${score} ?;
     document.getElementById('res-progress-fill').style.width = '100%';
   }
 
@@ -560,7 +562,7 @@ function calculate() {
 
   if (score >= targetMin) {
     document.querySelector('.progress-wrap').style.display = '';
-    document.getElementById('res-target').textContent = `✅ 已達成「${targetName}」！目前 ${score} 分`;
+    document.getElementById('res-target').textContent = `??撌脤???{targetName}???桀? ${score} ?;
     document.getElementById('res-combos').innerHTML = '';
     return;
   }
@@ -569,78 +571,78 @@ function calculate() {
     document.querySelector('.result-header').className = 'result-header';
     document.querySelector('.progress-wrap').style.display = 'none';
     document.getElementById('res-title-label').textContent = '';
-    document.getElementById('res-target').textContent = `❌ ${currentTitle.name} → ${targetName} 還差 ${need} 分，本期無法達成`;
+    document.getElementById('res-target').textContent = `??${currentTitle.name} ??${targetName} ?榆 ${need} ???祆??⊥???`;
     document.getElementById('res-combos').innerHTML =
-      `<div class="no-result">😢 本期最多可得 ${maxPossible} 分<br>無法達成「${targetName}」</div>`;
+      `<div class="no-result">? ?祆??憭敺?${maxPossible} ??br>?⊥?????{targetName}??/div>`;
     return;
   }
 
   document.querySelector('.progress-wrap').style.display = '';
 
   document.getElementById('res-target').textContent =
-    `🎯 目標：${targetName}（還差 ${need} 分，剩餘 ${remaining} 個任務全部接完）`;
+    `? ?格?嚗?{targetName}嚗?撌?${need} ???拚? ${remaining} ?遙??冽摰?`;
 
   if (remaining === 0) {
-    document.getElementById('res-combos').innerHTML = '<div class="no-result">⚠️ 本期任務已達上限</div>';
+    document.getElementById('res-combos').innerHTML = '<div class="no-result">?? ?祆?隞餃?撌脤?銝?</div>';
     return;
   }
 
   let combos, modeLabel;
 
   if (currentMode === 'min') {
-    // 最少任務數模式
+    // ?撠遙?璅∪?
     const result = findMinTaskCombos(score, targetMin, remaining, selectedMaxScore, selectedBonus);
     if (!result) {
       document.getElementById('res-combos').innerHTML =
-        `<div class="no-result">😢 找不到合適的組合，建議調整目標</div>`;
+        `<div class="no-result">? ?曆??啣??拍?蝯?嚗遣霅啗矽?渡璅?/div>`;
       return;
     }
     combos = result.combos;
     document.getElementById('res-target').textContent =
-      `🎯 目標：${targetName}（還差 ${need} 分）✨ 最少再接 ${result.minCount} 個任務即可達成！`;
-    modeLabel = `最少 ${result.minCount} 個任務`;
+      `? ?格?嚗?{targetName}嚗?撌?${need} ?????撠???${result.minCount} ?遙??舫???`;
+    modeLabel = `?撠?${result.minCount} ?遙?;
   } else {
-    // 最高分任務最少優先模式（恰好用完所有剩餘名額）
+    // ?擃?隞餃??撠?芋撘??啣末?典???擗?憿?
     combos = recommendCombinations(score, targetMin, remaining, selectedMaxScore, selectedBonus);
     if (!combos || combos.length === 0) {
       document.getElementById('res-combos').innerHTML =
-        `<div class="no-result">😢 找不到合適的組合，建議調整目標</div>`;
+        `<div class="no-result">? ?曆??啣??拍?蝯?嚗遣霅啗矽?渡璅?/div>`;
       return;
     }
     document.getElementById('res-target').textContent =
-      `🎯 目標：${targetName}（還差 ${need} 分，接滿 ${remaining} 個任務）`;
-    modeLabel = `接滿 ${remaining} 個任務`;
+      `? ?格?嚗?{targetName}嚗?撌?${need} ???交遛 ${remaining} ?遙??`;
+    modeLabel = `?交遛 ${remaining} ?遙?;
   }
 
   const top = combos.slice(0, 6);
   document.getElementById('res-combos').innerHTML = top.map((c, i) => {
     let taskDesc = '';
     if (c.b > 0) {
-      // 高分放前面
+      // 擃??曉???
       const [highScore, highCount, lowScore, lowCount] = c.b > c.a
         ? [c.b, c.cb, c.a, c.ca]
         : [c.a, c.ca, c.b, c.cb];
-      taskDesc = `${highCount} 個 ${highScore} 分 + ${lowCount} 個 ${lowScore} 分`;
+      taskDesc = `${highCount} ??${highScore} ??+ ${lowCount} ??${lowScore} ?;
     } else {
-      taskDesc = `${c.ca} 個 ${c.a} 分`;
+      taskDesc = `${c.ca} ??${c.a} ?;
     }
 
     const inRange = c.finalScore <= targetMax;
-    const badge = inRange ? `達成 ${targetName}` : `超出範圍（${c.finalScore} 分）`;
+    const badge = inRange ? `?? ${targetName}` : `頞蝭?嚗?{c.finalScore} ??`;
     const badgeStyle = inRange ? '' : 'background:#fff3e0;color:#e65100;';
 
     return `<div class="combo-item">
       <div class="combo-rank">${i+1}</div>
       <div class="combo-detail">
-        <div class="combo-tasks">接 ${taskDesc}</div>
-        <div class="combo-score">共 +${c.total} 分 → 總分 ${c.finalScore} 分（${c.taskCount} 個任務）</div>
+        <div class="combo-tasks">??${taskDesc}</div>
+        <div class="combo-score">??+${c.total} ????蝮賢? ${c.finalScore} ??${c.taskCount} ?遙??</div>
       </div>
       <div class="combo-badge" style="${badgeStyle}">${badge}</div>
     </div>`;
   }).join('');
 }
 
-// ── 漢堡選單 ──
+// ?? 瞍Ｗ?詨 ??
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
   document.getElementById('nav-overlay').classList.toggle('show');
@@ -652,18 +654,18 @@ function closeMobileNav() {
   document.getElementById('hamburger').classList.remove('open');
 }
 async function goEditor() {
-  const pw = prompt('請輸入管理密碼：');
+  const pw = prompt('隢撓?亦恣??蝣潘?');
   if (!pw) return;
   try {
     const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw: pw }));
     const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
     const data = await res.json();
     if (data.ok) { location.href = 'editor.html'; }
-    else { alert('密碼錯誤'); }
-  } catch(e) { alert('驗證失敗，請稍後再試'); }
+    else { alert('撖Ⅳ?航炊'); }
+  } catch(e) { alert('撽?憭望?嚗?蝔??岫'); }
 }
 
-// ── 初始化 ──
+// ?? ??????
 renderBonusButtons();
 </script>
 </body>
