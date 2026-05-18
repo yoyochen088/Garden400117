@@ -998,7 +998,7 @@ function renderIdTable() {
     const id = o.gameid || o.gameId || Object.values(o)[0] || '';
     if (id) ownerCount[id] = (ownerCount[id] || 0) + 1;
   });
-  const maxOwned = Math.max(...Object.values(ownerCount), 1);
+  const maxOwned = FLOWERS.length || 1;
 
   const sorted = MEMBERS.slice().sort((a,b) => (ROLE_ORDER[a.note]??9) - (ROLE_ORDER[b.note]??9));
   document.getElementById('idTableBody').innerHTML = sorted.map((m,i) => {
