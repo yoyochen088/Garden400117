@@ -114,7 +114,7 @@
   <a href="index.html#id-page">👥 公會成員</a>
   <a href="flower-showcase.html">🖼️ 個人花展</a>
   <a href="member-editor.html" class="active">✅ 花卉擁有</a>
-  <a href="#" onclick="closeMobileNav();goEditor();">⚙️ 管理</a>
+  <a href="editor.html">⚙️ 管理</a>
 </div>
 <div class="page-content">
 <h1>🌸 花卉擁有管理</h1>
@@ -149,18 +149,6 @@ let flowers = [];
 let members = [];
 let owned = new Set();
 let originalOwned = new Set();
-
-async function goEditor() {
-  const pw = prompt('請輸入管理密碼：');
-  if (!pw) return;
-  try {
-    const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw: pw }));
-    const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
-    const data = await res.json();
-    if (data.ok) { location.href = 'editor.html'; }
-    else { alert('密碼錯誤'); }
-  } catch(e) { alert('驗證失敗，請稍後再試'); }
-}
 
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');

@@ -135,17 +135,6 @@
 
 <script src="flower-showcase.js"></script>
 <script>
-async function goEditor() {
-  const pw = prompt('請輸入管理密碼：');
-  if (!pw) return;
-  try {
-    const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw: pw }));
-    const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
-    const data = await res.json();
-    if (data.ok) { location.href = 'editor.html'; }
-    else { alert('密碼錯誤'); }
-  } catch(e) { alert('驗證失敗，請稍後再試'); }
-}
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
   document.getElementById('nav-overlay').classList.toggle('show');
