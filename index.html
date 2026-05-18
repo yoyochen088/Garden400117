@@ -675,6 +675,10 @@
       <div class="loading-spinner"></div><br>載入成員資料中...
     </div>
     <div id="memberContent" style="display:none;">
+      <div style="font-size:0.95rem;font-weight:700;color:var(--pink-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+        <span style="display:inline-block;width:4px;height:1.1em;background:linear-gradient(135deg,#c2510b,#e96a1e);border-radius:2px;"></span>
+        公會成員 <span id="mainMemberTitle" style="font-size:0.8rem;font-weight:400;color:var(--text-muted);"></span>
+      </div>
       <div class="id-table-wrap">
         <table>
           <thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
@@ -1037,6 +1041,10 @@ function renderIdTable() {
   };
 
   document.getElementById('idTableBody').innerHTML = mainSorted.map(buildRow).join('');
+
+  // 主公會標題加人數
+  const mainTitle = document.getElementById('mainMemberTitle');
+  if (mainTitle) mainTitle.textContent = `（${mainSorted.length} 人）`;
 
   if (branchSorted.length > 0) {
     document.getElementById('branchTableBody').innerHTML = branchSorted.map(buildRow).join('');
