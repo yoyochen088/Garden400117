@@ -36,6 +36,7 @@ header {
   text-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
 .guild-name small { font-weight:400; opacity:0.8; font-size:0.7rem; }
+a.guild-name { text-decoration:none; color:inherit; cursor:pointer; }
 nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 nav a {
   color: #fff;

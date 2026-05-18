@@ -26,15 +26,6 @@
     .member-select label { font-size:0.9rem; font-weight:600; color:var(--pink-dark); white-space:nowrap; }
     .member-select select, .member-select input { padding:7px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:#3d1a2e; outline:none; cursor:pointer; }
     #memberPicker { flex:1; min-width:0; }
-    @media(max-width:600px) {
-      nav { display:none; }
-      .hamburger { display:flex; }
-      .guild-name { font-size:1rem; }
-      .member-select { gap:8px; }
-      #memberPicker { width:100%; flex:1 1 100%; }
-      #qualityFilter { flex:1; }
-      #flowerSearch { flex:2; min-width:0; width:auto !important; }
-    }
     .flower-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; }
     .flower-check { background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; cursor:pointer; transition:border-color 0.2s, background 0.2s; }
     .flower-check:hover { border-color:var(--pink-mid); background:var(--pink-light); }
@@ -61,6 +52,7 @@
     header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
     .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; }
     .guild-name small { font-weight:400; opacity:0.8; font-size:0.7rem; }
+    a.guild-name { text-decoration:none; color:inherit; cursor:pointer; }
     nav { display:flex; gap:8px; }
     nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); }
     nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
@@ -73,6 +65,16 @@
     #mobile-nav a { color:#fff; text-decoration:none; padding:12px 16px; border-radius:12px; font-size:1rem; font-weight:600; border:1.5px solid rgba(255,255,255,0.3); transition:background 0.2s; display:flex; align-items:center; gap:10px; }
     #mobile-nav a:hover, #mobile-nav a.active { background:rgba(255,255,255,0.2); }
     #mobile-nav .nav-close { position:absolute; top:16px; right:16px; background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
+
+    @media(max-width:600px) {
+      .guild-name { font-size:1rem; }
+      nav { display:none; }
+      .hamburger { display:flex; }
+      .member-select { gap:8px; }
+      #memberPicker { width:100%; flex:1 1 100%; }
+      #qualityFilter { flex:1; }
+      #flowerSearch { flex:2; min-width:0; width:auto !important; }
+    }
 
     /* ── 進度條 ── */
     #save-progress {
