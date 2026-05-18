@@ -681,6 +681,18 @@
           <tbody id="idTableBody"></tbody>
         </table>
       </div>
+      <div id="branchSection" style="display:none;margin-top:24px;">
+        <div style="font-size:0.95rem;font-weight:700;color:var(--pink-dark);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+          <span style="display:inline-block;width:4px;height:1.1em;background:linear-gradient(135deg,#3949ab,#9fa8da);border-radius:2px;"></span>
+          分會成員 <span id="branchCount" style="font-size:0.8rem;font-weight:400;color:var(--text-muted);"></span>
+        </div>
+        <div class="id-table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
+            <tbody id="branchTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -993,7 +1005,6 @@ function spawnParticles(card, quality) {
 
 // ── 11. 成員擁有熱力圖 ──
 function renderIdTable() {
-  // 計算每位成員擁有花卉數
   const ownerCount = {};
   OWNERSHIP.forEach(o => {
     const id = o.gameid || o.gameId || Object.values(o)[0] || '';
@@ -1001,8 +1012,14 @@ function renderIdTable() {
   });
   const maxOwned = FLOWERS.length || 1;
 
-  const sorted = MEMBERS.slice().sort((a,b) => (ROLE_ORDER[a.note]??9) - (ROLE_ORDER[b.note]??9));
-  document.getElementById('idTableBody').innerHTML = sorted.map((m,i) => {
+  // 分開：主公會成員 vs 分會成員
+  const mainMembers   = MEMBERS.filter(m => m.note !== '分會成員');
+  const branchMembers = MEMBERS.filter(m => m.note === '分會成員');
+
+  const mainSorted   = mainMembers.slice().sort((a,b) => (ROLE_ORDER[a.note]??9) - (ROLE_ORDER[b.note]??9));
+  const branchSorted = branchMembers.slice().sort((a,b) => (a.nickname||'').localeCompare(b.nickname||''));
+
+  const buildRow = (m, i) => {
     const cnt = ownerCount[m.gameId] || 0;
     const pct = Math.round(cnt / maxOwned * 100);
     return `<tr>
@@ -1017,7 +1034,18 @@ function renderIdTable() {
         </div>
       </td>
     </tr>`;
-  }).join('');
+  };
+
+  document.getElementById('idTableBody').innerHTML = mainSorted.map(buildRow).join('');
+
+  if (branchSorted.length > 0) {
+    document.getElementById('branchTableBody').innerHTML = branchSorted.map(buildRow).join('');
+    document.getElementById('branchCount').textContent = `（${branchSorted.length} 人）`;
+    document.getElementById('branchSection').style.display = '';
+  } else {
+    document.getElementById('branchSection').style.display = 'none';
+  }
+
   document.getElementById('memberLoading').style.display = 'none';
   document.getElementById('memberContent').style.display = 'block';
 }
