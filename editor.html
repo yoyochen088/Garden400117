@@ -45,6 +45,9 @@
     tbody tr:hover{background:var(--pink-light);}
     .thumb{width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:#fef0e7;display:block;}
     .fname{font-weight:600;font-size:.9rem;color:var(--pink-dark);}
+    .fname-input{font-weight:600;font-size:.9rem;color:var(--pink-dark);border:1.5px solid transparent;background:transparent;padding:4px 6px;border-radius:6px;transition:border-color .2s,background .2s;}
+    .fname-input:hover{border-color:var(--pink-mid);background:var(--bg);}
+    .fname-input:focus{border-color:var(--pink);background:var(--bg);outline:none;}
     .cs{position:relative;width:90px;user-select:none;}
     .cst{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:7px;cursor:pointer;font-size:.9rem;font-weight:700;color:#fff;border:none;width:100%;}
     .cst::after{content:'\25be';font-size:.75rem;margin-left:4px;}
@@ -290,7 +293,7 @@ function renderT(){
     +'<td><img class="thumb" src="'+(f._localPreview||f.img)+'" alt="'+f.name+'" onerror="this.style.opacity=0.3">'
     +(f._localPreview?'<div style="font-size:.65rem;color:#2e7d32;font-weight:700;">NEW</div>':'')
     +'</td>'
-    +'<td><div class="fname">'+f.name+'</div></td>'
+    +'<td><input type="text" class="fname-input" value="'+f.name+'" onchange="fd['+i+'].name=this.value" style="width:100%;min-width:120px;"></td>'
     +'<td><input type="number" min="1" value="'+(f.order||i+1)+'" onchange="fd['+i+'].order=Number(this.value)" style="width:60px;"></td>'
     +'<td>'+buildQS(i,f.quality)+'</td>'
     +'<td><select onchange="fd['+i+'].score=Number(this.value)">'+SL.map(s=>'<option value="'+s+'" '+(f.score===s?'selected':'')+'>'+s+' 分</option>').join('')+'</select></td>'
@@ -306,7 +309,7 @@ async function saveFlowers(){
   const toUpdate = fd.filter((f, i) => {
     const o = origFd.find(of => of.id === f.id);
     if (!o) return false;
-    return f.quality!==o.quality||f.score!==o.score||f.obtain!==o.obtain||f.order!==o.order;
+    return f.name!==o.name||f.quality!==o.quality||f.score!==o.score||f.obtain!==o.obtain||f.order!==o.order;
   });
 
   if (!toAdd.length && !toUpdate.length) { alert('花卡資料沒有變動'); return; }
@@ -330,7 +333,7 @@ async function saveFlowers(){
     for (const f of toUpdate) {
       await new Promise(res => {
         const p = encodeURIComponent(JSON.stringify({
-          action: 'updateFlower', id: f.id, quality: f.quality,
+          action: 'updateFlower', id: f.id, name: f.name, quality: f.quality,
           score: f.score, obtain: f.obtain, order: f.order
         }));
         const img = new Image(); img.onload = img.onerror = () => res();
