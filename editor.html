@@ -460,17 +460,19 @@ function showStatus(el, msg, type) {
 
 (async()=>{
   // ── 進入驗證 ──
+  await new Promise(r => { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', r); else r(); });
   const pw = prompt('請輸入管理密碼：');
-  if (!pw) { location.href = 'index.html'; return; }
+  if (pw === null) { location.href = 'index.html'; return; }
+  if (!pw.trim()) { alert('請輸入密碼'); location.href = 'index.html'; return; }
   try {
-    const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw }));
+    const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw: pw.trim() }));
     const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
     const data = await res.json();
     if (!data.ok) { alert('密碼錯誤'); location.href = 'index.html'; return; }
   } catch(e) {
     // Apps Script 冷啟動可能失敗，自動重試一次
     try {
-      const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw }));
+      const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw: pw.trim() }));
       const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
       const data = await res.json();
       if (!data.ok) { alert('密碼錯誤'); location.href = 'index.html'; return; }
