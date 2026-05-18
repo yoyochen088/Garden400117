@@ -202,13 +202,14 @@ function renderM(){
   const el=document.getElementById('mlist');
   const active=members.filter(m=>!m.left);
   if(!active.length){el.innerHTML='<p style="color:#9e6b7e;font-size:.9rem;margin-bottom:12px;">尚無在職成員。</p>';return;}
-  el.innerHTML=active.map(m=>{
+  el.innerHTML='<p style="font-size:0.85rem;color:var(--pink-dark);font-weight:600;margin-bottom:12px;">目前公會成員：'+active.length+' 人</p>'
+  +active.map(m=>{
     const i=members.indexOf(m);
     return '<div class="card"><div class="mrow">'
       +'<div><div class="lbl">遇戲 ID</div><input type="text" value="'+m.gameId+'" oninput="members['+i+'].gameId=this.value" placeholder="遇戲 ID"/></div>'
       +'<div><div class="lbl">昵稱</div><input type="text" value="'+m.nickname+'" oninput="members['+i+'].nickname=this.value" placeholder="昵稱"/></div>'
       +'<div><div class="lbl">職位</div><select onchange="members['+i+'].note=this.value">'
-      +['會長','副會長','理事','菁英','成員'].map(r=>'<option '+(m.note===r?'selected':'')+'>'+r+'</option>').join('')
+      +['會長','副會長','理事','菁英','成員','分會成員'].map(r=>'<option '+(m.note===r?'selected':'')+'>'+r+'</option>').join('')
       +'</select></div>'
       +'<div><button class="btn-rm" onclick="members['+i+'].left=true;renderM()">移除</button></div>'
       +'</div></div>';
@@ -458,6 +459,23 @@ function showStatus(el, msg, type) {
 }
 
 (async()=>{
+  // ── 進入驗證 ──
+  const pw = prompt('請輸入管理密碼：');
+  if (!pw) { location.href = 'index.html'; return; }
+  try {
+    const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw }));
+    const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
+    const data = await res.json();
+    if (!data.ok) { alert('密碼錯誤'); location.href = 'index.html'; return; }
+  } catch(e) {
+    // Apps Script 冷啟動可能失敗，自動重試一次
+    try {
+      const payload = encodeURIComponent(JSON.stringify({ action: 'checkPassword', pw }));
+      const res = await fetch(`${APPS_SCRIPT_URL}?data=${payload}`);
+      const data = await res.json();
+      if (!data.ok) { alert('密碼錯誤'); location.href = 'index.html'; return; }
+    } catch(e2) { alert('驗證失敗，請稍後再試'); location.href = 'index.html'; return; }
+  }
   await loadM();
   await loadF();
   document.getElementById('sfBtn').style.display='none';
