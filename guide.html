@@ -153,19 +153,50 @@
     }
     #back-to-top.show { opacity: 1; pointer-events: auto; }
     #back-to-top:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(233,106,30,0.5); }
+
+    /* ── 下拉選單 ── */
+    .nav-dropdown { position:relative; }
+    .nav-dropdown > .nav-drop-btn { color:#fff; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; border:1.5px solid rgba(255,255,255,0.5); background:none; cursor:pointer; display:flex; align-items:center; gap:5px; transition:background 0.2s; white-space:nowrap; }
+    .nav-dropdown > .nav-drop-btn:hover { background:rgba(255,255,255,0.25); }
+    .nav-dropdown > .nav-drop-btn.active { background:rgba(255,255,255,0.25); }
+    .nav-drop-btn .arrow { font-size:0.6rem; transition:transform 0.2s; display:inline-block; }
+    .nav-dropdown:hover .arrow { transform:rotate(180deg); }
+    .nav-drop-menu { display:none; position:absolute; top:100%; left:50%; transform:translateX(-50%); padding-top:8px; background:transparent; min-width:130px; z-index:200; }
+    .nav-dropdown:hover .nav-drop-menu { display:block; }
+    .nav-drop-menu-inner { background:#fff; border-radius:12px; border:1px solid var(--border,#f8d5b0); box-shadow:0 8px 24px rgba(194,81,11,0.18); overflow:hidden; }
+    .nav-drop-menu a { display:block; padding:10px 18px; color:#c2510b !important; font-size:0.88rem; font-weight:600; text-decoration:none; border:none !important; border-radius:0 !important; background:none !important; transition:background 0.15s; }
+    .nav-drop-menu a:hover { background:#fef0e7 !important; }
+    .nav-drop-menu a + a { border-top:1px solid #f8d5b0 !important; }
+    /* ── mobile 子選單 ── */
+    .mnav-group { display:flex; flex-direction:column; gap:0; }
+    .mnav-parent { color:#fff; padding:12px 16px; border-radius:12px; font-size:1rem; font-weight:600; border:1.5px solid rgba(255,255,255,0.3); background:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:background 0.2s; width:100%; }
+    .mnav-parent:hover { background:rgba(255,255,255,0.2); }
+    .mnav-parent .arrow { font-size:0.7rem; transition:transform 0.25s; }
+    .mnav-parent.open .arrow { transform:rotate(180deg); }
+    .mnav-children { display:none; flex-direction:column; gap:4px; padding:6px 0 2px 16px; }
+    .mnav-children.open { display:flex; }
+    .mnav-children a { color:rgba(255,255,255,0.9) !important; padding:9px 14px !important; border-radius:10px !important; font-size:0.92rem !important; border:1px solid rgba(255,255,255,0.2) !important; }
   </style>
 </head>
 <body>
 
 <header>
   <a href="index.html" class="guild-name">璀璨 <small>[400117]</small></a>
-  <nav>
-    <a href="index.html">花卉圖鑑</a>
+            <nav>
+    <a href="home.html" >首頁</a>
+    <a href="index.html" >花卉圖鑑</a>
+    <a href="guide.html" class="active">競賽攻略</a>
     <a href="index.html#id-page">公會成員</a>
-    <a href="flower-showcase.html">個人花展</a>
-    <a href="member-editor.html">花卉擁有</a>
-    <a href="contest-guide.html" class="active">競賽攻略</a>
-    <a href="editor.html">管理</a>
+    <div class="nav-dropdown">
+      <button class="nav-drop-btn ">👤 個人 <span class="arrow">▼</span></button>
+      <div class="nav-drop-menu">
+        <div class="nav-drop-menu-inner">
+          <a href="member-editor.html">✅ 花卉擁有</a>
+          <a href="flower-showcase.html">🖼️ 個人花展</a>
+        </div>
+      </div>
+    </div>
+    <a href="editor.html" >管理</a>
   </nav>
   <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
     <span></span><span></span><span></span>
@@ -175,16 +206,22 @@
 <div id="nav-overlay" onclick="closeMobileNav()"></div>
 <div id="mobile-nav">
   <button class="nav-close" onclick="closeMobileNav()">✕</button>
+  <a href="home.html" >🏠 首頁</a>
   <a href="index.html">🌸 花卉圖鑑</a>
+  <a href="guide.html" class="active">📖 競賽攻略</a>
   <a href="index.html#id-page">👥 公會成員</a>
-  <a href="flower-showcase.html">🖼️ 個人花展</a>
-  <a href="member-editor.html">✅ 花卉擁有</a>
-  <a href="contest-guide.html" class="active">📖 競賽攻略</a>
-  <a href="editor.html">⚙️ 管理</a>
+  <div class="mnav-group">
+    <button class="mnav-parent open" onclick="toggleMnavGroup(this)">👤 個人 <span class="arrow">▼</span></button>
+    <div class="mnav-children open">
+      <a href="member-editor.html">✅ 花卉擁有</a>
+      <a href="flower-showcase.html">🖼️ 個人花展</a>
+    </div>
+  </div>
+  <a href="editor.html" >⚙️ 管理</a>
 </div>
 
 <!-- Hero 區塊 -->
-<section class="hero">
+<!--<section class="hero">
   <div class="hero-inner">
     <div class="hero-text">
       <div class="badge">✨ 璀璨 400117</div>
@@ -210,7 +247,7 @@
     </div>
   </div>
 </section>
-
+-->
 <!-- 區塊快速導覽 -->
 <nav class="section-nav" id="sectionNav">
   <button class="snav-btn active" onclick="scrollToSection('s1')">📋 競賽說明</button>
@@ -242,7 +279,7 @@
           <div class="mini-card">
             <div class="mc-icon">🎁</div>
             <div class="mc-title">甲級寶箱</div>
-            <div class="mc-body">每 100 積分可兌換</div>
+            <div class="mc-body">每 100 積分可兌換一個個人寶箱</div>
           </div>
           <div class="mini-card">
             <div class="mc-icon">🏆</div>
@@ -268,7 +305,7 @@
         <img src="Context/衝分競賽週.png" alt="衝分競賽週" loading="lazy" />
         <div class="wc-footer">
           <div class="wc-title">🔥 衝分競賽週</div>
-          <div class="wc-desc">全力衝刺積分，善用元寶與加倍任務，目標王者花匠。</div>
+          <div class="wc-desc">全力衝刺積分，善用元寶與加倍任務，目標挑戰自己最高分。</div>
         </div>
       </div>
       <div class="week-card" onclick="openLightbox('Context/平時競賽週.png','平時競賽週')">
@@ -284,7 +321,7 @@
   <!-- Section 3：500~600 分攻略 -->
   <section class="guide-section" id="s3">
     <div class="section-label" style="color:#e96a1e">Strategy</div>
-    <div class="section-title">🎯 500~600 分攻略</div>
+    <div class="section-title">🎯 500~600 分攻略 - 極致省元寶又需要衝分時 </div>
     <div class="s3-grid">
       <div class="strat-card" onclick="openLightbox('Context/1.png','微課玩家')">
         <img src="Context/1.png" alt="微課玩家" loading="lazy" />
@@ -444,6 +481,11 @@ sections.forEach(id => {
 });
 
 // 漢堡選單
+
+function toggleMnavGroup(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
 function toggleMobileNav() {
   document.getElementById('mobile-nav').classList.toggle('open');
   document.getElementById('nav-overlay').classList.toggle('show');

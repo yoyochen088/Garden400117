@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>璀璨公會</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <style>
+    :root {
+      --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a;
+      --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#ffffff;
+      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
+      --shadow:0 2px 12px rgba(233,106,30,0.10); --radius:16px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:60px; }
+
+    /* ── Header ── */
+    header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
+    .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; text-decoration:none; color:inherit; }
+    .guild-name small { font-weight:400; opacity:0.8; font-size:0.7rem; }
+    nav { display:flex; gap:8px; align-items:center; }
+    nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); white-space:nowrap; }
+    nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
+
+    /* ── 下拉選單 ── */
+    .nav-dropdown { position:relative; }
+    .nav-dropdown > .nav-drop-btn {
+      color:#fff; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600;
+      border:1.5px solid rgba(255,255,255,0.5); background:none; cursor:pointer;
+      display:flex; align-items:center; gap:5px; transition:background 0.2s; white-space:nowrap;
+    }
+    .nav-dropdown > .nav-drop-btn:hover,
+    .nav-dropdown:hover > .nav-drop-btn { background:rgba(255,255,255,0.25); }
+    .nav-drop-btn .arrow { font-size:0.6rem; transition:transform 0.2s; display:inline-block; }
+    .nav-dropdown:hover .arrow { transform:rotate(180deg); }
+    .nav-drop-menu {
+      display:none; position:absolute; top:100%; left:50%;
+      transform:translateX(-50%);
+      padding-top:8px;
+      background:transparent;
+      min-width:130px; z-index:200;
+    }
+    .nav-dropdown:hover .nav-drop-menu { display:block; }
+    .nav-drop-menu-inner {
+      background:#fff; border-radius:12px; border:1px solid var(--border);
+      box-shadow:0 8px 24px rgba(194,81,11,0.18); overflow:hidden;
+    }
+    .nav-drop-menu a {
+      display:block; padding:10px 18px; color:var(--orange-dark) !important;
+      font-size:0.88rem; font-weight:600; text-decoration:none;
+      border:none !important; border-radius:0 !important; background:none !important;
+      transition:background 0.15s;
+    }
+    .nav-drop-menu a:hover { background:var(--orange-light) !important; }
+    .nav-drop-menu a + a { border-top:1px solid var(--border) !important; }
+
+    /* ── mobile-nav 子選單 ── */
+    .mnav-group { display:flex; flex-direction:column; gap:0; }
+    .mnav-parent {
+      color:#fff; padding:12px 16px; border-radius:12px; font-size:1rem; font-weight:600;
+      border:1.5px solid rgba(255,255,255,0.3); background:none; cursor:pointer;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:background 0.2s; width:100%;
+    }
+    .mnav-parent:hover { background:rgba(255,255,255,0.2); }
+    .mnav-parent .arrow { font-size:0.7rem; transition:transform 0.25s; }
+    .mnav-parent.open .arrow { transform:rotate(180deg); }
+    .mnav-children {
+      display:none; flex-direction:column; gap:4px;
+      padding:6px 0 2px 16px;
+    }
+    .mnav-children.open { display:flex; }
+    .mnav-children a {
+      color:rgba(255,255,255,0.9) !important; padding:9px 14px !important;
+      border-radius:10px !important; font-size:0.92rem !important;
+      border:1px solid rgba(255,255,255,0.2) !important;
+    }
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; }
+    .hamburger span { display:block; width:22px; height:2px; background:#fff; border-radius:2px; transition:all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+    #nav-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:150; }
+    #nav-overlay.show { display:block; }
+    #mobile-nav { position:fixed; top:0; right:-260px; width:240px; height:100vh; background:linear-gradient(160deg,#c2510b,#e96a1e); z-index:200; padding:70px 20px 30px; display:flex; flex-direction:column; gap:8px; transition:right 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.2); }
+    #mobile-nav.open { right:0; }
+    #mobile-nav a { color:#fff; text-decoration:none; padding:12px 16px; border-radius:12px; font-size:1rem; font-weight:600; border:1.5px solid rgba(255,255,255,0.3); transition:background 0.2s; display:flex; align-items:center; gap:10px; }
+    #mobile-nav a:hover, #mobile-nav a.active { background:rgba(255,255,255,0.2); }
+    #mobile-nav .nav-close { position:absolute; top:16px; right:16px; background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
+    @media(max-width:600px) { .guild-name { font-size:1rem; } nav { display:none; } .hamburger { display:flex; } }
+
+    /* ── Hero ── */
+    .hero { position:relative; overflow:hidden; background:linear-gradient(to bottom,#fff4d6,#f7edd7); border-bottom:1px solid var(--border); }
+    .hero::before { content:''; position:absolute; inset:0; opacity:0.2; background:radial-gradient(circle at top,#fff 0%,transparent 60%); pointer-events:none; }
+    .hero-inner { max-width:1100px; margin:0 auto; padding:60px 24px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; position:relative; z-index:1; }
+    .hero-text .badge { display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:24px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.08); border:1px solid #f0d7a2; font-size:0.82rem; font-weight:700; margin-bottom:20px; }
+    .hero-text h1 { font-size:3rem; font-weight:900; line-height:1.15; color:#5a371d; margin-bottom:12px; }
+    .hero-text .tagline { font-size:1.1rem; color:var(--orange); font-weight:700; margin-bottom:16px; }
+    .hero-text p { font-size:0.95rem; line-height:1.8; color:#6d5847; margin-bottom:28px; }
+    .hero-btns { display:flex; gap:12px; flex-wrap:wrap; }
+    .hero-btn { padding:12px 24px; border-radius:20px; font-size:0.95rem; font-weight:700; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; display:inline-block; }
+    .hero-btn.primary { background:var(--orange); color:#fff; box-shadow:0 4px 16px rgba(233,106,30,0.3); }
+    .hero-btn.primary:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(233,106,30,0.4); }
+    .hero-btn.secondary { background:#fff; border:1.5px solid var(--border); color:var(--orange-dark); }
+    .hero-btn.secondary:hover { background:#fff7e9; }
+    .hero-visual { position:relative; }
+    .hero-card { background:#fff; border-radius:32px; padding:16px; box-shadow:0 12px 48px rgba(233,106,30,0.15); border:1px solid var(--border); transform:rotate(4deg); transition:transform 0.3s; }
+    .hero-card:hover { transform:rotate(0deg) scale(1.02); }
+    .hero-card img { width:100%; height:auto; display:block; border-radius:20px; }
+    .hero-badge { position:absolute; bottom:-16px; left:-16px; background:#fff; border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,0.12); border:1px solid var(--border); padding:12px 18px; }
+    .hero-badge .hb-label { font-size:0.75rem; color:var(--text-muted); margin-bottom:2px; }
+    .hero-badge .hb-value { font-size:1.1rem; font-weight:900; color:var(--orange); }
+    @media(max-width:900px) {
+      .hero-inner { grid-template-columns:1fr; gap:32px; padding:40px 20px 48px; }
+      .hero-text h1 { font-size:2.4rem; }
+      .hero-visual { max-width:360px; margin:0 auto; }
+    }
+
+    /* ── 主內容 ── */
+    main { max-width:960px; margin:0 auto; padding:40px 16px; }
+    .section-title { font-size:1.4rem; font-weight:900; color:var(--text); margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+    .section-title::after { content:''; flex:1; height:2px; background:linear-gradient(to right,var(--border),transparent); border-radius:2px; }
+
+    /* ── 快速連結 ── */
+    .quick-links { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:48px; }
+    .ql-card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px 18px; text-decoration:none; color:var(--text); display:flex; flex-direction:column; align-items:flex-start; gap:8px; transition:transform 0.2s, box-shadow 0.2s; }
+    .ql-card:hover { transform:translateY(-3px); box-shadow:0 8px 28px rgba(233,106,30,0.18); }
+    .ql-icon { width:44px; height:44px; border-radius:12px; background:var(--orange-light); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+    .ql-title { font-size:1rem; font-weight:800; }
+    .ql-desc { font-size:0.8rem; color:var(--text-muted); line-height:1.5; }
+    @media(max-width:600px) { .quick-links { grid-template-columns:repeat(2,1fr); } }
+
+    /* ── 公會簡介 ── */
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:48px; }
+    .about-card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px 22px; }
+    .about-card .ac-title { font-size:0.85rem; font-weight:700; color:var(--orange); margin-bottom:12px; letter-spacing:0.1em; text-transform:uppercase; }
+    .req-list { display:flex; flex-direction:column; gap:8px; }
+    .req-item { display:flex; align-items:flex-start; gap:10px; font-size:0.9rem; line-height:1.5; }
+    .req-item .ri-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
+    .req-item.ok .ri-text { color:var(--text); }
+    .req-item.warn .ri-text { color:#c2510b; font-weight:600; }
+    @media(max-width:600px) { .about-grid { grid-template-columns:1fr; } }
+
+    /* ── 加入方式 ── */
+    .join-section { background:linear-gradient(135deg,#c2510b,#e96a1e,#f4a46a); border-radius:var(--radius); padding:28px 28px 24px; margin-bottom:48px; }
+    .join-section .js-title { color:#fff; font-size:1.1rem; font-weight:900; margin-bottom:16px; }
+    .contact-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .contact-card { background:rgba(255,255,255,0.18); border:1.5px solid rgba(255,255,255,0.35); border-radius:12px; padding:18px 20px; backdrop-filter:blur(4px); cursor:pointer; transition:background 0.2s, transform 0.15s; }
+    .contact-card:hover { background:rgba(255,255,255,0.28); transform:translateY(-2px); }
+    .contact-card:active { transform:scale(0.97); }
+    .contact-card .cc-name { color:#fff; font-weight:800; font-size:1rem; margin-bottom:4px; }
+    .contact-card .cc-id { color:rgba(255,255,255,0.85); font-size:0.82rem; font-family:monospace; letter-spacing:0.05em; cursor:pointer; display:flex; align-items:center; gap:6px; }
+    .contact-card .cc-id:hover { color:#fff; }
+    .copy-hint { font-size:0.7rem; opacity:0.7; }
+    .join-footer { margin-top:16px; color:rgba(255,255,255,0.9); font-size:0.88rem; font-weight:600; text-align:center; }
+    @media(max-width:600px) { .contact-grid { grid-template-columns:1fr; } }
+
+    /* ── 公告欄 ── */
+    .notice-list { display:flex; flex-direction:column; gap:10px; }
+    .notice-item { background:var(--card-bg); border-radius:12px; border:1px solid var(--border); box-shadow:var(--shadow); padding:14px 18px; display:flex; align-items:flex-start; gap:12px; }
+    .notice-dot { width:8px; height:8px; border-radius:50%; background:var(--orange); flex-shrink:0; margin-top:6px; }
+    .notice-text { font-size:0.9rem; line-height:1.6; }
+    .notice-date { font-size:0.75rem; color:var(--text-muted); margin-top:3px; }
+
+    /* ── 複製提示 ── */
+    #copy-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(10px); background:#3d1a2e; color:#fff; padding:8px 20px; border-radius:20px; font-size:0.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all 0.3s; z-index:999; }
+    #copy-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* ── 回頂部 ── */
+    #back-to-top { position:fixed; bottom:24px; right:20px; z-index:500; width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; font-size:1.2rem; border:none; cursor:pointer; box-shadow:0 4px 16px rgba(233,106,30,0.4); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s, transform 0.3s; }
+    #back-to-top.show { opacity:1; pointer-events:auto; }
+    #back-to-top:hover { transform:translateY(-3px); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="home.html" class="guild-name">璀璨 <small>[400117]</small></a>
+          <nav>
+    <a href="home.html" class="active">首頁</a>
+    <a href="index.html" >花卉圖鑑</a>
+    <a href="guide.html" >競賽攻略</a>
+    <a href="index.html#id-page">公會成員</a>
+    <div class="nav-dropdown">
+      <button class="nav-drop-btn ">👤 個人 <span class="arrow">▼</span></button>
+      <div class="nav-drop-menu">
+        <div class="nav-drop-menu-inner">
+          <a href="member-editor.html">✅ 花卉擁有</a>
+          <a href="flower-showcase.html">🖼️ 個人花展</a>
+        </div>
+      </div>
+    </div>
+    <a href="editor.html" >管理</a>
+  </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<div id="nav-overlay" onclick="closeMobileNav()"></div>
+<div id="mobile-nav">
+  <button class="nav-close" onclick="closeMobileNav()">✕</button>
+  <a href="home.html" class="active">🏠 首頁</a>
+  <a href="index.html">🌸 花卉圖鑑</a>
+  <a href="guide.html" >📖 競賽攻略</a>
+  <a href="index.html#id-page">👥 公會成員</a>
+  <div class="mnav-group">
+    <button class="mnav-parent open" onclick="toggleMnavGroup(this)">👤 個人 <span class="arrow">▼</span></button>
+    <div class="mnav-children open">
+      <a href="member-editor.html">✅ 花卉擁有</a>
+      <a href="flower-showcase.html">🖼️ 個人花展</a>
+    </div>
+  </div>
+  <a href="editor.html" >⚙️ 管理</a>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="badge">✨ 歡迎來到璀璨</div>
+      <h1>璀璨</h1>
+      <div class="tagline">加入璀璨，一同燦爛 ✨</div>
+      <p>招收活躍玩家，一起在花卉世界中閃耀。<br>我們重視參與感，請常常上線哦!!!</p>
+      <div class="hero-btns">
+        <a href="#join" class="hero-btn primary">加入我們</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <img src="Context/歡迎加入.png" alt="歡迎加入璀璨" />
+      </div>
+      <div class="hero-badge">
+        <div class="hb-label">公會編號</div>
+        <div class="hb-value">#400117</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+  <!-- 快速連結 -->
+ <!-- <div class="section-title">🔗 快速連結</div>
+  <div class="quick-links">
+    <a href="index.html" class="ql-card">
+      <div class="ql-icon">🌸</div>
+      <div class="ql-title">花卉圖鑑</div>
+      <div class="ql-desc">查詢公會花卉收藏與擁有狀況</div>
+    </a>
+    <a href="contest-guide.html" class="ql-card">
+      <div class="ql-icon">📖</div>
+      <div class="ql-title">競賽攻略</div>
+      <div class="ql-desc">衝分策略、任務技巧一次看</div>
+    </a>
+    <a href="contest.html" class="ql-card">
+      <div class="ql-icon">🏆</div>
+      <div class="ql-title">競賽算分</div>
+      <div class="ql-desc">計算最短路徑達成目標稱號</div>
+    </a>
+    <a href="flower-showcase.html" class="ql-card">
+      <div class="ql-icon">🖼️</div>
+      <div class="ql-title">個人花展</div>
+      <div class="ql-desc">下載個人花卉收藏圖片</div>
+    </a>
+    <a href="member-editor.html" class="ql-card">
+      <div class="ql-icon">✅</div>
+      <div class="ql-title">花卉擁有</div>
+      <div class="ql-desc">勾選自己擁有的花卉</div>
+    </a>
+    <a href="index.html#id-page" class="ql-card">
+      <div class="ql-icon">👥</div>
+      <div class="ql-title">公會成員</div>
+      <div class="ql-desc">查看成員名單與職位</div>
+    </a>
+  </div>-->
+
+  <!-- 公會簡介 -->
+  <div class="section-title">🌸 公會簡介</div>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="ac-title">✅ 基本福利</div>
+      <div class="req-list">
+        <div class="req-item ok">
+          <span class="ri-icon">🫶🏻</span>
+          <span class="ri-text">分享 4 次</span>
+        </div>
+        <div class="req-item ok">
+          <span class="ri-icon">🛒</span>
+          <span class="ri-text">商店 4 折優惠</span>
+        </div>
+      </div>
+    </div>
+    <div class="about-card">
+      <div class="ac-title">⚠️ 活躍要求</div>
+      <div class="req-list">
+        <div class="req-item warn">
+          <span class="ri-icon">🏗️</span>
+          <span class="ri-text">每日建設 70+</span>
+        </div>
+        <div class="req-item warn">
+          <span class="ri-icon">📋</span>
+          <span class="ri-text">每週任務解滿免費次數 18+</span>
+        </div>
+        <div class="req-item warn">
+          <span class="ri-icon">🏅</span>
+          <span class="ri-text">任務總分可達 500+</span>
+        </div>
+        <div class="req-item warn">
+          <span class="ri-icon">📢</span>
+          <span class="ri-text">未能上線請提前告知</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 加入方式 -->
+  <div id="join" class="section-title" style="scroll-margin-top:80px;">💌 加入方式</div>
+  <div class="join-section">
+    <div class="js-title">聯絡以下任一幹部申請加入 👇</div>
+    <div class="contact-grid">
+      <div class="contact-card" onclick="copyId('gt02q9a9f05','Yoyo')">
+        <div class="cc-name">Yoyo</div>
+        <div class="cc-id">
+          <span>gt02q9a9f05</span>
+          <span class="copy-hint">點擊複製</span>
+        </div>
+      </div>
+      <div class="contact-card" onclick="copyId('gt036u0jwe0','珞羽')">
+        <div class="cc-name">珞羽</div>
+        <div class="cc-id">
+          <span>gt036u0jwe0</span>
+          <span class="copy-hint">點擊複製</span>
+        </div>
+      </div>
+      <div class="contact-card" onclick="copyId('gt05hxdgb7v','Vank')">
+        <div class="cc-name">Vank</div>
+        <div class="cc-id">
+          <span>gt05hxdgb7v</span>
+          <span class="copy-hint">點擊複製</span>
+        </div>
+      </div>
+    </div>
+    <div class="join-footer">加入璀璨，一同燦爛 ✨</div>
+  </div>
+
+  <!-- 公告欄 -->
+   <!-- <div class="section-title">📢 最新公告</div>
+  <div class="notice-list">
+    <div class="notice-item">
+      <div class="notice-dot"></div>
+      <div>
+        <div class="notice-text">競賽攻略頁面上線，包含衝分週、平時週策略與任務技巧。</div>
+        <div class="notice-date">2026.05</div>
+      </div>
+    </div>
+    <div class="notice-item">
+      <div class="notice-dot"></div>
+      <div>
+        <div class="notice-text">花卉圖鑑系統更新，新增普及度長條圖與 Lightbox 翻轉功能。</div>
+        <div class="notice-date">2026.05</div>
+      </div>
+    </div>
+  </div>-->
+
+</main>
+
+<!-- 複製提示 -->
+<div id="copy-toast">已複製！</div>
+
+<!-- 回頂部 -->
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="回頂部">&#8679;</button>
+
+<script>
+function copyId(id, name) {
+  navigator.clipboard.writeText(id).then(() => {
+    const t = document.getElementById('copy-toast');
+    t.textContent = name + ' 的 ID 已複製：' + id;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  });
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('back-to-top').classList.toggle('show', window.scrollY > 300);
+}, { passive: true });
+
+function toggleMnavGroup(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+  document.getElementById('nav-overlay').classList.toggle('show');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('show');
+  document.getElementById('hamburger').classList.remove('open');
+}
+</script>
+</body>
+</html>
