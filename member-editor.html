@@ -43,6 +43,29 @@
     .check-icon { font-size:1.1rem; flex-shrink:0; opacity:0; transition:opacity 0.15s; }
     .flower-check.owned .check-icon { opacity:1; }
     .loading { text-align:center; padding:40px; color:#9e6b7e; grid-column: 1 / -1; }
+
+    /* ── 品質分組標題 ── */
+    .quality-group { margin-bottom:24px; }
+    .quality-group-title {
+      display:flex; align-items:center; gap:10px;
+      margin-bottom:12px; font-size:0.95rem; font-weight:700;
+    }
+    .quality-group-title .qg-badge {
+      padding:3px 14px; border-radius:20px; color:#fff; font-size:0.88rem; font-weight:700;
+    }
+    .quality-group-title .qg-line { flex:1; height:1.5px; opacity:0.25; border-radius:2px; }
+    .quality-group-title .qg-count { font-size:0.8rem; color:#9e6b7e; font-weight:400; }
+    .qg-仙 .qg-badge { background:linear-gradient(135deg,#ff4e8a,#ff8c42); }
+    .qg-仙 .qg-line  { background:linear-gradient(90deg,#ff4e8a,transparent); }
+    .qg-華 .qg-badge { background:linear-gradient(135deg,#ff8c00,#ffb347); }
+    .qg-華 .qg-line  { background:linear-gradient(90deg,#ff8c00,transparent); }
+    .qg-珍 .qg-badge { background:linear-gradient(135deg,#9b59b6,#c39bd3); }
+    .qg-珍 .qg-line  { background:linear-gradient(90deg,#9b59b6,transparent); }
+    .qg-普 .qg-badge { background:linear-gradient(135deg,#4a90d9,#74b9ff); }
+    .qg-普 .qg-line  { background:linear-gradient(90deg,#4a90d9,transparent); }
+    .qg-凡 .qg-badge { background:linear-gradient(135deg,#7f8c6e,#a8b89a); }
+    .qg-凡 .qg-line  { background:linear-gradient(90deg,#7f8c6e,transparent); }
+
     .bottom-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); padding:10px 12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; box-shadow:0 -2px 10px rgba(233,106,30,0.08); }
     .btn { padding:9px 18px; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; transition:opacity 0.2s; }
     .btn:hover { opacity:0.85; }
@@ -97,7 +120,7 @@
   <input id="flowerSearch" type="text" placeholder="🔍 搜尋花名..." oninput="renderFlowers()" style="width:140px;">
   <span id="ownedCount" style="font-size:0.85rem;color:#9e6b7e;"></span>
 </div>
-<div id="flowerGrid" class="flower-grid"><div class="loading">載入中...</div></div>
+<div id="flowerGrid"><div class="loading">載入中...</div></div>
 
 <div id="save-progress">
   <div class="progress-label" id="progress-label">準備儲存...</div>
@@ -180,6 +203,8 @@ async function loadOwned() {
 function renderFlowers() {
   const qFilter = document.getElementById('qualityFilter').value;
   const searchQ = document.getElementById('flowerSearch').value.trim().toLowerCase();
+  const QUALITY_LIST = ['仙','華','珍','普','凡'];
+
   const filtered = flowers.slice()
     .sort((a,b) => { const qd=(QUALITY_ORDER[a.quality]??9)-(QUALITY_ORDER[b.quality]??9); return qd||((a.order??999)-(b.order??999)); })
     .filter(f => (!qFilter||f.quality===qFilter) && (!searchQ||f.name.toLowerCase().includes(searchQ)));
@@ -189,7 +214,7 @@ function renderFlowers() {
     ? `已擁有 ${displayOwned} / ${filtered.length} 種${qFilter}品`
     : `已擁有 ${displayOwned} / ${filtered.length} 種`;
 
-  document.getElementById('flowerGrid').innerHTML = filtered.map(f => {
+  function buildCard(f) {
     const isOwned = owned.has(f.id);
     const thumb = f.img
       ? `<img class="flower-thumb" src="${f.img}" alt="${f.name}" onerror="this.style.opacity=0.3">`
@@ -197,8 +222,33 @@ function renderFlowers() {
     return `<label class="flower-check ${isOwned?'owned':''}">
       <input type="checkbox" ${isOwned?'checked':''} onchange="toggleOwn(${f.id},this)">
       ${thumb}
-      <div class="flower-info"><div class="fname">${f.name}</div><span class="badge-q q-${f.quality}">${f.quality}</span></div>
+      <div class="flower-info"><div class="fname">${f.name}</div></div>
       <span class="check-icon">✓</span></label>`;
+  }
+
+  // 有品質篩選時：單一分組，不顯示標題
+  if (qFilter) {
+    document.getElementById('flowerGrid').innerHTML =
+      `<div class="flower-grid">${filtered.map(buildCard).join('')}</div>`;
+    return;
+  }
+
+  // 無篩選：按品質分組
+  const groups = QUALITY_LIST.map(q => ({
+    q,
+    items: filtered.filter(f => f.quality === q)
+  })).filter(g => g.items.length > 0);
+
+  document.getElementById('flowerGrid').innerHTML = groups.map(g => {
+    const ownedInGroup = g.items.filter(f => owned.has(f.id)).length;
+    return `<div class="quality-group">
+      <div class="quality-group-title qg-${g.q}">
+        <span class="qg-badge">${g.q}</span>
+        <span class="qg-line"></span>
+        <span class="qg-count">已擁有 ${ownedInGroup} / ${g.items.length}</span>
+      </div>
+      <div class="flower-grid">${g.items.map(buildCard).join('')}</div>
+    </div>`;
   }).join('');
 }
 
@@ -206,12 +256,30 @@ function toggleOwn(fid, cb) {
   const el = cb.closest('.flower-check');
   owned.has(fid) ? (owned.delete(fid), el.classList.remove('owned'))
                  : (owned.add(fid),    el.classList.add('owned'));
+
+  // 更新頂部總計
   const qFilter = document.getElementById('qualityFilter').value;
   const filtered = flowers.filter(f => !qFilter || f.quality === qFilter);
   const displayOwned = filtered.filter(f => owned.has(f.id)).length;
   document.getElementById('ownedCount').textContent = qFilter
     ? `已擁有 ${displayOwned} / ${filtered.length} 種${qFilter}品`
     : `已擁有 ${displayOwned} / ${filtered.length} 種`;
+
+  // 更新分組標題的小計（無篩選時才有分組）
+  if (!qFilter) {
+    const flower = flowers.find(f => f.id === fid);
+    if (flower) {
+      const group = document.querySelectorAll('.quality-group');
+      group.forEach(g => {
+        const badge = g.querySelector('.qg-badge');
+        if (badge && badge.textContent === flower.quality) {
+          const cards = g.querySelectorAll('.flower-check');
+          const ownedCount = [...cards].filter(c => c.classList.contains('owned')).length;
+          g.querySelector('.qg-count').textContent = `已擁有 ${ownedCount} / ${cards.length}`;
+        }
+      });
+    }
+  }
 }
 
 async function saveToSheet() {
