@@ -122,33 +122,7 @@
 </head>
 <body>
 
-<header>
-  <a href="index.html" class="guild-name" style="text-decoration:none;color:inherit;">璀璨 <small>[400117]</small></a>
-  <nav>
-    <a href="index.html">花卉圖鑑</a>
-    <a href="index.html#id-page">公會成員</a>
-    <a href="flower-showcase.html">個人花展</a>
-    <a href="member-editor.html">花卉擁有</a>
-    <a href="contest.html" class="active">競賽算分</a>
-    <a href="guide.html">競賽攻略</a>
-    <a href="editor.html">管理</a>
-  </nav>
-  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
-    <span></span><span></span><span></span>
-  </button>
-</header>
-
-<div id="nav-overlay" onclick="closeMobileNav()"></div>
-<div id="mobile-nav">
-  <button class="nav-close" onclick="closeMobileNav()">✕</button>
-  <a href="index.html">🌸 花卉圖鑑</a>
-  <a href="index.html#id-page">👥 公會成員</a>
-  <a href="flower-showcase.html">🖼️ 個人花展</a>
-  <a href="member-editor.html">✅ 花卉擁有</a>
-  <a href="contest.html" class="active">🏆 競賽算分</a>
-  <a href="guide.html">📖 競賽攻略</a>
-  <a href="editor.html">⚙️ 管理</a>
-</div>
+<div id="site-header"></div>
 
 <main>
   <h1>🏆 競賽計算機</h1>
@@ -645,19 +619,9 @@ function calculate() {
   }).join('');
 }
 
-// ── 漢堡選單 ──
-function toggleMobileNav() {
-  document.getElementById('mobile-nav').classList.toggle('open');
-  document.getElementById('nav-overlay').classList.toggle('show');
-  document.getElementById('hamburger').classList.toggle('open');
-}
-function closeMobileNav() {
-  document.getElementById('mobile-nav').classList.remove('open');
-  document.getElementById('nav-overlay').classList.remove('show');
-  document.getElementById('hamburger').classList.remove('open');
-}
 // ── 初始化 ──
 renderBonusButtons();
 </script>
+<script src="header.js"></script>
 </body>
 </html>

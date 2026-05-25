@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>批次上傳花卉圖片 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <script>
+  const GITHUB_CONFIG = { owner:'yoyochen088', repo:'Garden400117', branch:'main' };
+  const SHEET_ID  = '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg';
+  const API_KEY   = 'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg';
+  const APPS_URL  = 'https://script.google.com/macros/s/AKfycbxFNC3q4JJFdxLnlQ2M2OgD8qVTIXrN1tZ6Y6rZQiUs2ku-Es9DkbWrlr-XT_3Rsgfu4Q/exec';
+  </script>
+  <style>
+    :root {
+      --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a;
+      --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#fff;
+      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
+      --shadow:0 2px 12px rgba(233,106,30,.10); --radius:14px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:60px; }
+
+    /* Header */
+    header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,.3); }
+    .guild-name { font-size:1.1rem; font-weight:700; letter-spacing:2px; text-decoration:none; color:inherit; }
+    .guild-name small { font-weight:400; opacity:.8; font-size:.7rem; }
+    nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:.9rem; font-weight:600; border:1.5px solid rgba(255,255,255,.5); transition:background .2s; }
+    nav a:hover { background:rgba(255,255,255,.25); }
+
+    /* 主內容 */
+    main { max-width:760px; margin:0 auto; padding:28px 16px; }
+    h1 { font-size:1.3rem; font-weight:900; color:var(--orange-dark); margin-bottom:4px; }
+    .subtitle { font-size:.85rem; color:var(--text-muted); margin-bottom:24px; }
+
+    /* 設定卡 */
+    .card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:18px 20px; margin-bottom:16px; }
+    .card-title { font-size:.85rem; font-weight:700; color:var(--orange-dark); margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+    .form-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+    .form-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:140px; }
+    .lbl { font-size:.78rem; color:var(--text-muted); font-weight:600; }
+    select, input[type=password] { padding:8px 12px; border:1.5px solid var(--orange-mid); border-radius:8px; font-size:.9rem; background:var(--bg); color:var(--text); outline:none; width:100%; }
+    select:focus, input:focus { border-color:var(--orange); }
+
+    /* 拖放區 */
+    .drop-zone {
+      border:2.5px dashed var(--orange-mid); border-radius:var(--radius);
+      background:var(--orange-light); padding:36px 20px;
+      text-align:center; cursor:pointer; transition:all .2s;
+      margin-bottom:16px;
+    }
+    .drop-zone.drag-over { border-color:var(--orange); background:#fde8d4; }
+    .drop-zone .dz-icon { font-size:2.4rem; margin-bottom:10px; }
+    .drop-zone .dz-text { font-size:.95rem; font-weight:700; color:var(--orange-dark); margin-bottom:4px; }
+    .drop-zone .dz-sub { font-size:.8rem; color:var(--text-muted); }
+    #file-input { display:none; }
+
+    /* 預覽格 */
+    .preview-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; margin-bottom:16px; }
+    .preview-item { background:var(--card-bg); border-radius:10px; border:1px solid var(--border); overflow:hidden; position:relative; }
+    .preview-item img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+    .preview-item .pi-name { font-size:.72rem; color:var(--text-muted); padding:5px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .preview-item .pi-remove { position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,.55); color:#fff; border:none; cursor:pointer; font-size:.8rem; display:flex; align-items:center; justify-content:center; }
+    .preview-item .pi-status { position:absolute; top:4px; left:4px; padding:2px 7px; border-radius:8px; font-size:.7rem; font-weight:700; }
+    .pi-status.pending  { background:rgba(255,255,255,.85); color:#888; }
+    .pi-status.uploading{ background:#fff9c4; color:#f57f17; }
+    .pi-status.done     { background:#c8e6c9; color:#2e7d32; }
+    .pi-status.error    { background:#ffcdd2; color:#c62828; }
+
+    /* 按鈕 */
+    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; border-radius:10px; font-size:.92rem; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
+    .btn-primary { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; box-shadow:0 3px 12px rgba(233,106,30,.3); }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(233,106,30,.4); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .btn-clear { background:var(--orange-light); color:var(--orange-dark); border:1.5px solid var(--border); }
+    .btn-clear:hover { background:#fde8d4; }
+
+    /* 進度 */
+    .progress-bar-wrap { background:#f0e0d0; border-radius:8px; height:10px; overflow:hidden; margin:12px 0 6px; }
+    .progress-bar-fill { height:100%; background:linear-gradient(90deg,#c2510b,#e96a1e); border-radius:8px; transition:width .3s; }
+    .progress-text { font-size:.82rem; color:var(--text-muted); text-align:right; }
+
+    /* 結果 */
+    .result-box { border-radius:var(--radius); padding:14px 18px; font-size:.88rem; line-height:1.7; display:none; }
+    .result-box.show { display:block; }
+    .result-ok  { background:#e8f5e9; border:1px solid #a5d6a7; color:#2e7d32; }
+    .result-err { background:#fce4ec; border:1px solid #f48fb1; color:#c62828; }
+
+    @media(max-width:500px) { .preview-grid { grid-template-columns:repeat(3,1fr); } }
+  </style>
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<main>
+  <h1>🖼️ 批次上傳花卉圖片</h1>
+  <p class="subtitle">選擇品質分類後，一次上傳多張圖片到 GitHub FlowerImage 資料夾</p>
+
+  <!-- 設定 -->
+  <div class="card">
+    <div class="card-title">⚙️ 上傳設定</div>
+    <div class="form-row">
+      <div class="form-group">
+        <div class="lbl">品質分類</div>
+        <select id="quality">
+          <option value="仙">仙</option>
+          <option value="華">華</option>
+          <option value="珍">珍</option>
+          <option value="普">普</option>
+          <option value="凡">凡</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:2;">
+        <div class="lbl">GitHub Token</div>
+        <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxx" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 拖放區 -->
+  <div class="drop-zone" id="dropZone" onclick="document.getElementById('file-input').click()">
+    <div class="dz-icon">📂</div>
+    <div class="dz-text">點擊或拖曳圖片到這裡</div>
+    <div class="dz-sub">支援 JPG、PNG，可一次選取多張</div>
+  </div>
+  <input type="file" id="file-input" accept="image/*" multiple onchange="addFiles(this.files)" />
+
+  <!-- 預覽 -->
+  <div class="preview-grid" id="previewGrid"></div>
+
+  <!-- 操作列 -->
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+    <button class="btn btn-primary" id="uploadBtn" onclick="startUpload()" disabled>⬆️ 開始上傳</button>
+    <button class="btn btn-clear" onclick="clearAll()">🗑️ 清除全部</button>
+    <span id="file-count" style="font-size:.85rem;color:var(--text-muted);"></span>
+  </div>
+
+  <!-- 進度 -->
+  <div id="progressWrap" style="display:none;">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-text" id="progressText">0 / 0</div>
+  </div>
+
+  <!-- 結果 -->
+  <div class="result-box" id="resultBox"></div>
+</main>
+
+<script>
+let files = []; // { file, id, status:'pending'|'uploading'|'done'|'error', msg }
+
+// ── 拖放 ──
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  addFiles(e.dataTransfer.files);
+});
+
+function addFiles(fileList) {
+  const existing = new Set(files.map(f => f.file.name));
+  for (const f of fileList) {
+    if (!f.type.startsWith('image/')) continue;
+    if (existing.has(f.name)) continue;
+    files.push({ file: f, status: 'pending', msg: '' });
+  }
+  renderPreviews();
+  updateCount();
+}
+
+function removeFile(idx) {
+  files.splice(idx, 1);
+  renderPreviews();
+  updateCount();
+}
+
+function clearAll() {
+  files = [];
+  renderPreviews();
+  updateCount();
+  document.getElementById('progressWrap').style.display = 'none';
+  hideResult();
+}
+
+function updateCount() {
+  const n = files.length;
+  document.getElementById('file-count').textContent = n ? `已選 ${n} 張` : '';
+  document.getElementById('uploadBtn').disabled = n === 0;
+}
+
+function renderPreviews() {
+  const grid = document.getElementById('previewGrid');
+  if (!files.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = files.map((item, i) => {
+    const url = URL.createObjectURL(item.file);
+    const statusLabel = { pending:'待上傳', uploading:'上傳中…', done:'✅ 完成', error:'❌ 失敗' }[item.status];
+    return `<div class="preview-item" id="pi-${i}">
+      <img src="${url}" alt="${item.file.name}" />
+      <div class="pi-status ${item.status}">${statusLabel}</div>
+      ${item.status === 'pending' ? `<button class="pi-remove" onclick="removeFile(${i})">✕</button>` : ''}
+      <div class="pi-name" title="${item.file.name}">${item.file.name}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── 上傳 ──
+async function startUpload() {
+  const quality = document.getElementById('quality').value;
+  const token   = document.getElementById('token').value.trim();
+  if (!token) { showResult('請填入 GitHub Token', false); return; }
+  if (!files.length) return;
+
+  const { owner, repo, branch } = GITHUB_CONFIG;
+  document.getElementById('uploadBtn').disabled = true;
+  document.getElementById('progressWrap').style.display = 'block';
+  hideResult();
+
+  // 取得目前 Sheet 最大 id，作為新增起點
+  showResult('⏳ 讀取 Sheet 中...', true);
+  let nextId = (await fetchMaxId()) + 1;
+  hideResult();
+
+  let done = 0, errCount = 0;
+  const total = files.length;
+
+  for (let i = 0; i < files.length; i++) {
+    const item = files[i];
+    if (item.status === 'done') { done++; continue; }
+
+    item.status = 'uploading';
+    updateItem(i);
+    setProgress(done, total);
+
+    try {
+      const base64 = await toBase64(item.file);
+      const imgPath = `FlowerImage/${quality}/${item.file.name}`;
+      const apiUrl  = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(imgPath)}`;
+
+      // 取得現有 sha（若已存在則覆蓋）
+      let sha;
+      const getRes = await fetch(apiUrl, {
+        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+      });
+      if (getRes.ok) sha = (await getRes.json()).sha;
+
+      const body = { message: `upload: ${item.file.name}`, content: base64, branch };
+      if (sha) body.sha = sha;
+
+      const putRes = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!putRes.ok) {
+        const e = await putRes.json();
+        throw new Error(e.message || putRes.status);
+      }
+
+      // 寫入 Sheet
+      await writeToSheet(nextId, quality, item.file.name);
+      item.sheetId = nextId;
+      nextId++;
+
+      item.status = 'done';
+      done++;
+    } catch(e) {
+      item.status = 'error';
+      item.msg = e.message;
+      errCount++;
+    }
+
+    updateItem(i);
+    setProgress(done, total);
+  }
+
+  document.getElementById('uploadBtn').disabled = false;
+
+  const quality2 = document.getElementById('quality').value;
+  if (errCount === 0) {
+    showResult(`✅ 全部 ${total} 張圖片上傳完成，已寫入 flowersimage Sheet！\n路徑：FlowerImage/${quality2}/`, true);
+  } else {
+    showResult(`上傳完成：${done} 張成功，${errCount} 張失敗。\n失敗的圖片可重新點擊「開始上傳」重試。`, errCount === total);
+  }
+}
+
+// ── 取得 flowersimage sheet 目前最大 id ──
+async function fetchMaxId() {
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/flowersimage!A:A?key=${API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) return 0;
+    const data = await res.json();
+    const rows = (data.values || []).slice(1); // 跳過標題
+    const ids = rows.map(r => Number(r[0])).filter(n => !isNaN(n) && n > 0);
+    return ids.length ? Math.max(...ids) : 0;
+  } catch { return 0; }
+}
+
+// ── 寫入 Sheet ──
+function writeToSheet(id, quality, imgPath) {
+  return new Promise(resolve => {
+    const img = `../FlowerImage/${quality}/${imgPath}`;
+    const params = encodeURIComponent(JSON.stringify({
+      action: 'addFlowerImage', id, quality, img
+    }));
+    const el = new Image();
+    el.onload = el.onerror = () => resolve();
+    el.src = `${APPS_URL}?data=${params}`;
+  });
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result.split(',')[1]);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function updateItem(i) {
+  const el = document.getElementById(`pi-${i}`);
+  if (!el) return;
+  const item = files[i];
+  const statusLabel = { pending:'待上傳', uploading:'上傳中…', done:'✅ 完成', error:'❌ 失敗' }[item.status];
+  const badge = el.querySelector('.pi-status');
+  if (badge) { badge.className = `pi-status ${item.status}`; badge.textContent = statusLabel; }
+  const rm = el.querySelector('.pi-remove');
+  if (rm && item.status !== 'pending') rm.remove();
+}
+
+function setProgress(done, total) {
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total}`;
+}
+
+function showResult(msg, ok) {
+  const el = document.getElementById('resultBox');
+  el.textContent = msg;
+  el.className = 'result-box show ' + (ok ? 'result-ok' : 'result-err');
+}
+function hideResult() {
+  document.getElementById('resultBox').className = 'result-box';
+}
+</script>
+<script src="header.js"></script>
+</body>
+</html>
