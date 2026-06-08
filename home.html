@@ -15,81 +15,6 @@
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:60px; }
 
-    /* ── Header ── */
-    header { background:linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%); color:#fff; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(194,81,11,0.3); }
-    .guild-name { font-size:1.25rem; font-weight:700; letter-spacing:2px; white-space:nowrap; text-decoration:none; color:inherit; }
-    .guild-name small { font-weight:400; opacity:0.8; font-size:0.7rem; }
-    nav { display:flex; gap:8px; align-items:center; }
-    nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600; transition:background 0.2s; border:1.5px solid rgba(255,255,255,0.5); white-space:nowrap; }
-    nav a:hover, nav a.active { background:rgba(255,255,255,0.25); }
-
-    /* ── 下拉選單 ── */
-    .nav-dropdown { position:relative; }
-    .nav-dropdown > .nav-drop-btn {
-      color:#fff; padding:6px 14px; border-radius:20px; font-size:0.9rem; font-weight:600;
-      border:1.5px solid rgba(255,255,255,0.5); background:none; cursor:pointer;
-      display:flex; align-items:center; gap:5px; transition:background 0.2s; white-space:nowrap;
-    }
-    .nav-dropdown > .nav-drop-btn:hover,
-    .nav-dropdown:hover > .nav-drop-btn { background:rgba(255,255,255,0.25); }
-    .nav-drop-btn .arrow { font-size:0.6rem; transition:transform 0.2s; display:inline-block; }
-    .nav-dropdown:hover .arrow { transform:rotate(180deg); }
-    .nav-drop-menu {
-      display:none; position:absolute; top:100%; left:50%;
-      transform:translateX(-50%);
-      padding-top:8px;
-      background:transparent;
-      min-width:130px; z-index:200;
-    }
-    .nav-dropdown:hover .nav-drop-menu { display:block; }
-    .nav-drop-menu-inner {
-      background:#fff; border-radius:12px; border:1px solid var(--border);
-      box-shadow:0 8px 24px rgba(194,81,11,0.18); overflow:hidden;
-    }
-    .nav-drop-menu a {
-      display:block; padding:10px 18px; color:var(--orange-dark) !important;
-      font-size:0.88rem; font-weight:600; text-decoration:none;
-      border:none !important; border-radius:0 !important; background:none !important;
-      transition:background 0.15s;
-    }
-    .nav-drop-menu a:hover { background:var(--orange-light) !important; }
-    .nav-drop-menu a + a { border-top:1px solid var(--border) !important; }
-
-    /* ── mobile-nav 子選單 ── */
-    .mnav-group { display:flex; flex-direction:column; gap:0; }
-    .mnav-parent {
-      color:#fff; padding:12px 16px; border-radius:12px; font-size:1rem; font-weight:600;
-      border:1.5px solid rgba(255,255,255,0.3); background:none; cursor:pointer;
-      display:flex; align-items:center; justify-content:space-between;
-      transition:background 0.2s; width:100%;
-    }
-    .mnav-parent:hover { background:rgba(255,255,255,0.2); }
-    .mnav-parent .arrow { font-size:0.7rem; transition:transform 0.25s; }
-    .mnav-parent.open .arrow { transform:rotate(180deg); }
-    .mnav-children {
-      display:none; flex-direction:column; gap:4px;
-      padding:6px 0 2px 16px;
-    }
-    .mnav-children.open { display:flex; }
-    .mnav-children a {
-      color:rgba(255,255,255,0.9) !important; padding:9px 14px !important;
-      border-radius:10px !important; font-size:0.92rem !important;
-      border:1px solid rgba(255,255,255,0.2) !important;
-    }
-    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; }
-    .hamburger span { display:block; width:22px; height:2px; background:#fff; border-radius:2px; transition:all 0.3s; }
-    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
-    .hamburger.open span:nth-child(2) { opacity:0; }
-    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
-    #nav-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:150; }
-    #nav-overlay.show { display:block; }
-    #mobile-nav { position:fixed; top:0; right:-260px; width:240px; height:100vh; background:linear-gradient(160deg,#c2510b,#e96a1e); z-index:200; padding:70px 20px 30px; display:flex; flex-direction:column; gap:8px; transition:right 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-4px 0 20px rgba(0,0,0,0.2); }
-    #mobile-nav.open { right:0; }
-    #mobile-nav a { color:#fff; text-decoration:none; padding:12px 16px; border-radius:12px; font-size:1rem; font-weight:600; border:1.5px solid rgba(255,255,255,0.3); transition:background 0.2s; display:flex; align-items:center; gap:10px; }
-    #mobile-nav a:hover, #mobile-nav a.active { background:rgba(255,255,255,0.2); }
-    #mobile-nav .nav-close { position:absolute; top:16px; right:16px; background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer; }
-    @media(max-width:600px) { .guild-name { font-size:1rem; } nav { display:none; } .hamburger { display:flex; } }
-
     /* ── Hero ── */
     .hero { position:relative; overflow:hidden; background:linear-gradient(to bottom,#fff4d6,#f7edd7); border-bottom:1px solid var(--border); }
     .hero::before { content:''; position:absolute; inset:0; opacity:0.2; background:radial-gradient(circle at top,#fff 0%,transparent 60%); pointer-events:none; }
@@ -167,6 +92,63 @@
     #copy-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(10px); background:#3d1a2e; color:#fff; padding:8px 20px; border-radius:20px; font-size:0.85rem; font-weight:600; opacity:0; pointer-events:none; transition:all 0.3s; z-index:999; }
     #copy-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
+    /* ── 禮包兌換碼 ── */
+    .coupon-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:48px; }
+    .coupon-card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:18px 20px; }
+    .coupon-card-title { font-size:0.85rem; font-weight:700; color:var(--orange); margin-bottom:14px; letter-spacing:0.05em; }
+    .coupon-list { display:flex; flex-direction:column; gap:8px; }
+    .coupon-item {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 14px; border-radius:10px; cursor:pointer;
+      background:var(--orange-light); border:1px solid var(--border);
+      transition:background 0.15s, transform 0.1s;
+    }
+    .coupon-item:hover { background:#fde8d4; transform:translateY(-1px); }
+    .coupon-item:active { transform:scale(0.97); }
+    .coupon-code { font-family:'Consolas','Courier New',monospace; font-size:0.92rem; font-weight:700; color:var(--text); letter-spacing:0.5px; }
+    .coupon-copy-hint { font-size:0.7rem; color:var(--text-muted); opacity:0.7; }
+    .coupon-loading { font-size:0.85rem; color:var(--text-muted); padding:8px 0; }
+    .coupon-empty { font-size:0.85rem; color:var(--text-muted); font-style:italic; padding:8px 0; }
+    @media(max-width:600px) { .coupon-grid { grid-template-columns:1fr; } }
+
+    /* ── Line 群固定浮動卡 ── */
+    .line-float-card {
+      position: fixed; bottom: 80px; left: 20px; z-index: 500;
+      text-decoration: none;
+      display: block;
+    }
+    .lfc-collapsed {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.13); border: 1px solid var(--border);
+      padding: 10px 14px; cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .lfc-collapsed .lfc-label { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+    .lfc-collapsed .lfc-thumb { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; flex-shrink: 0; display: block; }
+    /* 展開的 QR 面板，預設隱藏 */
+    .lfc-expanded {
+      position: absolute; bottom: 0; left: 0;
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18); border: 1px solid var(--border);
+      padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+      opacity: 0; pointer-events: none;
+      transform: scale(0.85) translateY(8px);
+      transform-origin: bottom left;
+      transition: opacity 0.22s, transform 0.22s;
+      width: 200px;
+    }
+    .lfc-qr { width: 172px; height: 172px; object-fit: contain; border-radius: 8px; display: block; }
+    .lfc-scan { font-size: 0.78rem; font-weight: 700; color: #06c755; }
+    /* hover 時：隱藏小卡，顯示 QR */
+    .line-float-card:hover .lfc-collapsed {
+      opacity: 0; pointer-events: none; transform: scale(0.9);
+    }
+    .line-float-card:hover .lfc-expanded {
+      opacity: 1; pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
     /* ── 回頂部 ── */
     #back-to-top { position:fixed; bottom:24px; right:20px; z-index:500; width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; font-size:1.2rem; border:none; cursor:pointer; box-shadow:0 4px 16px rgba(233,106,30,0.4); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s, transform 0.3s; }
     #back-to-top.show { opacity:1; pointer-events:auto; }
@@ -175,45 +157,7 @@
 </head>
 <body>
 
-<header>
-  <a href="home.html" class="guild-name">璀璨 <small>[400117]</small></a>
-          <nav>
-    <a href="home.html" class="active">首頁</a>
-    <a href="index.html" >花卉圖鑑</a>
-    <a href="guide.html" >競賽攻略</a>
-    <a href="index.html#id-page">公會成員</a>
-    <div class="nav-dropdown">
-      <button class="nav-drop-btn ">👤 個人 <span class="arrow">▼</span></button>
-      <div class="nav-drop-menu">
-        <div class="nav-drop-menu-inner">
-          <a href="member-editor.html">✅ 花卉擁有</a>
-          <a href="flower-showcase.html">🖼️ 個人花展</a>
-        </div>
-      </div>
-    </div>
-    <a href="editor.html" >管理</a>
-  </nav>
-  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="選單">
-    <span></span><span></span><span></span>
-  </button>
-</header>
-
-<div id="nav-overlay" onclick="closeMobileNav()"></div>
-<div id="mobile-nav">
-  <button class="nav-close" onclick="closeMobileNav()">✕</button>
-  <a href="home.html" class="active">🏠 首頁</a>
-  <a href="index.html">🌸 花卉圖鑑</a>
-  <a href="guide.html" >📖 競賽攻略</a>
-  <a href="index.html#id-page">👥 公會成員</a>
-  <div class="mnav-group">
-    <button class="mnav-parent open" onclick="toggleMnavGroup(this)">👤 個人 <span class="arrow">▼</span></button>
-    <div class="mnav-children open">
-      <a href="member-editor.html">✅ 花卉擁有</a>
-      <a href="flower-showcase.html">🖼️ 個人花展</a>
-    </div>
-  </div>
-  <a href="editor.html" >⚙️ 管理</a>
-</div>
+<div id="site-header"></div>
 
 <!-- Hero -->
 <section class="hero">
@@ -345,6 +289,19 @@
     <div class="join-footer">加入璀璨，一同燦爛 ✨</div>
   </div>
 
+  <!-- 禮包兌換碼 -->
+  <div class="section-title">🎁 禮包兌換碼</div>
+  <div class="coupon-grid">
+    <div class="coupon-card">
+      <div class="coupon-card-title">🔒 常態兌換碼</div>
+      <div id="coupon-permanent" class="coupon-list"><div class="coupon-loading">載入中...</div></div>
+    </div>
+    <div class="coupon-card">
+      <div class="coupon-card-title">🔄 週期兌換碼</div>
+      <div id="coupon-periodic" class="coupon-list"><div class="coupon-loading">載入中...</div></div>
+    </div>
+  </div>
+
   <!-- 公告欄 -->
    <!-- <div class="section-title">📢 最新公告</div>
   <div class="notice-list">
@@ -369,6 +326,19 @@
 <!-- 複製提示 -->
 <div id="copy-toast">已複製！</div>
 
+<!-- Line QR 固定浮動卡 -->
+<a href="https://line.me/ti/g2/xf0Od6Moys9dfgxL4hN-AkKZMIFvRxeJLQIrjA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
+   target="_blank" rel="noopener" class="line-float-card" aria-label="加入璀璨公會 Line 群">
+  <div class="lfc-collapsed">
+    <img src="Context/line.jpg" alt="Line QR" class="lfc-thumb" />
+    <div class="lfc-label">公會 Line 群</div>
+  </div>
+  <div class="lfc-expanded">
+    <img src="Context/line.jpg" alt="Line QR Code" class="lfc-qr" />
+    <div class="lfc-scan">掃描或點擊加入</div>
+  </div>
+</a>
+
 <!-- 回頂部 -->
 <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="回頂部">&#8679;</button>
 
@@ -386,21 +356,61 @@ window.addEventListener('scroll', () => {
   document.getElementById('back-to-top').classList.toggle('show', window.scrollY > 300);
 }, { passive: true });
 
-function toggleMnavGroup(btn) {
-  btn.classList.toggle('open');
-  btn.nextElementSibling.classList.toggle('open');
+// ── 禮包兌換碼 ──
+(async function loadCoupons() {
+  const SHEET_ID = '1hKW9-wVYfZAjP4YIGJY6ngK8cFWuhDn1OxGvPnHLGDg';
+  const API_KEY  = 'AIzaSyALI8OL0bN4yg4PTV3q_hwIsdrkkpcJ0Tg';
+  try {
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/coupon!A1:Z?key=${API_KEY}`);
+    if (!res.ok) throw new Error('讀取失敗');
+    const data = await res.json();
+    const rows = (data.values || []);
+    const headers = rows[0] || [];
+    const codeIdx = headers.indexOf('兌換碼');
+    const typeIdx = headers.indexOf('類別');
+    if (codeIdx < 0) throw new Error('找不到兌換碼欄位');
+
+    const coupons = rows.slice(1)
+      .filter(r => r[codeIdx] && r[codeIdx].trim())
+      .map(r => ({ code: r[codeIdx].trim(), type: (r[typeIdx] || '常態').trim() }));
+
+    const permanent = coupons.filter(c => c.type === '常態');
+    const periodic  = coupons.filter(c => c.type === '週期');
+
+    renderCouponList('coupon-permanent', permanent);
+    renderCouponList('coupon-periodic', periodic);
+  } catch(e) {
+    document.getElementById('coupon-permanent').innerHTML = `<div class="coupon-empty">⚠️ ${e.message}</div>`;
+    document.getElementById('coupon-periodic').innerHTML = `<div class="coupon-empty">⚠️ ${e.message}</div>`;
+  }
+})();
+
+function renderCouponList(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items.length) {
+    el.innerHTML = '<div class="coupon-empty">目前沒有兌換碼</div>';
+    return;
+  }
+  el.innerHTML = items.map(c =>
+    `<div class="coupon-item" onclick="copyCoupon(this,'${c.code.replace(/'/g,"\\'")}')">
+      <span class="coupon-code">${c.code}</span>
+      <span class="coupon-copy-hint">點擊複製</span>
+    </div>`
+  ).join('');
 }
 
-function toggleMobileNav() {
-  document.getElementById('mobile-nav').classList.toggle('open');
-  document.getElementById('nav-overlay').classList.toggle('show');
-  document.getElementById('hamburger').classList.toggle('open');
-}
-function closeMobileNav() {
-  document.getElementById('mobile-nav').classList.remove('open');
-  document.getElementById('nav-overlay').classList.remove('show');
-  document.getElementById('hamburger').classList.remove('open');
+function copyCoupon(el, code) {
+  navigator.clipboard.writeText(code).then(() => {
+    const t = document.getElementById('copy-toast');
+    t.textContent = '已複製：' + code;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+    // 短暫閃綠色
+    el.style.background = '#d4edda';
+    setTimeout(() => el.style.background = '', 400);
+  });
 }
 </script>
+<script src="header.js"></script>
 </body>
 </html>
