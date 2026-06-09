@@ -13,6 +13,7 @@
         { label: '🖼️ 個人花展', href: 'flower-showcase.html' },
       ]
     },
+    { label: '社群 Line', href: '#line-qr', icon: '📱', match: [], mobileOnly: true },
     { label: '管理', href: 'editor.html', icon: '⚙️', match: ['editor.html'] },
   ];
 
@@ -132,13 +133,13 @@
       #site-header nav { display: none; }
       #site-header .sh-hamburger { display: flex; }
     }
-    /* mobile-nav 底部 Line 群按鈕 */
     #sh-mobile-nav .sh-mnav-line-btn {
-      margin-top: auto; padding: 12px 16px; border-radius: 12px;
+      padding: 12px 16px; border-radius: 12px;
       background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3);
       color: #fff; font-size: 1rem; font-weight: 600;
       cursor: pointer; transition: background 0.2s;
       text-align: center; width: 100%;
+      display: flex; align-items: center; gap: 10px;
     }
     #sh-mobile-nav .sh-mnav-line-btn:hover { background: rgba(255,255,255,0.25); }
     /* Line QR Lightbox */
@@ -190,7 +191,7 @@
 
   // ── 建立桌面 nav ──
   function buildNav() {
-    return NAV_ITEMS.map(item => {
+    return NAV_ITEMS.filter(item => !item.mobileOnly).map(item => {
       if (item.dropdown) {
         const active = isActive(item) ? 'sh-active' : '';
         const children = item.children.map(c =>
@@ -227,6 +228,10 @@
             <div class="sh-mnav-children ${active}">${children}</div>
           </div>`;
       }
+      // 社群 Line 用按鈕觸發 lightbox
+      if (item.href === '#line-qr') {
+        return `<button class="sh-mnav-line-btn" onclick="shShowLineQR(event)">${item.icon} ${item.label}</button>`;
+      }
       const active = isActive(item) ? 'sh-active' : '';
       return `<a href="${item.href}" class="${active}">${item.icon} ${item.label}</a>`;
     }).join('');
@@ -253,7 +258,6 @@
     <div id="sh-mobile-nav">
       <button class="sh-nav-close" onclick="shCloseNav()">✕</button>
       ${buildMobileNav()}
-      <button class="sh-mnav-line-btn" onclick="shShowLineQR(event)">📱 社群 Line</button>
     </div>
     <div id="sh-line-lightbox" onclick="shCloseLineQR()">
       <button class="sh-line-close" onclick="shCloseLineQR()">✕</button>
