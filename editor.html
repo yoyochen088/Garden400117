@@ -89,6 +89,7 @@
 <div class="tabs">
   <button class="tab active" onclick="switchTab('tm',this)">&#128101; 成員管理</button>
   <button class="tab" onclick="switchTab('tf',this)">&#127800; 花卉資料</button>
+  <button class="tab" onclick="switchTab('tc',this)">&#127873; 兌換碼</button>
 </div>
 <div id="tm" class="panel active">
   <div id="mlist"><div class="loading">載入中...</div></div>
@@ -140,9 +141,14 @@
     <tbody id="tb"></tbody></table>
   </div>
 </div>
+<div id="tc" class="panel">
+  <div id="clist"><div class="loading">載入中...</div></div>
+  <button class="btn-add" onclick="addCoupon()">＋ 新增兌換碼</button>
+</div>
 <div class="bbar">
   <button class="btn" style="background:#4a90d9;color:#fff;" id="smBtn" onclick="saveM()">&#128190; 儲存成員</button>
   <button class="btn" style="background:#34a853;color:#fff;display:none;" id="sfBtn" onclick="saveFlowers()">&#128190; 儲存花卉</button>
+  <button class="btn" style="background:#e96a1e;color:#fff;display:none;" id="scBtn" onclick="saveCoupons()">&#128190; 儲存兌換碼</button>
 </div>
 <script>
 
@@ -157,6 +163,7 @@ function switchTab(id,btn){
   document.getElementById(id).classList.add('active');btn.classList.add('active');
   document.getElementById('smBtn').style.display=id==='tm'?'inline-flex':'none';
   document.getElementById('sfBtn').style.display=id==='tf'?'inline-flex':'none';
+  document.getElementById('scBtn').style.display=id==='tc'?'inline-flex':'none';
 }
 
 // ── 成員管理 ──
@@ -432,6 +439,128 @@ function showStatus(el, msg, type) {
   el.style.display = 'block';
 }
 
+// ══════════════════════════════════════
+// ── 兌換碼管理 ──
+// ══════════════════════════════════════
+let coupons = [], origCoupons = [];
+
+async function loadC() {
+  try {
+    const r = await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/coupon!A1:Z?key='+API_KEY);
+    const d = await r.json();
+    const rows = d.values || [];
+    const headers = rows[0] || [];
+    const codeIdx = headers.indexOf('兌換碼');
+    const typeIdx = headers.indexOf('類別');
+    coupons = rows.slice(1).map(row => ({
+      code: (row[codeIdx] || '').trim(),
+      type: (row[typeIdx] || '常態').trim(),
+      _deleted: false,
+      _orig: { code: (row[codeIdx] || '').trim(), type: (row[typeIdx] || '常態').trim() }
+    })).filter(c => c.code);
+    origCoupons = JSON.parse(JSON.stringify(coupons));
+  } catch(e) { coupons = []; origCoupons = []; }
+  renderC();
+}
+
+function renderC() {
+  const el = document.getElementById('clist');
+  if (!coupons.filter(c => !c._deleted).length) {
+    el.innerHTML = '<p style="color:#9e6b7e;font-size:.9rem;margin-bottom:12px;">尚無兌換碼。</p>';
+    return;
+  }
+  el.innerHTML = coupons.map((c, i) => {
+    if (c._deleted) return '';
+    return '<div class="card"><div class="mrow" style="grid-template-columns:1fr auto auto;">'
+      + '<div><div class="lbl">兌換碼</div><input type="text" value="' + c.code + '" oninput="coupons[' + i + '].code=this.value" placeholder="輸入兌換碼"/></div>'
+      + '<div><div class="lbl">類別</div><select onchange="coupons[' + i + '].type=this.value">'
+      + ['常態','週期'].map(t => '<option ' + (c.type === t ? 'selected' : '') + '>' + t + '</option>').join('')
+      + '</select></div>'
+      + '<div><button class="btn-rm" onclick="coupons[' + i + ']._deleted=true;renderC()">移除</button></div>'
+      + '</div></div>';
+  }).join('');
+}
+
+function addCoupon() {
+  coupons.push({ code: '', type: '常態', _deleted: false });
+  renderC();
+}
+
+async function saveCoupons() {
+  const active = coupons.filter(c => !c._deleted && c.code.trim());
+  const deleted = coupons.filter(c => c._deleted && c._orig); // 原本存在且被刪除的
+
+  // 計算差異
+  const origMap = {};
+  origCoupons.forEach((c, i) => { origMap[i] = c; });
+
+  const toAdd = [];
+  const toUpdate = [];
+  const toDelete = [];
+
+  // 找新增與修改
+  active.forEach(c => {
+    if (!c._orig) {
+      // 沒有 _orig 代表新增的
+      if (c.code.trim()) toAdd.push(c);
+    } else {
+      // 有 _orig 代表原本就存在，看有沒有改
+      if (c.code.trim() !== c._orig.code || c.type !== c._orig.type) {
+        toUpdate.push(c);
+      }
+    }
+  });
+
+  // 找刪除
+  deleted.forEach(c => { toDelete.push(c._orig); });
+
+  if (!toAdd.length && !toUpdate.length && !toDelete.length) {
+    alert('兌換碼沒有變動');
+    return;
+  }
+
+  const btn = document.getElementById('scBtn');
+  btn.innerHTML = '⏳ 儲存中...'; btn.disabled = true;
+  try {
+    // 新增
+    for (const c of toAdd) {
+      await new Promise(resolve => {
+        const p = encodeURIComponent(JSON.stringify({
+          action: 'addCoupon', code: c.code.trim(), type: c.type
+        }));
+        const img = new Image(); img.onload = img.onerror = () => resolve();
+        img.src = APPS_SCRIPT_URL + '?data=' + p;
+      });
+    }
+    // 修改
+    for (const c of toUpdate) {
+      await new Promise(resolve => {
+        const p = encodeURIComponent(JSON.stringify({
+          action: 'updateCoupon', oldCode: c._orig.code, code: c.code.trim(), type: c.type
+        }));
+        const img = new Image(); img.onload = img.onerror = () => resolve();
+        img.src = APPS_SCRIPT_URL + '?data=' + p;
+      });
+    }
+    // 刪除
+    for (const c of toDelete) {
+      await new Promise(resolve => {
+        const p = encodeURIComponent(JSON.stringify({
+          action: 'deleteCoupon', code: c.code
+        }));
+        const img = new Image(); img.onload = img.onerror = () => resolve();
+        img.src = APPS_SCRIPT_URL + '?data=' + p;
+      });
+    }
+    alert(`✅ 兌換碼已儲存！（新增 ${toAdd.length}、修改 ${toUpdate.length}、刪除 ${toDelete.length} 筆）`);
+    // 重新整理狀態
+    coupons = active.map(c => ({ code: c.code.trim(), type: c.type, _deleted: false, _orig: { code: c.code.trim(), type: c.type } }));
+    origCoupons = JSON.parse(JSON.stringify(coupons));
+    renderC();
+  } catch(e) { alert('❌ 儲存失敗：' + e.message); }
+  finally { btn.innerHTML = '💾 儲存兌換碼'; btn.disabled = false; }
+}
+
 (async()=>{
   // ── 進入驗證 ──
   await new Promise(r => { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', r); else r(); });
@@ -454,8 +583,10 @@ function showStatus(el, msg, type) {
   }
   await loadM();
   await loadF();
+  await loadC();
   document.getElementById('sfBtn').style.display='none';
   document.getElementById('smBtn').style.display='inline-flex';
+  document.getElementById('scBtn').style.display='none';
 })();
 </script>
 </div>
