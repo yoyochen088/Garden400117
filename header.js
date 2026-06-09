@@ -132,6 +132,21 @@
       #site-header nav { display: none; }
       #site-header .sh-hamburger { display: flex; }
     }
+    /* mobile-nav 底部 Line 群 */
+    #sh-mobile-nav .sh-mnav-line {
+      margin-top: auto; padding: 14px; border-radius: 14px;
+      background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.25);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      text-decoration: none; transition: background 0.2s;
+    }
+    #sh-mobile-nav .sh-mnav-line:hover { background: rgba(255,255,255,0.22); }
+    #sh-mobile-nav .sh-mnav-line-qr {
+      width: 120px; height: 120px; object-fit: contain; border-radius: 10px;
+      background: #fff; padding: 4px;
+    }
+    #sh-mobile-nav .sh-mnav-line span {
+      color: #fff; font-size: 0.88rem; font-weight: 700;
+    }
   `;
 
   // ── 判斷目前頁面 ──
@@ -216,6 +231,11 @@
     <div id="sh-mobile-nav">
       <button class="sh-nav-close" onclick="shCloseNav()">✕</button>
       ${buildMobileNav()}
+      <a href="https://line.me/ti/g2/xf0Od6Moys9dfgxL4hN-AkKZMIFvRxeJLQIrjA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
+         target="_blank" rel="noopener" class="sh-mnav-line">
+        <img src="Context/line.jpg" alt="Line QR" class="sh-mnav-line-qr" />
+        <span>📱 加入公會 Line 群</span>
+      </a>
     </div>
   `;
 
