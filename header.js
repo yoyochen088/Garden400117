@@ -135,13 +135,13 @@
     }
     #sh-mobile-nav .sh-mnav-line-btn {
       padding: 12px 16px; border-radius: 12px;
-      background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3);
+      background: none; border: 1.5px solid rgba(255,255,255,0.3);
       color: #fff; font-size: 1rem; font-weight: 600;
       cursor: pointer; transition: background 0.2s;
-      text-align: center; width: 100%;
+      text-align: left; width: 100%;
       display: flex; align-items: center; gap: 10px;
     }
-    #sh-mobile-nav .sh-mnav-line-btn:hover { background: rgba(255,255,255,0.25); }
+    #sh-mobile-nav .sh-mnav-line-btn:hover { background: rgba(255,255,255,0.2); }
     /* Line QR Lightbox */
     #sh-line-lightbox {
       display: none; position: fixed; inset: 0;
