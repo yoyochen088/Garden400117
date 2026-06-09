@@ -132,21 +132,43 @@
       #site-header nav { display: none; }
       #site-header .sh-hamburger { display: flex; }
     }
-    /* mobile-nav 底部 Line 群 */
-    #sh-mobile-nav .sh-mnav-line {
-      margin-top: auto; padding: 14px; border-radius: 14px;
-      background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.25);
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-      text-decoration: none; transition: background 0.2s;
+    /* mobile-nav 底部 Line 群按鈕 */
+    #sh-mobile-nav .sh-mnav-line-btn {
+      margin-top: auto; padding: 12px 16px; border-radius: 12px;
+      background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3);
+      color: #fff; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+      text-align: center; width: 100%;
     }
-    #sh-mobile-nav .sh-mnav-line:hover { background: rgba(255,255,255,0.22); }
-    #sh-mobile-nav .sh-mnav-line-qr {
-      width: 120px; height: 120px; object-fit: contain; border-radius: 10px;
-      background: #fff; padding: 4px;
+    #sh-mobile-nav .sh-mnav-line-btn:hover { background: rgba(255,255,255,0.25); }
+    /* Line QR Lightbox */
+    #sh-line-lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85); z-index: 999;
+      align-items: center; justify-content: center; flex-direction: column; gap: 16px;
     }
-    #sh-mobile-nav .sh-mnav-line span {
-      color: #fff; font-size: 0.88rem; font-weight: 700;
+    #sh-line-lightbox.open { display: flex; }
+    #sh-line-lightbox img {
+      width: 260px; max-width: 80vw; height: auto;
+      border-radius: 16px; background: #fff; padding: 8px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
     }
+    #sh-line-lightbox .sh-line-label {
+      color: #fff; font-size: 1rem; font-weight: 700;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    #sh-line-lightbox .sh-line-close {
+      position: absolute; top: 18px; right: 22px;
+      background: none; border: none; color: #fff; font-size: 2rem;
+      cursor: pointer; opacity: 0.8; line-height: 1;
+    }
+    #sh-line-lightbox .sh-line-open-btn {
+      padding: 10px 24px; border-radius: 20px; font-size: 0.9rem; font-weight: 700;
+      background: #06c755; color: #fff; border: none; cursor: pointer;
+      box-shadow: 0 3px 12px rgba(6,199,85,0.4); transition: transform 0.15s;
+      text-decoration: none; display: inline-block;
+    }
+    #sh-line-lightbox .sh-line-open-btn:hover { transform: translateY(-2px); }
   `;
 
   // ── 判斷目前頁面 ──
@@ -231,11 +253,14 @@
     <div id="sh-mobile-nav">
       <button class="sh-nav-close" onclick="shCloseNav()">✕</button>
       ${buildMobileNav()}
+      <button class="sh-mnav-line-btn" onclick="shShowLineQR(event)">📱 社群 Line</button>
+    </div>
+    <div id="sh-line-lightbox" onclick="shCloseLineQR()">
+      <button class="sh-line-close" onclick="shCloseLineQR()">✕</button>
+      <img src="Context/line.jpg" alt="Line QR Code" onclick="event.stopPropagation()" />
+      <div class="sh-line-label">掃描 QR 或點下方加入</div>
       <a href="https://line.me/ti/g2/xf0Od6Moys9dfgxL4hN-AkKZMIFvRxeJLQIrjA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
-         target="_blank" rel="noopener" class="sh-mnav-line">
-        <img src="Context/line.jpg" alt="Line QR" class="sh-mnav-line-qr" />
-        <span>📱 加入公會 Line 群</span>
-      </a>
+         target="_blank" rel="noopener" class="sh-line-open-btn" onclick="event.stopPropagation()">加入 Line 群</a>
     </div>
   `;
 
@@ -292,4 +317,18 @@
     btn.classList.toggle('open');
     btn.nextElementSibling.classList.toggle('open');
   };
+  window.shShowLineQR = function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    shCloseNav();
+    document.getElementById('sh-line-lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.shCloseLineQR = function () {
+    document.getElementById('sh-line-lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') shCloseLineQR();
+  });
 })();
