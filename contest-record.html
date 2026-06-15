@@ -6,7 +6,6 @@
   <title>競賽成績辨識 - 璀璨</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
   <script src="config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
       --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a;
@@ -111,6 +110,12 @@
     </div>
   </div>
 
+  <!-- 原始辨識文字（除錯用） -->
+  <div class="card" id="rawCard" style="display:none;">
+    <div class="card-title">📝 原始辨識文字</div>
+    <pre id="rawText" style="white-space:pre-wrap;font-size:0.8rem;color:var(--text-muted);max-height:200px;overflow-y:auto;background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border);"></pre>
+  </div>
+
   <!-- 結果 -->
   <div class="card" id="resultCard" style="display:none;">
     <div class="card-title">📋 辨識結果（可修正）</div>
@@ -155,7 +160,7 @@ function clearAll() {
   document.getElementById('progressWrap').style.display = 'none';
 }
 
-// ── OCR ──
+// ── OCR（Google Cloud Vision API）──
 async function startOCR() {
   if (!uploadedFiles.length) return;
   const btn = document.getElementById('ocrBtn');
@@ -164,33 +169,60 @@ async function startOCR() {
   const pf = document.getElementById('progressFill');
   const pt = document.getElementById('progressText');
   pw.style.display = 'block';
-  pf.style.width = '0%';
-  pt.textContent = '初始化 OCR 引擎...';
+  pf.style.width = '10%';
+  pt.textContent = '上傳圖片至 Google Vision...';
 
   let allText = '';
 
   for (let i = 0; i < uploadedFiles.length; i++) {
     pt.textContent = `辨識第 ${i+1}/${uploadedFiles.length} 張...`;
-    pf.style.width = Math.round((i / uploadedFiles.length) * 80) + '%';
+    pf.style.width = Math.round(10 + (i / uploadedFiles.length) * 80) + '%';
 
-    const result = await Tesseract.recognize(uploadedFiles[i], 'chi_tra+eng', {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          const p = Math.round(80 + (m.progress * 20 / uploadedFiles.length));
-          pf.style.width = Math.min(p, 95) + '%';
-        }
-      }
+    // 讀取圖片為 base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(uploadedFiles[i]);
     });
-    allText += result.data.text + '\n';
+
+    // 呼叫 Google Cloud Vision API
+    const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: [{
+          image: { content: base64 },
+          features: [{ type: 'TEXT_DETECTION' }]
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      pt.textContent = `❌ API 錯誤：${err.error?.message || res.status}`;
+      btn.disabled = false; btn.textContent = '🔍 開始辨識';
+      return;
+    }
+
+    const data = await res.json();
+    const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
+    allText += text + '\n';
   }
 
-  pf.style.width = '100%';
+  pf.style.width = '95%';
   pt.textContent = '解析結果中...';
 
   // 解析文字
   parsedData = parseOCRText(allText);
+
+  // 顯示原始文字供除錯
+  document.getElementById('rawText').textContent = allText;
+  document.getElementById('rawCard').style.display = 'block';
+
   renderResult();
 
+  pf.style.width = '100%';
   btn.disabled = false; btn.textContent = '🔍 開始辨識';
   pt.textContent = `✅ 辨識完成！共 ${parsedData.length} 筆`;
 }
@@ -209,9 +241,8 @@ function parseOCRText(text) {
     const titleMatch = TITLES.find(t => line.includes(t));
     if (titleMatch) { currentTitle = titleMatch; continue; }
 
-    // 嘗試解析成員行：s{數字}.{暱稱} ... {分數}
-    // 格式：s2.果果 成員 1409 或 s10.小貓曬太陽 理事 1402
-    const match = line.match(/s(\d+)[.\s·．](.+?)\s+(會長|副會長|理事|菁英|成員|分會成員)\s+[\D]*(\d{3,4})/);
+    // 嚴格匹配：s{數字}.{暱稱} {職位} {分數}
+    const match = line.match(/[sS](\d+)[.\s·．、](.+?)\s*(會長|副會長|理事|菁英|成員|分會成員)\s*[\D]*?(\d{3,4})/);
     if (match) {
       results.push({
         server: 's' + match[1],
@@ -223,13 +254,16 @@ function parseOCRText(text) {
       continue;
     }
 
-    // 寬鬆匹配：有數字開頭和結尾分數的
-    const loose = line.match(/[sS]?(\d+)[.\s·．](.+?)\s+(\d{3,4})$/);
+    // 寬鬆匹配：有 s+數字 開頭和結尾分數的
+    const loose = line.match(/[sS](\d+)[.\s·．、](.+?)\s*(\d{3,4})\s*$/);
     if (loose && parseInt(loose[3]) >= 100) {
+      const roleMatch = line.match(/(會長|副會長|理事|菁英|成員|分會成員)/);
+      let nick = loose[2].trim();
+      if (roleMatch) nick = nick.replace(roleMatch[0], '').trim();
       results.push({
         server: 's' + loose[1],
-        nickname: loose[2].replace(/(會長|副會長|理事|菁英|成員|分會成員)/g, '').trim(),
-        role: (line.match(/(會長|副會長|理事|菁英|成員|分會成員)/) || ['',''])[1] || '',
+        nickname: nick,
+        role: roleMatch ? roleMatch[1] : '',
         score: parseInt(loose[3]),
         title: currentTitle
       });
