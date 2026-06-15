@@ -229,24 +229,52 @@ async function startOCR() {
 
 // ── 解析 OCR 文字 ──
 function parseOCRText(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
   const results = [];
   let currentTitle = '';
 
   // 稱號關鍵字
   const TITLES = ['王者花匠', '大師花匠', '黃金花匠', '白銀花匠', '青銅花匠'];
+  const ROLES = ['會長', '副會長', '理事', '菁英', '成員', '分會成員'];
 
-  for (const line of lines) {
-    // 偵測稱號分隔
+  // 先把所有文字合成一大串，用換行分割
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+  // 合併斷行：把分數獨立在下一行的情況合回來
+  const merged = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // 如果這行只有 3~4 位數字，且上一行有 s 開頭，合併
+    if (/^\d{3,4}$/.test(line) && merged.length > 0) {
+      merged[merged.length - 1] += ' ' + line;
+    } else {
+      merged.push(line);
+    }
+  }
+
+  for (const line of merged) {
+    // 偵測稱號
     const titleMatch = TITLES.find(t => line.includes(t));
     if (titleMatch) { currentTitle = titleMatch; continue; }
 
-    // 嚴格匹配：s{數字}.{暱稱} {職位} {分數}
-    const match = line.match(/[sS](\d+)[.\s·．、](.+?)\s*(會長|副會長|理事|菁英|成員|分會成員)\s*[\D]*?(\d{3,4})/);
+    // 嘗試匹配成員行
+    // 修正常見 OCR 錯誤：$ → s, S → s
+    const fixed = line.replace(/^\$/, 's').replace(/^S/, 's');
+
+    // 模式1：s{數字}.{暱稱}{職位} {分數}
+    // 模式2：s{數字}.{暱稱} {職位} {分數}
+    // 模式3：s{數字}.{暱稱}{職位}{分數}（全部黏在一起）
+    const pattern = /[sS](\d+)[.\s·．、](.+?)[\s(（]*?(會長|副會長|理事|菁英|成員|分會成員)[)）\s]*?[\s\D]*?(\d{3,4})/;
+    const match = fixed.match(pattern);
     if (match) {
+      let nickname = match[2].trim();
+      // 清除暱稱尾部的職位殘留
+      ROLES.forEach(r => { nickname = nickname.replace(new RegExp(r + '$'), '').trim(); });
+      // 清除 OCR 常見誤判（emoji 被辨識成的中文）
+      nickname = nickname.replace(/^[菜米]+[.\s]?/, '').replace(/[書与與]+$/, '').trim();
+
       results.push({
         server: 's' + match[1],
-        nickname: match[2].trim(),
+        nickname: nickname,
         role: match[3],
         score: parseInt(match[4]),
         title: currentTitle
@@ -254,15 +282,18 @@ function parseOCRText(text) {
       continue;
     }
 
-    // 寬鬆匹配：有 s+數字 開頭和結尾分數的
-    const loose = line.match(/[sS](\d+)[.\s·．、](.+?)\s*(\d{3,4})\s*$/);
-    if (loose && parseInt(loose[3]) >= 100) {
-      const roleMatch = line.match(/(會長|副會長|理事|菁英|成員|分會成員)/);
-      let nick = loose[2].trim();
-      if (roleMatch) nick = nick.replace(roleMatch[0], '').trim();
+    // 寬鬆模式：只要有 s+數字 和 3~4位數字
+    const loose = fixed.match(/[sS](\d+)[.\s·．、](.+?)\s*(\d{3,4})/);
+    if (loose && parseInt(loose[3]) >= 500) {
+      let nickname = loose[2].trim();
+      const roleMatch = nickname.match(/(會長|副會長|理事|菁英|成員|分會成員)/);
+      if (roleMatch) nickname = nickname.replace(roleMatch[0], '').trim();
+      // 清除括號
+      nickname = nickname.replace(/[()（）]/g, '').trim();
+
       results.push({
         server: 's' + loose[1],
-        nickname: nick,
+        nickname: nickname,
         role: roleMatch ? roleMatch[1] : '',
         score: parseInt(loose[3]),
         title: currentTitle
