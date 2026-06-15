@@ -119,7 +119,11 @@
       </table>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveToSheet()">💾 儲存到 Sheet</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveToSheet()">💾 儲存到 Sheet</button>
+    </div>
+    <div class="progress-wrap" id="saveProgressWrap" style="display:none;">
+      <div class="progress-bar"><div class="progress-fill" id="saveProgressFill"></div></div>
+      <div class="progress-text" id="saveProgressText"></div>
     </div>
   </div>
 </main>
@@ -482,18 +486,19 @@ async function saveToSheet() {
   if (!period) { alert('請填入競賽期數'); return; }
   if (!parsedData.length) { alert('沒有資料可儲存'); return; }
 
-  const btn = event.target;
+  const btn = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = '⏳ 儲存中...';
 
-  const pw = document.getElementById('progressWrap');
-  const pf = document.getElementById('progressFill');
-  const pt = document.getElementById('progressText');
+  const pw = document.getElementById('saveProgressWrap');
+  const pf = document.getElementById('saveProgressFill');
+  const pt = document.getElementById('saveProgressText');
   pw.style.display = 'block';
   pf.style.width = '0%';
+  pt.textContent = `準備儲存 ${parsedData.length} 筆...`;
 
   try {
-    // 分批傳送，每批 5 筆（避免 URL 過長）
-    const BATCH_SIZE = 5;
+    // 分批傳送，每批 10 筆
+    const BATCH_SIZE = 10;
     const total = parsedData.length;
     let done = 0;
 
