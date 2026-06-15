@@ -109,12 +109,6 @@
     </div>
   </div>
 
-  <!-- 原始辨識文字（除錯用） -->
-  <div class="card" id="rawCard" style="display:none;">
-    <div class="card-title">📝 原始辨識文字</div>
-    <pre id="rawText" style="white-space:pre-wrap;font-size:0.8rem;color:var(--text-muted);max-height:200px;overflow-y:auto;background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border);"></pre>
-  </div>
-
   <!-- 結果 -->
   <div class="card" id="resultCard" style="display:none;">
     <div class="card-title">📋 辨識結果（可修正）</div>
@@ -272,9 +266,18 @@ async function startOCR() {
   // 用 members 資料比對補正暱稱和職位
   await matchWithMembers(parsedData);
 
-  // 顯示原始文字供除錯
-  document.getElementById('rawText').textContent = allText;
-  document.getElementById('rawCard').style.display = 'block';
+  // 根據分數自動填入稱號
+  parsedData.forEach(d => {
+    if (d.score >= 1400)      d.title = '王者花匠';
+    else if (d.score >= 1300) d.title = '大師花匠';
+    else if (d.score >= 1000) d.title = '黃金花匠';
+    else if (d.score >= 700)  d.title = '白銀花匠';
+    else if (d.score >= 500)  d.title = '青銅花匠';
+    else                      d.title = '無稱號';
+  });
+
+  // 按分數高→低排序
+  parsedData.sort((a, b) => b.score - a.score);
 
   renderResult();
 
