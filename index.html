@@ -270,7 +270,8 @@
     .owners-section { margin-top:2px; }
     .owners-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
     .owners-list { display:flex; flex-wrap:wrap; gap:4px; }
-    .owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:8px; padding:2px 8px; font-size:0.75rem; font-weight:500; border:1px solid var(--border); }
+    .owner-tag { background:var(--pink-light); color:var(--pink-dark); border-radius:8px; padding:2px 8px; font-size:0.75rem; font-weight:500; border:1px solid var(--border); cursor:pointer; transition:background 0.15s; }
+    .owner-tag:hover { background:var(--pink-mid); color:#fff; }
     .no-owner { font-size:0.78rem; color:#bbb; font-style:italic; }
     .owner-count-badge { font-size:0.75rem; color:var(--text-muted); }
 
@@ -808,6 +809,18 @@ function resetFilters() {
   applyFilters();
 }
 
+function filterByOwner(name, e) {
+  if (e) e.stopPropagation(); // 避免觸發卡片的 lightbox
+  document.getElementById('searchInput').value = name;
+  // 重置品質 tab 到全部，確保能看到該成員所有花
+  document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
+  document.querySelector('.qtab[data-q=""]').classList.add('active');
+  activeQTab = '';
+  applyFilters();
+  // 滾到頂部看結果
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ── 數字計數動畫 ──
 function animateCount(el, target) {
   const start = parseInt(el.textContent) || 0;
@@ -873,7 +886,7 @@ function renderFlowers(list, ownerDisplay, ownerRole) {
 function buildCard(f, ownerDisplay, ownerRole, idx) {
   const ownerNames = f.owners.map(ownerDisplay).filter(Boolean);
   const ownerTags = ownerNames.length
-    ? ownerNames.map(name => `<span class="owner-tag">${name}</span>`).join('')
+    ? ownerNames.map(name => `<span class="owner-tag" onclick="filterByOwner('${name.replace(/'/g,"\\'")}',event)">${name}</span>`).join('')
     : '<span class="no-owner">尚無人擁有</span>';
 
   const thumbContent = f.img
