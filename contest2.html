@@ -183,6 +183,7 @@
   <div class="btn-row">
     <button class="btn-calc btn-calc-max" onclick="calculateMode('max')">&#x1F4CB; 接滿剩餘任務</button>
     <button class="btn-calc btn-calc-min" onclick="calculateMode('min')">&#x2728; 最少任務數達標</button>
+    <button class="btn-calc" style="background:linear-gradient(135deg,#b8860b,#daa520);color:#fff;" onclick="calculateMode('cost')">&#x1F4B0; 最低元寶</button>
   </div>
 
   <!-- 結果 -->
@@ -353,6 +354,85 @@ function findMinTaskCombos(currentScore, targetScore, remaining, maxScore, bonus
   }
 
   return null; // 無法達標
+}
+
+// ── 元寶成本計算 ──
+// 翻倍任務清單（得分 → 基本分）
+const DOUBLED_COST_MAP = { 28:14, 42:21, 46:23, 50:25, 56:28, 57:28, 58:28, 60:30, 61:30, 62:30 };
+const RENEW_COST = 45; // 第 19~24 個任務的續做成本
+
+function calcComboCost(combo, doneCount) {
+  // 計算翻倍元寶：只有翻倍任務才花元寶
+  let doubleCost = 0;
+  const tasks = [];
+  if (combo.a > 0) for (let i = 0; i < combo.ca; i++) tasks.push(combo.a);
+  if (combo.b > 0) for (let i = 0; i < combo.cb; i++) tasks.push(combo.b);
+
+  tasks.forEach(score => {
+    const base = DOUBLED_COST_MAP[score];
+    if (base) doubleCost += base * 3; // 翻倍任務
+    // 普通任務（14/21/23/25/28/30 且不在翻倍表中）不花元寶
+  });
+
+  // 計算續做元寶：已做 doneCount 個，再接 taskCount 個，超過 18 的部分
+  const totalAfter = doneCount + combo.taskCount;
+  const renewCount = Math.max(0, totalAfter - 18);
+  const renewCost = renewCount * RENEW_COST;
+
+  return { doubleCost, renewCost, totalCost: doubleCost + renewCost };
+}
+
+// ── 最低元寶模式：枚舉所有可能的任務數（1~remaining），找到元寶最低的組合 ──
+function findMinCostCombos(currentScore, targetScore, remaining, doneCount, maxScore, bonus) {
+  const need = targetScore - currentScore;
+  if (need <= 0) return { minCost: 0, combos: [] };
+
+  const allScores = buildAllScores(maxScore, bonus);
+  const maxSingle = Math.max(...allScores);
+  const allResults = [];
+
+  for (let n = 1; n <= remaining; n++) {
+    if (n * maxSingle < need) continue;
+
+    for (let i = 0; i < allScores.length; i++) {
+      const sa = allScores[i];
+      for (let j = i; j < allScores.length; j++) {
+        const sb = allScores[j];
+        for (let cb = 0; cb <= n; cb++) {
+          const ca = n - cb;
+          const total = ca * sa + cb * sb;
+          if (total >= need) {
+            let combo;
+            if (sa === sb)     combo = { a: sa, ca: ca+cb, b: 0,  cb: 0 };
+            else if (ca === 0) combo = { a: sb, ca: cb,    b: 0,  cb: 0 };
+            else if (cb === 0) combo = { a: sa, ca: ca,    b: 0,  cb: 0 };
+            else               combo = { a: sa, ca,        b: sb, cb };
+
+            combo.total = total;
+            combo.finalScore = currentScore + total;
+            combo.taskCount = n;
+
+            const cost = calcComboCost(combo, doneCount);
+            combo.doubleCost = cost.doubleCost;
+            combo.renewCost = cost.renewCost;
+            combo.totalCost = cost.totalCost;
+
+            const key = `${combo.a},${combo.ca},${combo.b},${combo.cb}`;
+            if (!allResults.find(r => `${r.a},${r.ca},${r.b},${r.cb}` === key)) {
+              allResults.push(combo);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (!allResults.length) return null;
+
+  // 排序：元寶最低 → 任務數最少 → 總分最低
+  allResults.sort((a, b) => a.totalCost - b.totalCost || a.taskCount - b.taskCount || a.total - b.total);
+
+  return { minCost: allResults[0].totalCost, combos: allResults };
 }
 
 function selectTitle(el) {
@@ -566,7 +646,19 @@ function calculate() {
 
   let combos, modeLabel;
 
-  if (currentMode === 'min') {
+  if (currentMode === 'cost') {
+    // 最低元寶模式
+    const result = findMinCostCombos(score, targetMin, remaining, done, selectedMaxScore, selectedBonus);
+    if (!result) {
+      document.getElementById('res-combos').innerHTML =
+        `<div class="no-result">😢 找不到合適的組合，建議調整目標</div>`;
+      return;
+    }
+    combos = result.combos;
+    document.getElementById('res-target').textContent =
+      `🎯 目標：${targetName}（還差 ${need} 分）💰 最低 ${result.minCost} 元寶可達成！`;
+    modeLabel = `最低 ${result.minCost} 元寶`;
+  } else if (currentMode === 'min') {
     // 最少任務數模式
     const result = findMinTaskCombos(score, targetMin, remaining, selectedMaxScore, selectedBonus);
     if (!result) {
@@ -595,7 +687,6 @@ function calculate() {
   document.getElementById('res-combos').innerHTML = top.map((c, i) => {
     let taskDesc = '';
     if (c.b > 0) {
-      // 高分放前面
       const [highScore, highCount, lowScore, lowCount] = c.b > c.a
         ? [c.b, c.cb, c.a, c.ca]
         : [c.a, c.ca, c.b, c.cb];
@@ -608,11 +699,17 @@ function calculate() {
     const badge = inRange ? `達成 ${targetName}` : `超出範圍（${c.finalScore} 分）`;
     const badgeStyle = inRange ? '' : 'background:#fff3e0;color:#e65100;';
 
+    // 元寶成本顯示（cost 模式才有 totalCost）
+    const costInfo = c.totalCost !== undefined
+      ? `<div class="combo-score" style="color:#b8860b;">💰 ${c.totalCost} 元寶（翻倍 ${c.doubleCost} + 續做 ${c.renewCost}）</div>`
+      : '';
+
     return `<div class="combo-item">
       <div class="combo-rank">${i+1}</div>
       <div class="combo-detail">
         <div class="combo-tasks">接 ${taskDesc}</div>
         <div class="combo-score">共 +${c.total} 分 → 總分 ${c.finalScore} 分（${c.taskCount} 個任務）</div>
+        ${costInfo}
       </div>
       <div class="combo-badge" style="${badgeStyle}">${badge}</div>
     </div>`;
