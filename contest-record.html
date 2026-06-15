@@ -128,8 +128,15 @@
 let uploadedFiles = [];
 let parsedData = [];
 
-// ── 預設日期為今天 ──
-document.getElementById('periodInput').valueAsDate = new Date();
+// ── 預設日期為最近的週日 ──
+(function() {
+  const today = new Date();
+  const day = today.getDay(); // 0=週日, 1=週一, ...
+  const diff = day === 0 ? 0 : day; // 如果今天是週日就用今天，否則回推到上週日
+  const lastSunday = new Date(today);
+  lastSunday.setDate(today.getDate() - diff);
+  document.getElementById('periodInput').valueAsDate = lastSunday;
+})();
 
 // ── 拖放 ──
 const dz = document.getElementById('dropZone');
@@ -310,6 +317,18 @@ async function loadMembers() {
   } catch(e) { return []; }
 }
 
+// ── 編輯距離（Levenshtein） ──
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, () => Array(n+1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+  return dp[m][n];
+}
+
 async function matchWithMembers(data) {
   const members = await loadMembers();
   if (!members.length) return;
@@ -330,6 +349,18 @@ async function matchWithMembers(data) {
         if (mClean.length < 2 || ocrClean.length < 2) return false;
         return ocrClean.includes(mClean) || mClean.includes(ocrClean);
       });
+    }
+
+    // 編輯距離匹配：差 1 個字以內
+    if (!match && ocrClean.length >= 2) {
+      let bestDist = 999, bestMatch = null;
+      for (const m of members) {
+        const mClean = stripSymbols(m.nickname);
+        if (Math.abs(mClean.length - ocrClean.length) > 1) continue;
+        const dist = levenshtein(ocrClean, mClean);
+        if (dist <= 1 && dist < bestDist) { bestDist = dist; bestMatch = m; }
+      }
+      if (bestMatch) match = bestMatch;
     }
 
     if (match) {
@@ -458,25 +489,36 @@ async function saveToSheet() {
   const pf = document.getElementById('progressFill');
   const pt = document.getElementById('progressText');
   pw.style.display = 'block';
-  pf.style.width = '30%';
-  pt.textContent = `傳送 ${parsedData.length} 筆資料...`;
+  pf.style.width = '0%';
 
   try {
-    const records = parsedData.map(d => ([period, d.server, d.nickname, d.role, d.score, d.title]));
-    const params = encodeURIComponent(JSON.stringify({
-      action: 'addContestBatch',
-      records: records
-    }));
+    // 分批傳送，每批 5 筆（避免 URL 過長）
+    const BATCH_SIZE = 5;
+    const total = parsedData.length;
+    let done = 0;
 
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload = img.onerror = () => resolve();
-      img.src = `${APPS_SCRIPT_URL}?data=${params}`;
-    });
+    for (let i = 0; i < total; i += BATCH_SIZE) {
+      const batch = parsedData.slice(i, i + BATCH_SIZE);
+      const records = batch.map(d => ([period, d.server, d.nickname, d.role, d.score, d.title]));
+      const params = encodeURIComponent(JSON.stringify({
+        action: 'addContestBatch',
+        records: records
+      }));
+
+      await new Promise(resolve => {
+        const img = new Image();
+        img.onload = img.onerror = () => resolve();
+        img.src = `${APPS_SCRIPT_URL}?data=${params}`;
+      });
+
+      done += batch.length;
+      pf.style.width = Math.round(done / total * 100) + '%';
+      pt.textContent = `儲存中 ${done}/${total}...`;
+    }
 
     pf.style.width = '100%';
-    pt.textContent = `✅ 已儲存 ${parsedData.length} 筆！`;
-    alert(`✅ 已儲存 ${parsedData.length} 筆成績到 Sheet！`);
+    pt.textContent = `✅ 已儲存 ${total} 筆！`;
+    alert(`✅ 已儲存 ${total} 筆成績到 Sheet！`);
   } catch(e) {
     pt.textContent = '❌ 儲存失敗';
     alert('❌ 儲存失敗：' + e.message);
