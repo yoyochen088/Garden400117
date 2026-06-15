@@ -120,7 +120,7 @@
     <div class="card-title">📋 辨識結果（可修正）</div>
     <div style="overflow-x:auto;">
       <table class="result-table">
-        <thead><tr><th>#</th><th>暱稱</th><th>伺服器</th><th>職位</th><th>分數</th><th>稱號</th></tr></thead>
+        <thead><tr><th>#</th><th>伺服器</th><th>暱稱</th><th>職稱</th><th>分數</th><th>稱號</th></tr></thead>
         <tbody id="resultBody"></tbody>
       </table>
     </div>
@@ -285,73 +285,69 @@ function parseOCRText(text) {
   const results = [];
   let currentTitle = '';
 
-  // 稱號關鍵字
   const TITLES = ['王者花匠', '大師花匠', '黃金花匠', '白銀花匠', '青銅花匠'];
-  const ROLES = ['會長', '副會長', '理事', '菁英', '成員', '分會成員'];
+  const ROLES = ['副會長', '會長', '理事', '菁英', '成員', '分會成員'];
 
-  // 先把所有文字合成一大串，用換行分割
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  // 先清除空格對解析的干擾：把 "s 24" 合成 "s24"，"$ 10" 合成 "$10"
+  const cleaned = text
+    .replace(/[sS$]\s*(\d+)\s*[.\s·．、]\s*/g, (m, num) => `s${num}.`)  // 統一 s{num}. 格式
+    .replace(/副\s*會\s*長/g, '副會長')
+    .replace(/會\s*長/g, '會長')
+    .replace(/理\s*事/g, '理事')
+    .replace(/菁\s*英/g, '菁英')
+    .replace(/成\s*員/g, '成員')
+    .replace(/分\s*會\s*成\s*員/g, '分會成員');
 
-  // 合併斷行：把分數獨立在下一行的情況合回來
+  const lines = cleaned.split('\n').map(l => l.trim()).filter(l => l);
+
+  // 合併斷行：分數獨立在下一行的情況
   const merged = [];
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    // 如果這行只有 3~4 位數字，且上一行有 s 開頭，合併
-    if (/^\d{3,4}$/.test(line) && merged.length > 0) {
-      merged[merged.length - 1] += ' ' + line;
+    if (/^\d{3,4}$/.test(lines[i]) && merged.length > 0 && /s\d+\./.test(merged[merged.length - 1])) {
+      merged[merged.length - 1] += ' ' + lines[i];
     } else {
-      merged.push(line);
+      merged.push(lines[i]);
     }
   }
 
   for (const line of merged) {
     // 偵測稱號
     const titleMatch = TITLES.find(t => line.includes(t));
-    if (titleMatch) { currentTitle = titleMatch; continue; }
+    if (titleMatch && !line.match(/s\d+\./)) { currentTitle = titleMatch; continue; }
 
-    // 嘗試匹配成員行
-    // 修正常見 OCR 錯誤：$ → s, S → s
-    const fixed = line.replace(/^\$/, 's').replace(/^S/, 's');
+    // 主要匹配模式：s{num}.{任意文字}{分數}
+    const match = line.match(/s(\d+)\.(.+?)(\d{3,4})\s*$/);
+    if (!match) continue;
 
-    // 模式1：s{數字}.{暱稱}{職位} {分數}
-    // 模式2：s{數字}.{暱稱} {職位} {分數}
-    // 模式3：s{數字}.{暱稱}{職位}{分數}（全部黏在一起）
-    const pattern = /[sS](\d+)[.\s·．、](.+?)[\s(（]*?(會長|副會長|理事|菁英|成員|分會成員)[)）\s]*?[\s\D]*?(\d{3,4})/;
-    const match = fixed.match(pattern);
-    if (match) {
-      let nickname = match[2].trim();
-      // 清除暱稱尾部的職位殘留
-      ROLES.forEach(r => { nickname = nickname.replace(new RegExp(r + '$'), '').trim(); });
-      // 清除 OCR 常見誤判（emoji 被辨識成的中文）
-      nickname = nickname.replace(/^[菜米]+[.\s]?/, '').replace(/[書与與]+$/, '').trim();
+    const server = 's' + match[1];
+    let middle = match[2].trim();
+    const score = parseInt(match[3]);
 
-      results.push({
-        server: 's' + match[1],
-        nickname: nickname,
-        role: match[3],
-        score: parseInt(match[4]),
-        title: currentTitle
-      });
-      continue;
+    // 從 middle 提取職位
+    let role = '';
+    for (const r of ROLES) {
+      if (middle.includes(r)) {
+        role = r;
+        middle = middle.replace(r, '').trim();
+        break;
+      }
     }
 
-    // 寬鬆模式：只要有 s+數字 和 3~4位數字
-    const loose = fixed.match(/[sS](\d+)[.\s·．、](.+?)\s*(\d{3,4})/);
-    if (loose && parseInt(loose[3]) >= 500) {
-      let nickname = loose[2].trim();
-      const roleMatch = nickname.match(/(會長|副會長|理事|菁英|成員|分會成員)/);
-      if (roleMatch) nickname = nickname.replace(roleMatch[0], '').trim();
-      // 清除括號
-      nickname = nickname.replace(/[()（）]/g, '').trim();
+    // 清除常見 OCR 雜訊
+    let nickname = middle
+      .replace(/^[.\s·．、]+/, '')           // 開頭的點號
+      .replace(/[菜米]+\s*[.·．]?\s*/g, '')  // 「菜」「米」（emoji 誤判）
+      .replace(/米果\s*/g, '')              // 「米果」
+      .replace(/[書与與]+\s*$/g, '')         // 結尾的「書與」
+      .replace(/[事]+\s*$/g, '')            // 結尾的「事」（理事的殘留）
+      .replace(/[()（）]/g, '')             // 括號
+      .replace(/商店\s*/g, '')              // 背景文字殘留
+      .replace(/\s+/g, '')                  // 移除中間多餘空格
+      .trim();
 
-      results.push({
-        server: 's' + loose[1],
-        nickname: nickname,
-        role: roleMatch ? roleMatch[1] : '',
-        score: parseInt(loose[3]),
-        title: currentTitle
-      });
-    }
+    if (!nickname || score < 100) continue;
+
+    results.push({ server, nickname, role, score, title: currentTitle });
   }
 
   return results;
@@ -378,8 +374,8 @@ function renderResult() {
     }
     return titleRow + `<tr>
       <td>${i+1}</td>
-      <td><input value="${d.nickname}" onchange="parsedData[${i}].nickname=this.value" /></td>
       <td><input value="${d.server}" onchange="parsedData[${i}].server=this.value" style="width:60px;" /></td>
+      <td><input value="${d.nickname}" onchange="parsedData[${i}].nickname=this.value" /></td>
       <td><select onchange="parsedData[${i}].role=this.value">
         ${['會長','副會長','理事','菁英','成員','分會成員',''].map(r => `<option ${d.role===r?'selected':''}>${r}</option>`).join('')}
       </select></td>
