@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>競賽成績辨識 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root {
+      --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a;
+      --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#fff;
+      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
+      --shadow:0 2px 12px rgba(233,106,30,.10); --radius:14px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:80px; }
+    main { max-width:800px; margin:0 auto; padding:24px 16px; }
+    h1 { text-align:center; color:var(--orange-dark); font-size:1.3rem; margin-bottom:4px; }
+    .subtitle { text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:24px; }
+
+    .card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; margin-bottom:16px; }
+    .card-title { font-size:0.9rem; font-weight:700; color:var(--orange-dark); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+
+    /* 上傳區 */
+    .drop-zone {
+      border:2.5px dashed var(--orange-mid); border-radius:var(--radius);
+      background:var(--orange-light); padding:40px 20px;
+      text-align:center; cursor:pointer; transition:all .2s; margin-bottom:16px;
+    }
+    .drop-zone.drag-over { border-color:var(--orange); background:#fde8d4; }
+    .drop-zone .dz-icon { font-size:2.4rem; margin-bottom:10px; }
+    .drop-zone .dz-text { font-size:0.95rem; font-weight:700; color:var(--orange-dark); margin-bottom:4px; }
+    .drop-zone .dz-sub { font-size:0.8rem; color:var(--text-muted); }
+    #file-input { display:none; }
+
+    /* 預覽 */
+    .preview-img { max-width:100%; max-height:300px; border-radius:12px; border:1px solid var(--border); display:none; margin-bottom:14px; }
+
+    /* 進度 */
+    .progress-wrap { margin:12px 0; display:none; }
+    .progress-bar { background:#f0e0d0; border-radius:8px; height:10px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,#c2510b,#e96a1e); border-radius:8px; transition:width .3s; width:0%; }
+    .progress-text { font-size:0.82rem; color:var(--text-muted); text-align:center; margin-top:6px; }
+
+    /* 結果表格 */
+    .result-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    .result-table thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
+    .result-table th { padding:10px 12px; text-align:left; font-weight:600; }
+    .result-table td { padding:8px 12px; border-bottom:1px solid var(--border); }
+    .result-table tbody tr:hover { background:var(--orange-light); }
+    .result-table input { padding:5px 8px; border:1.5px solid var(--orange-mid); border-radius:6px; font-size:0.88rem; background:var(--bg); color:var(--text); outline:none; width:100%; }
+    .result-table input:focus { border-color:var(--orange); }
+
+    .title-divider { background:var(--orange-light); font-weight:700; color:var(--orange-dark); font-size:0.85rem; }
+    .title-divider td { padding:8px 12px !important; }
+
+    /* 按鈕 */
+    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; border-radius:10px; font-size:.92rem; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
+    .btn-primary { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; box-shadow:0 3px 12px rgba(233,106,30,.3); }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(233,106,30,.4); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .btn-secondary { background:var(--orange-light); color:var(--orange-dark); border:1.5px solid var(--border); }
+    .btn-secondary:hover { background:#fde8d4; }
+
+    .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+
+    /* 期數設定 */
+    .period-input { display:flex; gap:10px; align-items:center; margin-bottom:14px; }
+    .period-input label { font-size:0.85rem; font-weight:600; color:var(--orange-dark); white-space:nowrap; }
+    .period-input input { padding:8px 12px; border:1.5px solid var(--orange-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:var(--text); outline:none; width:140px; }
+
+    .empty-state { text-align:center; padding:40px; color:var(--text-muted); font-size:0.9rem; }
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+<main>
+  <h1>📸 競賽成績辨識</h1>
+  <p class="subtitle">上傳遊戲內競賽功勳截圖，自動辨識成員與分數</p>
+
+  <!-- 設定 -->
+  <div class="card">
+    <div class="card-title">📅 期數設定</div>
+    <div class="period-input">
+      <label>競賽期數：</label>
+      <input type="text" id="periodInput" placeholder="例：2026/06/14" />
+    </div>
+  </div>
+
+  <!-- 上傳 -->
+  <div class="card">
+    <div class="card-title">📷 上傳截圖</div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('file-input').click()">
+      <div class="dz-icon">📂</div>
+      <div class="dz-text">點擊或拖曳截圖到這裡</div>
+      <div class="dz-sub">支援 JPG、PNG，可多張（多頁截圖）</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)" />
+    <img id="preview" class="preview-img" />
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">準備辨識中...</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="ocrBtn" onclick="startOCR()" disabled>🔍 開始辨識</button>
+      <button class="btn btn-secondary" onclick="clearAll()">🗑️ 清除</button>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="card-title">📋 辨識結果（可修正）</div>
+    <div style="overflow-x:auto;">
+      <table class="result-table">
+        <thead><tr><th>#</th><th>暱稱</th><th>伺服器</th><th>職位</th><th>分數</th><th>稱號</th></tr></thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveToSheet()">💾 儲存到 Sheet</button>
+    </div>
+  </div>
+</main>
+
+<script>
+let uploadedFiles = [];
+let parsedData = [];
+
+// ── 拖放 ──
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
+function handleFiles(fileList) {
+  uploadedFiles = [...fileList].filter(f => f.type.startsWith('image/'));
+  if (!uploadedFiles.length) return;
+  // 顯示第一張預覽
+  const preview = document.getElementById('preview');
+  preview.src = URL.createObjectURL(uploadedFiles[0]);
+  preview.style.display = 'block';
+  document.getElementById('ocrBtn').disabled = false;
+}
+
+function clearAll() {
+  uploadedFiles = [];
+  parsedData = [];
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('ocrBtn').disabled = true;
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'none';
+}
+
+// ── OCR ──
+async function startOCR() {
+  if (!uploadedFiles.length) return;
+  const btn = document.getElementById('ocrBtn');
+  btn.disabled = true; btn.textContent = '⏳ 辨識中...';
+  const pw = document.getElementById('progressWrap');
+  const pf = document.getElementById('progressFill');
+  const pt = document.getElementById('progressText');
+  pw.style.display = 'block';
+  pf.style.width = '0%';
+  pt.textContent = '初始化 OCR 引擎...';
+
+  let allText = '';
+
+  for (let i = 0; i < uploadedFiles.length; i++) {
+    pt.textContent = `辨識第 ${i+1}/${uploadedFiles.length} 張...`;
+    pf.style.width = Math.round((i / uploadedFiles.length) * 80) + '%';
+
+    const result = await Tesseract.recognize(uploadedFiles[i], 'chi_tra+eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const p = Math.round(80 + (m.progress * 20 / uploadedFiles.length));
+          pf.style.width = Math.min(p, 95) + '%';
+        }
+      }
+    });
+    allText += result.data.text + '\n';
+  }
+
+  pf.style.width = '100%';
+  pt.textContent = '解析結果中...';
+
+  // 解析文字
+  parsedData = parseOCRText(allText);
+  renderResult();
+
+  btn.disabled = false; btn.textContent = '🔍 開始辨識';
+  pt.textContent = `✅ 辨識完成！共 ${parsedData.length} 筆`;
+}
+
+// ── 解析 OCR 文字 ──
+function parseOCRText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const results = [];
+  let currentTitle = '';
+
+  // 稱號關鍵字
+  const TITLES = ['王者花匠', '大師花匠', '黃金花匠', '白銀花匠', '青銅花匠'];
+
+  for (const line of lines) {
+    // 偵測稱號分隔
+    const titleMatch = TITLES.find(t => line.includes(t));
+    if (titleMatch) { currentTitle = titleMatch; continue; }
+
+    // 嘗試解析成員行：s{數字}.{暱稱} ... {分數}
+    // 格式：s2.果果 成員 1409 或 s10.小貓曬太陽 理事 1402
+    const match = line.match(/s(\d+)[.\s·．](.+?)\s+(會長|副會長|理事|菁英|成員|分會成員)\s+[\D]*(\d{3,4})/);
+    if (match) {
+      results.push({
+        server: 's' + match[1],
+        nickname: match[2].trim(),
+        role: match[3],
+        score: parseInt(match[4]),
+        title: currentTitle
+      });
+      continue;
+    }
+
+    // 寬鬆匹配：有數字開頭和結尾分數的
+    const loose = line.match(/[sS]?(\d+)[.\s·．](.+?)\s+(\d{3,4})$/);
+    if (loose && parseInt(loose[3]) >= 100) {
+      results.push({
+        server: 's' + loose[1],
+        nickname: loose[2].replace(/(會長|副會長|理事|菁英|成員|分會成員)/g, '').trim(),
+        role: (line.match(/(會長|副會長|理事|菁英|成員|分會成員)/) || ['',''])[1] || '',
+        score: parseInt(loose[3]),
+        title: currentTitle
+      });
+    }
+  }
+
+  return results;
+}
+
+// ── 顯示結果 ──
+function renderResult() {
+  const card = document.getElementById('resultCard');
+  const tbody = document.getElementById('resultBody');
+
+  if (!parsedData.length) {
+    card.style.display = 'block';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">⚠️ 未能辨識到成員資料，請確認截圖清晰度</td></tr>';
+    return;
+  }
+
+  card.style.display = 'block';
+  let lastTitle = '';
+  tbody.innerHTML = parsedData.map((d, i) => {
+    let titleRow = '';
+    if (d.title && d.title !== lastTitle) {
+      lastTitle = d.title;
+      titleRow = `<tr class="title-divider"><td colspan="6">🏆 ${d.title}</td></tr>`;
+    }
+    return titleRow + `<tr>
+      <td>${i+1}</td>
+      <td><input value="${d.nickname}" onchange="parsedData[${i}].nickname=this.value" /></td>
+      <td><input value="${d.server}" onchange="parsedData[${i}].server=this.value" style="width:60px;" /></td>
+      <td><select onchange="parsedData[${i}].role=this.value">
+        ${['會長','副會長','理事','菁英','成員','分會成員',''].map(r => `<option ${d.role===r?'selected':''}>${r}</option>`).join('')}
+      </select></td>
+      <td><input type="number" value="${d.score}" onchange="parsedData[${i}].score=Number(this.value)" style="width:70px;" /></td>
+      <td>${d.title}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 儲存到 Sheet ──
+async function saveToSheet() {
+  const period = document.getElementById('periodInput').value.trim();
+  if (!period) { alert('請填入競賽期數'); return; }
+  if (!parsedData.length) { alert('沒有資料可儲存'); return; }
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳ 儲存中...';
+
+  try {
+    for (const d of parsedData) {
+      await new Promise(resolve => {
+        const params = encodeURIComponent(JSON.stringify({
+          action: 'addContestRecord',
+          period, server: d.server, nickname: d.nickname,
+          role: d.role, score: d.score, title: d.title
+        }));
+        const img = new Image();
+        img.onload = img.onerror = () => resolve();
+        img.src = `${APPS_SCRIPT_URL}?data=${params}`;
+      });
+    }
+    alert(`✅ 已儲存 ${parsedData.length} 筆成績到 Sheet！`);
+  } catch(e) {
+    alert('❌ 儲存失敗：' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 儲存到 Sheet';
+  }
+}
+</script>
+<script src="header.js"></script>
+</body>
+</html>
