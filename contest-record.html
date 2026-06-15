@@ -303,25 +303,26 @@ async function matchWithMembers(data) {
   if (!members.length) return;
 
   for (const d of data) {
-    // 嘗試精確匹配
-    let match = members.find(m => m.nickname === d.nickname);
+    const ocrName = d.nickname.replace(/\s/g, ''); // OCR 暱稱去空格
 
-    // 模糊匹配：OCR 暱稱包含成員暱稱，或成員暱稱包含 OCR 暱稱
+    // 精確匹配（去空格後）
+    let match = members.find(m => m.nickname.replace(/\s/g, '') === ocrName);
+
+    // 模糊匹配：OCR 暱稱包含成員暱稱，或成員暱稱包含 OCR 暱稱（至少2字）
     if (!match) {
-      match = members.find(m => m.nickname && d.nickname && (
-        d.nickname.includes(m.nickname) || m.nickname.includes(d.nickname)
-      ));
+      match = members.find(m => {
+        const mName = m.nickname.replace(/\s/g, '');
+        if (mName.length < 2 || ocrName.length < 2) return false;
+        return ocrName.includes(mName) || mName.includes(ocrName);
+      });
     }
 
     if (match) {
-      // 補正職位（永遠用 Sheet 的資料覆蓋）
+      // 用 Sheet 的正確暱稱和職位覆蓋
+      d.nickname = match.nickname;
       d.role = match.role;
-      // 如果暱稱有差異，用 Sheet 的正確暱稱替換
-      if (d.nickname !== match.nickname) {
-        d.nickname = match.nickname;
-      }
     } else {
-      // 沒匹配到的，預設給「成員」（公會裡最多的職位）
+      // 沒匹配到，預設「成員」
       if (!d.role) d.role = '成員';
     }
   }
@@ -383,10 +384,9 @@ function parseOCRText(text) {
     // 清除常見 OCR 雜訊
     let nickname = middle
       .replace(/^[.\s·．、]+/, '')           // 開頭的點號
-      .replace(/[菜米]+\s*[.·．]?\s*/g, '')  // 「菜」「米」（emoji 誤判）
-      .replace(/米果\s*/g, '')              // 「米果」
+      .replace(/^菜\s*米\s*/g, '')          // 開頭的「菜米」（emoji 誤判）只清開頭
+      .replace(/^米果\s*/g, '')             // 開頭的「米果」
       .replace(/[書与與]\s*[書与與]?\s*$/g, '')  // 結尾的「書與」「書」
-      .replace(/[事]+\s*$/g, '')            // 結尾的「事」（理事的殘留）
       .replace(/[()（）]/g, '')             // 括號
       .replace(/商店\s*/g, '')              // 背景文字殘留
       .replace(/\s+/g, '')                  // 移除中間多餘空格
