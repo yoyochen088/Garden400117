@@ -171,7 +171,7 @@ async function loadM(){
   try{
     const r=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SHEET_ID+'/values/members!A1:E?key='+API_KEY);
     const d=await r.json();
-    members=(d.values||[]).slice(1).map(r=>({gameId:r[0]||'',nickname:r[1]||'',note:r[2]||'成員',left:(r[3]||'').toLowerCase()==='true'}));
+    members=(d.values||[]).slice(1).map(r=>({gameId:r[0]||'',nickname:r[1]||'',note:r[2]||'成員',left:(r[3]||'').toLowerCase()==='true',server:r[4]||''}));
     origM=JSON.parse(JSON.stringify(members));
   }catch(e){members=[];origM=[];}
   renderM();
@@ -186,18 +186,19 @@ function renderM(){
   el.innerHTML='<p style="font-size:0.85rem;color:var(--pink-dark);font-weight:600;margin-bottom:12px;">目前公會成員：'+active.length+' 人</p>'
   +sorted.map(m=>{
     const i=members.indexOf(m);
-    return '<div class="card"><div class="mrow">'
-      +'<div><div class="lbl">遊戲 ID</div><input type="text" value="'+m.gameId+'" oninput="members['+i+'].gameId=this.value" placeholder="遊戲 ID"/></div>'
+    return '<div class="card"><div class="mrow" style="grid-template-columns:80px 1fr 1fr auto auto;">'
+      +'<div><div class="lbl">伺服器</div><input type="text" value="'+(m.server||'')+'" oninput="members['+i+'].server=this.value" placeholder="s2" style="width:70px;"/></div>'
       +'<div><div class="lbl">昵稱</div><input type="text" value="'+m.nickname+'" oninput="members['+i+'].nickname=this.value" placeholder="昵稱"/></div>'
       +'<div><div class="lbl">職位</div><select onchange="members['+i+'].note=this.value">'
       +['會長','副會長','理事','菁英','成員','分會成員'].map(r=>'<option '+(m.note===r?'selected':'')+'>'+r+'</option>').join('')
       +'</select></div>'
+      +'<div><div class="lbl">ID</div><div style="font-size:.75rem;color:#9e6b7e;padding:7px 0;">'+m.gameId+'</div></div>'
       +'<div><button class="btn-rm" onclick="members['+i+'].left=true;renderM()">移除</button></div>'
       +'</div></div>';
   }).join('');
 }
 
-function addM(){members.push({gameId:'',nickname:'',note:'成員',left:false});renderM();}
+function addM(){members.push({gameId:'',nickname:'',note:'成員',left:false,server:''});renderM();}
 
 async function saveM(){
   const om={};origM.forEach(m=>{om[m.gameId]=m;});
@@ -205,7 +206,7 @@ async function saveM(){
     if(!m.gameId)return false;
     const o=om[m.gameId];
     if(!o&&m.left)return false;if(!o)return true;
-    return o.nickname!==m.nickname||o.note!==m.note||!!o.left!==!!m.left;
+    return o.nickname!==m.nickname||o.note!==m.note||!!o.left!==!!m.left||(o.server||'')!==(m.server||'');
   });
   if(!ch.length){alert('成員資料沒有變動');return;}
   const btn=document.getElementById('smBtn');
@@ -213,7 +214,7 @@ async function saveM(){
   try{
     for(const m of ch){
       await new Promise(res=>{
-        const p=encodeURIComponent(JSON.stringify({action:'updateMember',gameId:m.gameId,nickname:m.nickname,note:m.note,left:!!m.left}));
+        const p=encodeURIComponent(JSON.stringify({action:'updateMember',gameId:m.gameId,nickname:m.nickname,note:m.note,left:!!m.left,server:m.server||''}));
         const img=new Image();img.onload=img.onerror=()=>res();
         img.src=APPS_SCRIPT_URL+'?data='+p;
       });

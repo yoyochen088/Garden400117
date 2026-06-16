@@ -396,7 +396,7 @@ async function loadMembers() {
     const rows = (data.values || []).slice(1);
     membersCache = rows
       .filter(r => (r[3] || '').toLowerCase() !== 'true') // 排除已離開
-      .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', role: r[2]||'成員' }));
+      .map(r => ({ gameId: r[0]||'', nickname: r[1]||'', role: r[2]||'成員', server: r[4]||'' }));
     return membersCache;
   } catch(e) { return []; }
 }
@@ -450,6 +450,7 @@ async function matchWithMembers(data) {
     if (match) {
       d.nickname = match.nickname;
       d.role = match.role;
+      if (match.server && !d.server) d.server = match.server;
     } else {
       if (!d.role) d.role = '成員';
     }
