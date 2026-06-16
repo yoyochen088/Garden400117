@@ -70,6 +70,9 @@
     .period-input input { padding:8px 12px; border:1.5px solid var(--orange-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:var(--text); outline:none; width:140px; }
 
     .empty-state { text-align:center; padding:40px; color:var(--text-muted); font-size:0.9rem; }
+    .lbl { font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-bottom:3px; display:block; }
+    #summaryResult input { padding:7px 10px; border:1.5px solid var(--orange-mid); border-radius:7px; font-size:0.88rem; background:var(--bg); color:var(--text); outline:none; }
+    #summaryResult input:focus { border-color:var(--orange); }
   </style>
 </head>
 <body>
@@ -87,9 +90,30 @@
     </div>
   </div>
 
+  <!-- 總結截圖 -->
+  <div class="card">
+    <div class="card-title">📊 公會總結（選填）</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="drop-zone" id="summaryDropZone" onclick="document.getElementById('summary-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
+        <div class="dz-icon" style="font-size:1.6rem;">📊</div>
+        <div class="dz-text" style="font-size:0.85rem;">上傳總結截圖</div>
+      </div>
+      <input type="file" id="summary-file" accept="image/*" style="display:none;" onchange="handleSummaryFile(this.files[0])" />
+      <div id="summaryResult" style="flex:2;min-width:200px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><label class="lbl">成員數</label><input type="number" id="sumMembers" placeholder="43" style="width:100%;" /></div>
+          <div><label class="lbl">總分</label><input type="number" id="sumTotal" placeholder="33603" style="width:100%;" /></div>
+          <div><label class="lbl">名次</label><input type="text" id="sumRank" placeholder="甲級第四名" style="width:100%;" /></div>
+          <div><label class="lbl">評級</label><input type="text" id="sumGrade" placeholder="甲級公會" style="width:100%;" /></div>
+        </div>
+      </div>
+    </div>
+    <div id="summaryStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
+  </div>
+
   <!-- 上傳 -->
   <div class="card">
-    <div class="card-title">📷 上傳截圖</div>
+    <div class="card-title">📷 上傳成員截圖</div>
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('file-input').click()">
       <div class="dz-icon">📂</div>
       <div class="dz-text">點擊或拖曳截圖到這裡</div>
@@ -112,13 +136,21 @@
   <!-- 結果 -->
   <div class="card" id="resultCard" style="display:none;">
     <div class="card-title">📋 辨識結果（可修正）</div>
+
+    <!-- 缺少成員提示 -->
+    <div id="missingAlert" style="display:none;background:#fff3e0;border:1px solid #ffcc80;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:0.85rem;color:#e65100;">
+      <strong>⚠️ 以下成員未辨識到：</strong>
+      <div id="missingList" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
     <div style="overflow-x:auto;">
       <table class="result-table">
-        <thead><tr><th>#</th><th>伺服器</th><th>暱稱</th><th>職稱</th><th>分數</th><th>稱號</th></tr></thead>
+        <thead><tr><th>#</th><th>伺服器</th><th>暱稱</th><th>職稱</th><th>分數</th><th>稱號</th><th></th></tr></thead>
         <tbody id="resultBody"></tbody>
       </table>
     </div>
     <div class="btn-row">
+      <button class="btn btn-secondary" onclick="addManualRow()">＋ 手動新增</button>
       <button class="btn btn-primary" id="saveBtn" onclick="saveToSheet()">💾 儲存到 Sheet</button>
     </div>
     <div class="progress-wrap" id="saveProgressWrap" style="display:none;">
@@ -141,6 +173,54 @@ let parsedData = [];
   lastSunday.setDate(today.getDate() - diff);
   document.getElementById('periodInput').valueAsDate = lastSunday;
 })();
+
+// ── 總結截圖 OCR ──
+const summaryDz = document.getElementById('summaryDropZone');
+summaryDz.addEventListener('dragover', e => { e.preventDefault(); summaryDz.classList.add('drag-over'); });
+summaryDz.addEventListener('dragleave', () => summaryDz.classList.remove('drag-over'));
+summaryDz.addEventListener('drop', e => { e.preventDefault(); summaryDz.classList.remove('drag-over'); handleSummaryFile(e.dataTransfer.files[0]); });
+
+async function handleSummaryFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const status = document.getElementById('summaryStatus');
+  status.style.display = 'block';
+  status.style.color = '#1565c0';
+  status.textContent = '⏳ 辨識總結中...';
+
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }] })
+    });
+    const data = await res.json();
+    const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
+
+    // 解析總結資訊
+    const membersMatch = text.match(/在\s*(\d+)\s*名/);
+    const totalMatch = text.match(/總獲得\s*([\d,]+)\s*積分/) || text.match(/([\d,]{4,})\s*積分/);
+    const rankMatch = text.match(/位列\s*(.+?名)/) || text.match(/(甲級|乙級|丙級).{0,4}(第.名)/);
+    const gradeMatch = text.match(/(甲級|乙級|丙級)\s*公會/);
+
+    if (membersMatch) document.getElementById('sumMembers').value = membersMatch[1];
+    if (totalMatch) document.getElementById('sumTotal').value = totalMatch[1].replace(/,/g, '');
+    if (rankMatch) document.getElementById('sumRank').value = rankMatch[1] || (rankMatch[1] + rankMatch[2]);
+    if (gradeMatch) document.getElementById('sumGrade').value = gradeMatch[1] + '公會';
+
+    status.style.color = '#2e7d32';
+    status.textContent = '✅ 辨識完成，請確認數據';
+  } catch(e) {
+    status.style.color = '#c62828';
+    status.textContent = '❌ 辨識失敗：' + e.message;
+  }
+}
 
 // ── 拖放 ──
 const dz = document.getElementById('dropZone');
@@ -456,7 +536,8 @@ function renderResult() {
 
   if (!parsedData.length) {
     card.style.display = 'block';
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">⚠️ 未能辨識到成員資料，請確認截圖清晰度</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">⚠️ 未能辨識到成員資料，請確認截圖清晰度</td></tr>';
+    checkMissing();
     return;
   }
 
@@ -466,19 +547,99 @@ function renderResult() {
     let titleRow = '';
     if (d.title && d.title !== lastTitle) {
       lastTitle = d.title;
-      titleRow = `<tr class="title-divider"><td colspan="6">🏆 ${d.title}</td></tr>`;
+      titleRow = `<tr class="title-divider"><td colspan="7">🏆 ${d.title}</td></tr>`;
     }
     return titleRow + `<tr>
       <td>${i+1}</td>
-      <td><input value="${d.server}" onchange="parsedData[${i}].server=this.value" style="width:60px;" /></td>
-      <td><input value="${d.nickname}" onchange="parsedData[${i}].nickname=this.value" /></td>
-      <td><select onchange="parsedData[${i}].role=this.value">
+      <td><input value="${d.server}" onchange="updateRow(${i},'server',this.value)" style="width:60px;" /></td>
+      <td><input value="${d.nickname}" onchange="updateRow(${i},'nickname',this.value)" /></td>
+      <td><select onchange="updateRow(${i},'role',this.value)">
         ${['會長','副會長','理事','菁英','成員','分會成員',''].map(r => `<option ${d.role===r?'selected':''}>${r}</option>`).join('')}
       </select></td>
-      <td><input type="number" value="${d.score}" onchange="parsedData[${i}].score=Number(this.value)" style="width:70px;" /></td>
+      <td><input type="number" value="${d.score}" onchange="updateScore(${i},this.value)" style="width:70px;" /></td>
       <td>${d.title}</td>
+      <td><button onclick="removeRow(${i})" style="background:none;border:none;color:#e65100;cursor:pointer;font-size:1rem;" title="刪除">✕</button></td>
     </tr>`;
   }).join('');
+
+  checkMissing();
+}
+
+function updateRow(idx, field, value) {
+  parsedData[idx][field] = value;
+}
+
+function updateScore(idx, value) {
+  parsedData[idx].score = Number(value);
+  // 重新計算稱號
+  const s = parsedData[idx].score;
+  if (s >= 1400)      parsedData[idx].title = '王者花匠';
+  else if (s >= 1300) parsedData[idx].title = '大師花匠';
+  else if (s >= 1000) parsedData[idx].title = '黃金花匠';
+  else if (s >= 700)  parsedData[idx].title = '白銀花匠';
+  else if (s >= 500)  parsedData[idx].title = '青銅花匠';
+  else                parsedData[idx].title = '無稱號';
+}
+
+function removeRow(idx) {
+  parsedData.splice(idx, 1);
+  resortAndRender();
+}
+
+function addManualRow() {
+  parsedData.push({ server: '', nickname: '', role: '成員', score: 0, title: '無稱號' });
+  resortAndRender();
+  // 滾到最底部讓使用者填寫（新增的分數是 0 會排最後）
+  setTimeout(() => {
+    const tbody = document.getElementById('resultBody');
+    tbody.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+function resortAndRender() {
+  // 重新計算所有稱號
+  parsedData.forEach(d => {
+    const s = d.score;
+    if (s >= 1400)      d.title = '王者花匠';
+    else if (s >= 1300) d.title = '大師花匠';
+    else if (s >= 1000) d.title = '黃金花匠';
+    else if (s >= 700)  d.title = '白銀花匠';
+    else if (s >= 500)  d.title = '青銅花匠';
+    else                d.title = '無稱號';
+  });
+  // 按分數排序
+  parsedData.sort((a, b) => b.score - a.score);
+  renderResult();
+}
+
+// ── 檢查缺少的成員 ──
+async function checkMissing() {
+  const members = await loadMembers();
+  if (!members.length) return;
+
+  const foundNames = new Set(parsedData.map(d => d.nickname));
+  const missing = members.filter(m => !foundNames.has(m.nickname));
+
+  const alert = document.getElementById('missingAlert');
+  const list = document.getElementById('missingList');
+
+  if (missing.length > 0 && missing.length < members.length) {
+    alert.style.display = '';
+    list.innerHTML = missing.map(m =>
+      `<button onclick="addMissingMember('${m.nickname.replace(/'/g,"\\'")}','${m.role}')" style="padding:3px 10px;border-radius:8px;border:1px solid #ffcc80;background:#fff;color:#e65100;font-size:0.8rem;cursor:pointer;font-weight:600;">＋ ${m.nickname}</button>`
+    ).join('');
+  } else {
+    alert.style.display = 'none';
+  }
+}
+
+function addMissingMember(nickname, role) {
+  // 從 members 找伺服器資訊（如果有的話）
+  const score = parseInt(prompt(`請輸入 ${nickname} 的分數：`));
+  if (isNaN(score) || score <= 0) return;
+
+  parsedData.push({ server: '', nickname, role, score, title: '' });
+  resortAndRender();
 }
 
 // ── 儲存到 Sheet（整批） ──
@@ -524,6 +685,24 @@ async function saveToSheet() {
 
     pf.style.width = '100%';
     pt.textContent = `✅ 已儲存 ${total} 筆！`;
+
+    // 儲存公會總結（如果有填）
+    const sumMembers = document.getElementById('sumMembers').value.trim();
+    const sumTotal = document.getElementById('sumTotal').value.trim();
+    const sumRank = document.getElementById('sumRank').value.trim();
+    const sumGrade = document.getElementById('sumGrade').value.trim();
+    if (sumTotal) {
+      await new Promise(resolve => {
+        const params = encodeURIComponent(JSON.stringify({
+          action: 'addContestSummary',
+          period, members: sumMembers, total: sumTotal, rank: sumRank, grade: sumGrade
+        }));
+        const img = new Image();
+        img.onload = img.onerror = () => resolve();
+        img.src = `${APPS_SCRIPT_URL}?data=${params}`;
+      });
+    }
+
     alert(`✅ 已儲存 ${total} 筆成績到 Sheet！`);
   } catch(e) {
     pt.textContent = '❌ 儲存失敗';
