@@ -622,7 +622,7 @@
       </div>
       <div class="id-table-wrap">
         <table>
-          <thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
+          <thead><tr><th>#</th><th>暱稱</th><th>伺服器</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
           <tbody id="idTableBody"></tbody>
         </table>
       </div>
@@ -633,7 +633,7 @@
         </div>
         <div class="id-table-wrap">
           <table>
-            <thead><tr><th>#</th><th>暱稱</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
+            <thead><tr><th>#</th><th>暱稱</th><th>伺服器</th><th>遊戲 ID</th><th>職位</th><th class="member-bar-col">擁有花卉數</th></tr></thead>
             <tbody id="branchTableBody"></tbody>
           </table>
         </div>
@@ -987,6 +987,7 @@ function renderIdTable() {
     return `<tr>
       <td>${i+1}</td>
       <td>${m.nickname}</td>
+      <td>${m.server || ''}</td>
       <td>${m.gameId}</td>
       <td><span class="role-badge role-${m.note||'成員'}">${m.note||'成員'}</span></td>
       <td class="member-bar-col">
