@@ -78,6 +78,12 @@
 
     .loading { text-align:center; padding:40px; color:var(--text-muted); }
 
+    /* 與上期差異 */
+    .diff-chip { padding:6px 16px; border-radius:20px; font-size:0.82rem; font-weight:700; display:inline-flex; align-items:center; gap:4px; }
+    .diff-up { background:#e8f5e9; color:#2e7d32; }
+    .diff-down { background:#fce4ec; color:#c62828; }
+    .diff-same { background:#f5f5f5; color:#888; }
+
     @media(max-width:768px) {
       .stats-grid { grid-template-columns:repeat(2,1fr); }
       .mid-grid { grid-template-columns:1fr; }
@@ -105,7 +111,16 @@
     <div class="stat-box"><div class="sv" id="dTotal">-</div><div class="sl">公會總分</div></div>
     <div class="stat-box"><div class="sv" id="dRank">-</div><div class="sl">公會排名</div></div>
     <div class="stat-box"><div class="sv" id="dParticipation">-</div><div class="sl">參賽人數</div></div>
-    <div class="stat-box"><div class="sv" id="dRate">-</div><div class="sl">參賽率</div></div>
+    <div class="stat-box"><div class="sv" id="dRate">-</div><div class="sl">平均分數</div></div>
+  </div>
+
+  <!-- 與上期差異 -->
+  <div id="diffSection" style="display:none;margin-bottom:24px;">
+    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+      <div class="diff-chip" id="diffTotal"></div>
+      <div class="diff-chip" id="diffRank"></div>
+      <div class="diff-chip" id="diffAvg"></div>
+    </div>
   </div>
 
   <!-- 中間：趨勢圖 + MVP -->
@@ -126,7 +141,18 @@
         <div class="mc-name" id="progressName">-</div>
         <div class="mc-score" id="progressScore">資料累積中</div>
       </div>
+      <div class="mvp-card mvp-2" style="background:linear-gradient(135deg,#f3e5f5,#ede7f6);border-color:#ce93d8;" id="potentialCard">
+        <div class="mc-label">🚀 潛力成員</div>
+        <div class="mc-name" id="potentialName">-</div>
+        <div class="mc-score" id="potentialScore" style="color:#7b1fa2;">資料累積中</div>
+      </div>
     </div>
+  </div>
+
+  <!-- 排名走勢圖 -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-title">📉 排名走勢（數字越小越靠前）</div>
+    <div class="chart-placeholder" id="rankChartArea">資料累積中...</div>
   </div>
 
   <!-- 本期排行榜 TOP 5 -->
@@ -203,12 +229,12 @@ async function init() {
     const total = latestSummary ? Number(latestSummary.total) : latestData.reduce((s,d) => s + d.score, 0);
     const participation = latestSummary ? latestSummary.members : latestData.length;
     const rank = latestSummary ? latestSummary.rank : '-';
-    const rate = totalMembers ? Math.round(latestData.length / totalMembers * 100) + '%' : '-';
+    const avg = latestData.length ? Math.round(latestData.reduce((s,d) => s+d.score, 0) / latestData.length) : '-';
 
     document.getElementById('dTotal').textContent = total.toLocaleString();
     document.getElementById('dRank').textContent = rank;
-    document.getElementById('dParticipation').textContent = participation + (latestSummary ? '' : ' 人');
-    document.getElementById('dRate').textContent = rate;
+    document.getElementById('dParticipation').textContent = (latestSummary ? latestSummary.members : latestData.length) + ' 人';
+    document.getElementById('dRate').textContent = avg;
 
     // ── MVP ──
     if (latestData.length) {
@@ -233,6 +259,60 @@ async function init() {
       if (progressMember && maxProgress > 0) {
         document.getElementById('progressName').textContent = progressMember.nickname;
         document.getElementById('progressScore').textContent = '+' + maxProgress + ' 分';
+      }
+
+      // ── 與上期差異 ──
+      const prevSummary = summaries.find(s => s.period === prevPeriod);
+      const diffSection = document.getElementById('diffSection');
+      if (prevSummary || prevData.length) {
+        diffSection.style.display = '';
+        const prevTotal = prevSummary ? Number(prevSummary.total) : prevData.reduce((s,d) => s+d.score, 0);
+        const totalDiff = total - prevTotal;
+        document.getElementById('diffTotal').className = 'diff-chip ' + (totalDiff > 0 ? 'diff-up' : totalDiff < 0 ? 'diff-down' : 'diff-same');
+        document.getElementById('diffTotal').textContent = (totalDiff >= 0 ? '▲' : '▼') + ' 總分 ' + (totalDiff >= 0 ? '+' : '') + totalDiff.toLocaleString();
+
+        const prevAvg = prevData.length ? Math.round(prevData.reduce((s,d)=>s+d.score,0)/prevData.length) : 0;
+        const avgDiff = avg - prevAvg;
+        document.getElementById('diffAvg').className = 'diff-chip ' + (avgDiff > 0 ? 'diff-up' : avgDiff < 0 ? 'diff-down' : 'diff-same');
+        document.getElementById('diffAvg').textContent = (avgDiff >= 0 ? '▲' : '▼') + ' 均分 ' + (avgDiff >= 0 ? '+' : '') + avgDiff;
+
+        // 排名差異（需要從 rank 字串提取數字）
+        const extractRankNum = r => { const m = String(r).match(/第?(\d+)/); return m ? Number(m[1]) : null; };
+        const currRankNum = extractRankNum(rank);
+        const prevRankStr = prevSummary ? prevSummary.rank : '';
+        const prevRankNum = extractRankNum(prevRankStr);
+        if (currRankNum && prevRankNum) {
+          const rankDiff = prevRankNum - currRankNum; // 正=進步
+          document.getElementById('diffRank').className = 'diff-chip ' + (rankDiff > 0 ? 'diff-up' : rankDiff < 0 ? 'diff-down' : 'diff-same');
+          document.getElementById('diffRank').textContent = (rankDiff > 0 ? '▲' : rankDiff < 0 ? '▼' : '—') + ' 排名 ' + (rankDiff > 0 ? '+' + rankDiff : rankDiff === 0 ? '持平' : rankDiff);
+        } else {
+          document.getElementById('diffRank').className = 'diff-chip diff-same';
+          document.getElementById('diffRank').textContent = '— 排名 -';
+        }
+      }
+    }
+
+    // ── 潛力成員（最近 3 期持續成長）──
+    if (periods.length >= 3) {
+      const last3 = periods.slice(-3);
+      const scoreByPeriod = {};
+      last3.forEach(p => { scoreByPeriod[p] = {}; });
+      allRecords.filter(r => last3.includes(r.period)).forEach(r => { scoreByPeriod[r.period][r.nickname] = r.score; });
+
+      let bestStreak = null, bestGrowth = 0;
+      const allNames = [...new Set(allRecords.map(r => r.nickname))];
+      allNames.forEach(name => {
+        const s0 = scoreByPeriod[last3[0]]?.[name];
+        const s1 = scoreByPeriod[last3[1]]?.[name];
+        const s2 = scoreByPeriod[last3[2]]?.[name];
+        if (s0 && s1 && s2 && s2 > s1 && s1 > s0) {
+          const growth = s2 - s0;
+          if (growth > bestGrowth) { bestGrowth = growth; bestStreak = name; }
+        }
+      });
+      if (bestStreak) {
+        document.getElementById('potentialName').textContent = bestStreak;
+        document.getElementById('potentialScore').textContent = '連 3 期成長 +' + bestGrowth + ' 分';
       }
     }
 
@@ -293,6 +373,28 @@ async function init() {
               return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
                 <div style="font-size:.65rem;color:var(--text-muted);">${(d.total/1000).toFixed(1)}k</div>
                 <div style="width:100%;max-width:40px;height:${h}px;background:linear-gradient(180deg,var(--orange),var(--orange-mid));border-radius:6px 6px 2px 2px;"></div>
+                <div style="font-size:.6rem;color:var(--text-muted);">${d.period.slice(5)}</div>
+              </div>`;
+            }).join('')}
+          </div>`;
+      }
+
+      // ── 排名走勢圖 ──
+      const extractRankNum = r => { const m = String(r).match(/第?(\d+)/); return m ? Number(m[1]) : null; };
+      const rankData = periods.slice(-7).map(p => {
+        const s = summaries.find(x => x.period === p);
+        return { period: p, rank: s ? extractRankNum(s.rank) : null };
+      }).filter(d => d.rank !== null);
+
+      if (rankData.length >= 3) {
+        const maxRank = Math.max(...rankData.map(d => d.rank), 5);
+        document.getElementById('rankChartArea').innerHTML = `
+          <div style="display:flex;align-items:flex-end;gap:8px;height:140px;width:100%;padding:0 10px;">
+            ${rankData.map(d => {
+              const h = Math.round((1 - (d.rank - 1) / maxRank) * 120) + 20;
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <div style="font-size:.7rem;font-weight:700;color:var(--orange);">#${d.rank}</div>
+                <div style="width:100%;max-width:40px;height:${h}px;background:linear-gradient(180deg,#4a90d9,#74b9ff);border-radius:6px 6px 2px 2px;"></div>
                 <div style="font-size:.6rem;color:var(--text-muted);">${d.period.slice(5)}</div>
               </div>`;
             }).join('')}
