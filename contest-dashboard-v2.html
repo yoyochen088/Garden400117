@@ -66,7 +66,9 @@
     /* ===== MID GRID: 趨勢+比較+亮點 ===== */
     .mid-grid {
       display:grid; grid-template-columns:1.4fr 0.8fr 1fr; gap:16px;
+      align-items:stretch;
     }
+    .mid-grid > .card { display:flex; flex-direction:column; }
 
     /* 與上期比較 */
     .compare-list { display:flex; flex-direction:column; gap:12px; }
@@ -133,7 +135,7 @@
     .title-count { font-weight:700; color:#4a3520; }
 
     /* chart */
-    .chart-wrap { position:relative; height:180px; }
+    .chart-wrap { position:relative; flex:1; min-height:160px; }
 
     /* loading */
     .loading { text-align:center; padding:40px; color:#a08050; }
@@ -187,6 +189,7 @@
       <div class="card">
         <div class="section-title">排名走勢</div>
         <div class="chart-wrap"><canvas id="chartRank"></canvas></div>
+        <div id="rankChartNote" style="margin-top:auto;padding-top:14px;font-size:0.82rem;color:#a08050;text-align:center;"></div>
       </div>
       <!-- 本期亮點 -->
       <div class="card">
@@ -391,8 +394,12 @@ async function init() {
         new Chart(document.getElementById('chartRank'),{
           type:'line',
           data:{labels:rd.map(d=>d.period.slice(5)),datasets:[{data:rd.map(d=>d.rank),borderColor:'#4a90d9',backgroundColor:'rgba(74,144,217,0.06)',fill:true,tension:0.35,pointRadius:5,pointBackgroundColor:'#4a90d9',pointBorderColor:'#fff',pointBorderWidth:2}]},
-          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{reverse:true,min:1,ticks:{stepSize:1,callback:v=>'#'+v},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{reverse:true,min:Math.max(1,Math.min(...rd.map(d=>d.rank))-1),max:Math.max(...rd.map(d=>d.rank))+1,ticks:{stepSize:1,callback:v=>'#'+v},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}
         });
+        // 排名走勢下方摘要
+        const best = Math.min(...rd.map(d=>d.rank));
+        const worst = Math.max(...rd.map(d=>d.rank));
+        document.getElementById('rankChartNote').innerHTML = `近 ${rd.length} 期排名區間：<strong style="color:#4a90d9;">#${best}</strong> ~ <strong style="color:#4a90d9;">#${worst}</strong>`;
       }
     }
 
