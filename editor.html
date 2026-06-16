@@ -29,7 +29,7 @@
     .tab.active{background:var(--pink);color:#fff;border-color:var(--pink);}
     .panel{display:none;}.panel.active{display:block;}
     .card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;}
-    .mrow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:center;}
+    .mrow{display:grid;grid-template-columns:1fr 55px 1fr auto auto;gap:10px;align-items:center;}
     .lbl{font-size:.75rem;color:#9e6b7e;margin-bottom:3px;}
     input[type=text],input[type=number],select{padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.9rem;background:var(--bg);color:#3d1a2e;outline:none;width:100%;}
     input:focus,select:focus{border-color:var(--pink);}
@@ -76,6 +76,8 @@
       .guild-name{font-size:1rem;}
       nav{display:none !important;}
       .hamburger{display:flex !important;}
+      .mrow { grid-template-columns:1fr 1fr !important; gap:8px !important; }
+      .mrow > div:last-child { grid-column:1 / -1; text-align:right; }
     }
 
     /* nav-dropdown 由 header.js 統一注入 */
@@ -186,7 +188,7 @@ function renderM(){
   el.innerHTML='<p style="font-size:0.85rem;color:var(--pink-dark);font-weight:600;margin-bottom:12px;">目前公會成員：'+active.length+' 人</p>'
   +sorted.map(m=>{
     const i=members.indexOf(m);
-    return '<div class="card"><div class="mrow" style="grid-template-columns:1fr 55px 1fr auto auto;">'
+    return '<div class="card"><div class="mrow">'
       +'<div><div class="lbl">遊戲 ID</div><input type="text" value="'+m.gameId+'" oninput="members['+i+'].gameId=this.value" placeholder="遊戲 ID"/></div>'
       +'<div><div class="lbl">伺服器</div><input type="text" value="'+(m.server||'')+'" oninput="members['+i+'].server=this.value" placeholder="" style="width:50px;"/></div>'
       +'<div><div class="lbl">暱稱</div><input type="text" value="'+m.nickname+'" oninput="members['+i+'].nickname=this.value" placeholder="暱稱"/></div>'
