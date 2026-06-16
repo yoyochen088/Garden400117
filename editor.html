@@ -25,11 +25,11 @@
     .subtitle{text-align:center;color:#9e6b7e;font-size:.85rem;margin-bottom:16px;}
     .page-content{padding:0 16px;}
     .tabs{display:flex;gap:8px;margin-bottom:16px;}
-    .tab{padding:8px 22px;border-radius:20px;font-size:.92rem;font-weight:600;cursor:pointer;border:1.5px solid var(--pink-mid);background:var(--pink-light);color:var(--pink-dark);transition:all .2s;}
+    .tab{padding:8px 22px;border-radius:20px;font-size:.92rem;font-weight:600;cursor:pointer;border:1.5px solid var(--pink-mid);background:var(--pink-light);color:var(--pink-dark);transition:all .2s;display:flex;align-items:center;gap:6px;}
     .tab.active{background:var(--pink);color:#fff;border-color:var(--pink);}
     .panel{display:none;}.panel.active{display:block;}
     .card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;}
-    .mrow{display:grid;grid-template-columns:1fr 55px 1fr auto auto;gap:10px;align-items:center;}
+    .mrow{display:grid;grid-template-columns:140px 55px 1fr auto auto;gap:10px;align-items:center;}
     .lbl{font-size:.75rem;color:#9e6b7e;margin-bottom:3px;}
     input[type=text],input[type=number],select{padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.9rem;background:var(--bg);color:#3d1a2e;outline:none;width:100%;}
     input:focus,select:focus{border-color:var(--pink);}
@@ -76,8 +76,17 @@
       .guild-name{font-size:1rem;}
       nav{display:none !important;}
       .hamburger{display:flex !important;}
-      .mrow { grid-template-columns:1fr 1fr !important; gap:8px !important; }
-      .mrow > div:last-child { grid-column:1 / -1; text-align:right; }
+      .mrow {
+        grid-template-columns: 1fr auto auto !important;
+        gap: 6px 8px !important;
+      }
+      .mrow .m-id { grid-column:1; grid-row:1; }
+      .mrow .m-role { grid-column:2; grid-row:1; }
+      .mrow .m-rm { grid-column:3; grid-row:1; }
+      .mrow .m-sv { grid-column:1; grid-row:2; width:60px; }
+      .mrow .m-nick { grid-column:2 / 4; grid-row:2; }
+      .tabs { gap:6px; }
+      .tab { padding:8px 14px; font-size:.82rem; text-align:center; }
     }
 
     /* nav-dropdown 由 header.js 統一注入 */
@@ -89,9 +98,9 @@
 <h1>⚙️ 管理編輯器</h1>
 <p class="subtitle">成員管理 / 花卉資料編輯</p>
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('tm',this)">&#128101; 成員管理</button>
-  <button class="tab" onclick="switchTab('tf',this)">&#127800; 花卉資料</button>
-  <button class="tab" onclick="switchTab('tc',this)">&#127873; 兌換碼</button>
+  <button class="tab active" onclick="switchTab('tm',this)">&#128101;<br>成員管理</button>
+  <button class="tab" onclick="switchTab('tf',this)">&#127800;<br>花卉資料</button>
+  <button class="tab" onclick="switchTab('tc',this)">&#127873;<br>兌換碼</button>
 </div>
 <div id="tm" class="panel active">
   <div id="mlist"><div class="loading">載入中...</div></div>
@@ -189,13 +198,13 @@ function renderM(){
   +sorted.map(m=>{
     const i=members.indexOf(m);
     return '<div class="card"><div class="mrow">'
-      +'<div><div class="lbl">遊戲 ID</div><input type="text" value="'+m.gameId+'" oninput="members['+i+'].gameId=this.value" placeholder="遊戲 ID"/></div>'
-      +'<div><div class="lbl">伺服器</div><input type="text" value="'+(m.server||'')+'" oninput="members['+i+'].server=this.value" placeholder="" style="width:50px;"/></div>'
-      +'<div><div class="lbl">暱稱</div><input type="text" value="'+m.nickname+'" oninput="members['+i+'].nickname=this.value" placeholder="暱稱"/></div>'
-      +'<div><div class="lbl">職位</div><select onchange="members['+i+'].note=this.value">'
+      +'<div class="m-id"><div class="lbl">遊戲 ID</div><input type="text" value="'+m.gameId+'" oninput="members['+i+'].gameId=this.value" placeholder="遊戲 ID"/></div>'
+      +'<div class="m-sv"><div class="lbl">伺服器</div><input type="text" value="'+(m.server||'')+'" oninput="members['+i+'].server=this.value" placeholder=""/></div>'
+      +'<div class="m-nick"><div class="lbl">暱稱</div><input type="text" value="'+m.nickname+'" oninput="members['+i+'].nickname=this.value" placeholder="暱稱"/></div>'
+      +'<div class="m-role"><div class="lbl">職位</div><select onchange="members['+i+'].note=this.value">'
       +['會長','副會長','理事','菁英','成員','分會成員'].map(r=>'<option '+(m.note===r?'selected':'')+'>'+r+'</option>').join('')
       +'</select></div>'
-      +'<div><button class="btn-rm" onclick="members['+i+'].left=true;renderM()">移除</button></div>'
+      +'<div class="m-rm"><button class="btn-rm" onclick="members['+i+'].left=true;renderM()">移除</button></div>'
       +'</div></div>';
   }).join('');
 }
