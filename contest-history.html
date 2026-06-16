@@ -107,7 +107,7 @@
 <main>
   <h1>🏆 競賽戰績</h1>
   <p class="subtitle">查看每期公會競賽成績</p>
-  <div style="text-align:center;margin-bottom:16px;"><a href="contest-dashboard.html" style="color:var(--orange);font-size:0.85rem;font-weight:600;text-decoration:none;">← 返回儀表板</a></div>
+  <div style="text-align:center;margin-bottom:16px;"><a href="contest-dashboard.html" style="display:inline-block;padding:8px 20px;border-radius:20px;font-size:0.85rem;font-weight:700;background:var(--orange);color:#fff;text-decoration:none;box-shadow:0 3px 12px rgba(233,106,30,.3);">← 返回儀表板</a></div>
 
   <!-- 期數選擇 -->
   <div class="period-select">
@@ -202,6 +202,14 @@ async function init() {
     sel.innerHTML = periods.map(p => `<option value="${p}">${p}</option>`).join('');
 
     document.getElementById('loadingState').style.display = 'none';
+
+    // 支援 URL 帶期數參數：?period=2026-06-15
+    const urlParams = new URLSearchParams(location.search);
+    const urlPeriod = urlParams.get('period');
+    if (urlPeriod && periods.includes(urlPeriod)) {
+      document.getElementById('periodPicker').value = urlPeriod;
+    }
+
     loadPeriod();
   } catch(e) {
     document.getElementById('loadingState').textContent = '⚠️ ' + e.message;

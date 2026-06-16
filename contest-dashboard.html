@@ -103,7 +103,7 @@
       <div class="page-title">競賽儀表板</div>
       <div class="page-subtitle" id="periodLabel">載入中...</div>
     </div>
-    <a href="contest-history.html" class="btn-link">📋 完整戰績</a>
+    <a href="contest-history.html" class="btn-link">📋 歷史戰績</a>
   </div>
 
   <!-- 統計四格 -->
@@ -162,7 +162,7 @@
       <thead><tr><th>排名</th><th>暱稱</th><th>職位</th><th>分數</th></tr></thead>
       <tbody id="rankBody"><tr><td colspan="4" class="loading">載入中...</td></tr></tbody>
     </table>
-    <div class="rank-more"><a href="contest-history.html">查看完整排名 →</a></div>
+    <div class="rank-more"><a href="contest-history.html" id="rankMoreLink" class="btn-link" style="font-size:0.85rem;padding:8px 20px;">📋 查看完整排名 →</a></div>
   </div>
 
   <!-- 下方：公會歷史 + 稱號分布 -->
@@ -224,6 +224,7 @@ async function init() {
     const latestSummary = summaries.find(s => s.period === latestPeriod);
 
     document.getElementById('periodLabel').textContent = latestPeriod + ' 期 競賽成績';
+    document.getElementById('rankMoreLink').href = 'contest-history.html?period=' + latestPeriod;
 
     // ── 統計四格 ──
     const total = latestSummary ? Number(latestSummary.total) : latestData.reduce((s,d) => s + d.score, 0);
