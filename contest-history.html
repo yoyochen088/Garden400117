@@ -70,6 +70,32 @@
     .loading { text-align:center; padding:40px; color:var(--text-muted); }
     .empty-state { text-align:center; padding:40px; color:var(--text-muted); font-size:0.9rem; }
 
+    /* 總結卷軸卡片 */
+    .summary-scroll {
+      background: linear-gradient(160deg, #fffdf5, #fef8e8);
+      border-radius: 24px; border: 2px solid #e8d5a3;
+      box-shadow: 0 8px 32px rgba(200,160,60,0.15);
+      padding: 28px 24px; margin-bottom: 24px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .summary-scroll::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+      background: linear-gradient(90deg, #d4a843, #f0d060, #d4a843);
+      border-radius: 24px 24px 0 0;
+    }
+    .scroll-title { font-size: 1.3rem; font-weight: 900; color: #8b5e00; margin-bottom: 18px; }
+    .scroll-body { display: flex; flex-direction: column; gap: 10px; }
+    .scroll-line { font-size: 0.95rem; color: #5a4520; line-height: 1.6; }
+    .scroll-highlight { font-size: 1.15rem; font-weight: 900; color: #2e7d32; }
+    .scroll-grade {
+      margin-top: 12px; display: inline-block;
+      background: linear-gradient(135deg, #d4a843, #f0d060);
+      color: #5a3800; font-weight: 900; font-size: 1rem;
+      padding: 8px 24px; border-radius: 24px;
+      border: 2px solid #c49a30;
+      box-shadow: 0 3px 12px rgba(200,160,60,0.3);
+    }
+
     @media(max-width:600px) {
       .stats-row { grid-template-columns:1fr 1fr 1fr; gap:8px; }
       .stat-value { font-size:1.2rem; }
@@ -89,6 +115,19 @@
     <select id="periodPicker" onchange="loadPeriod()">
       <option value="">載入中...</option>
     </select>
+  </div>
+
+  <!-- 總結卡片 -->
+  <div id="summaryCard" style="display:none;">
+    <div class="summary-scroll">
+      <div class="scroll-title">🏆 競賽結果</div>
+      <div class="scroll-body">
+        <div class="scroll-line">在 <span class="scroll-highlight" id="hMembers">-</span> 名公會成員的共同努力下</div>
+        <div class="scroll-line">總獲得 <span class="scroll-highlight" id="hTotal">-</span> 積分</div>
+        <div class="scroll-line">位列 <span class="scroll-highlight" id="hRank">-</span></div>
+        <div class="scroll-grade" id="hGrade">-</div>
+      </div>
+    </div>
   </div>
 
   <!-- 統計卡片 -->
@@ -123,16 +162,17 @@
 <script>
 let allData = []; // 所有期數資料
 let periods = []; // 可選期數清單
+let summaryData = []; // 公會總結
 
 async function init() {
   try {
+    // 讀取成員成績
     const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`);
     if (!res.ok) throw new Error('讀取失敗');
     const data = await res.json();
     const rows = (data.values || []);
     if (rows.length <= 1) { showEmpty(); return; }
 
-    const headers = rows[0];
     allData = rows.slice(1).map(r => ({
       period: r[0] || '',
       server: r[1] || '',
@@ -141,6 +181,19 @@ async function init() {
       score: Number(r[4]) || 0,
       title: r[5] || ''
     }));
+
+    // 讀取公會總結
+    try {
+      const sRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`);
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        const sRows = (sData.values || []).slice(1);
+        summaryData = sRows.map(r => ({
+          period: r[0] || '', members: r[1] || '', total: r[2] || '',
+          rank: r[3] || '', grade: r[4] || ''
+        }));
+      }
+    } catch(e) {}
 
     // 取得所有期數（去重，按日期排序新→舊）
     periods = [...new Set(allData.map(d => d.period))].sort().reverse();
@@ -162,6 +215,19 @@ function loadPeriod() {
   const data = allData.filter(d => d.period === period).sort((a, b) => b.score - a.score);
 
   if (!data.length) { showEmpty(); return; }
+
+  // 顯示公會總結
+  const summary = summaryData.find(s => s.period === period);
+  const summaryCard = document.getElementById('summaryCard');
+  if (summary) {
+    summaryCard.style.display = '';
+    document.getElementById('hMembers').textContent = summary.members;
+    document.getElementById('hTotal').textContent = Number(summary.total).toLocaleString();
+    document.getElementById('hRank').textContent = summary.rank;
+    document.getElementById('hGrade').textContent = summary.grade;
+  } else {
+    summaryCard.style.display = 'none';
+  }
 
   // 統計
   const total = data.reduce((s, d) => s + d.score, 0);
