@@ -77,14 +77,16 @@
       nav{display:none !important;}
       .hamburger{display:flex !important;}
       .mrow {
-        grid-template-columns: 1fr auto auto !important;
+        grid-template-columns: 1fr 90px 42px !important;
         gap: 6px 8px !important;
+        align-items: end !important;
       }
       .mrow .m-id { grid-column:1; grid-row:1; }
       .mrow .m-role { grid-column:2; grid-row:1; }
-      .mrow .m-rm { grid-column:3; grid-row:1; }
-      .mrow .m-sv { grid-column:1; grid-row:2; width:60px; }
+      .mrow .m-rm { grid-column:3; grid-row:1; align-self:end; }
+      .mrow .m-sv { grid-column:1; grid-row:2; width:70px; }
       .mrow .m-nick { grid-column:2 / 4; grid-row:2; }
+      .mrow .m-rm .btn-rm { padding:7px 8px; font-size:.78rem; }
       .tabs { gap:6px; }
       .tab { padding:8px 14px; font-size:.82rem; text-align:center; }
     }
