@@ -386,6 +386,7 @@ function parseOCRText(text) {
 
   // 先清除空格對解析的干擾：把 "s 24" 合成 "s24"，"$ 10" 合成 "$10"
   const cleaned = text
+    .replace(/商店\s*/g, '')  // 移除背景「商店」文字
     .replace(/[sS$]\s*(\d+)\s*[.\s·．、]\s*/g, (m, num) => `s${num}.`)  // 統一 s{num}. 格式
     .replace(/副\s*會\s*長/g, '副會長')
     .replace(/會\s*長/g, '會長')
