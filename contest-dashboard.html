@@ -36,13 +36,13 @@
 
     /* 趨勢圖 */
     .chart-placeholder { min-height:80px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.88rem; background:var(--bg); border-radius:10px; border:1px dashed var(--border); }
-    .chart-svg { width:100%; height:160px; }
-    .chart-line { fill:none; stroke:var(--orange); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+    .chart-svg { width:100%; height:auto; display:block; }
+    .chart-line { fill:none; stroke:var(--orange); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .chart-area { fill:url(#chartGrad); }
     .chart-dot { fill:var(--orange); }
-    .chart-label { font-size:10px; fill:var(--text-muted); text-anchor:middle; }
-    .chart-value { font-size:9px; fill:var(--orange-dark); text-anchor:middle; font-weight:700; }
-    .rank-line { fill:none; stroke:#4a90d9; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+    .chart-label { font-size:11px; fill:var(--text-muted); text-anchor:middle; }
+    .chart-value { font-size:10px; fill:var(--orange-dark); text-anchor:middle; font-weight:700; }
+    .rank-line { fill:none; stroke:#4a90d9; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .rank-area { fill:url(#rankGrad); }
     .rank-dot { fill:#4a90d9; }
 
@@ -386,7 +386,7 @@ async function init() {
         const max = Math.max(...chartData.map(d => d.total));
         const min = Math.min(...chartData.map(d => d.total));
         const range = max - min || 1;
-        const w = 100, h = 160, px = 12, py = 25, pb = 20;
+        const w = 400, h = 180, px = 40, py = 30, pb = 25;
         const points = chartData.map((d, i) => {
           const x = px + (i / (chartData.length - 1)) * (w - px * 2);
           const y = py + (1 - (d.total - min) / range) * (h - py - pb);
@@ -396,16 +396,16 @@ async function init() {
         const areaStr = `${points[0].x},${h - pb} ${lineStr} ${points[points.length-1].x},${h - pb}`;
 
         document.getElementById('chartArea').innerHTML = `
-          <svg viewBox="0 0 ${w} ${h}" class="chart-svg" preserveAspectRatio="none">
+          <svg viewBox="0 0 ${w} ${h}" class="chart-svg">
             <defs><linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="var(--orange)" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="var(--orange)" stop-opacity="0.02"/>
-            </linearGradient></defs>
+              <stop offset="0%" stop-color="#e96a1e" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#e96a1e" stop-opacity="0.02"/>
+            <\/linearGradient><\/defs>
             <polygon class="chart-area" points="${areaStr}" />
             <polyline class="chart-line" points="${lineStr}" />
-            ${points.map(p => `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" r="2.5"/>`).join('')}
-            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 6}">${(p.total/1000).toFixed(1)}k<\/text>`).join('')}
-            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 5}">${p.period.slice(5)}<\/text>`).join('')}
+            ${points.map(p => `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" r="4"/>`).join('')}
+            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 10}">${(p.total/1000).toFixed(1)}k<\/text>`).join('')}
+            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 6}">${p.period.slice(5)}<\/text>`).join('')}
           <\/svg>`;
       }
 
@@ -426,26 +426,26 @@ async function init() {
 
       if (rankData.length >= 3) {
         const maxRank = Math.max(...rankData.map(d => d.rank), 5);
-        const w = 100, h = 160, px = 12, py = 25, pb = 20;
+        const w = 400, h = 180, px = 40, py = 30, pb = 25;
         const points = rankData.map((d, i) => {
           const x = px + (i / (rankData.length - 1)) * (w - px * 2);
-          const y = py + ((d.rank - 1) / (maxRank - 1 || 1)) * (h - py - pb); // 排名小=上面
+          const y = py + ((d.rank - 1) / (maxRank - 1 || 1)) * (h - py - pb);
           return { x, y, ...d };
         });
         const lineStr = points.map(p => `${p.x},${p.y}`).join(' ');
         const areaStr = `${points[0].x},${h - pb} ${lineStr} ${points[points.length-1].x},${h - pb}`;
 
         document.getElementById('rankChartArea').innerHTML = `
-          <svg viewBox="0 0 ${w} ${h}" class="chart-svg" preserveAspectRatio="none">
+          <svg viewBox="0 0 ${w} ${h}" class="chart-svg">
             <defs><linearGradient id="rankGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#4a90d9" stop-opacity="0.25"/>
+              <stop offset="0%" stop-color="#4a90d9" stop-opacity="0.15"/>
               <stop offset="100%" stop-color="#4a90d9" stop-opacity="0.02"/>
             </linearGradient></defs>
             <polygon class="rank-area" points="${areaStr}" />
             <polyline class="rank-line" points="${lineStr}" />
-            ${points.map(p => `<circle class="rank-dot" cx="${p.x}" cy="${p.y}" r="2.5"/>`).join('')}
-            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 6}" style="fill:#4a90d9;">#${p.rank}<\/text>`).join('')}
-            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 5}">${p.period.slice(5)}<\/text>`).join('')}
+            ${points.map(p => `<circle class="rank-dot" cx="${p.x}" cy="${p.y}" r="4"/>`).join('')}
+            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 10}" style="fill:#4a90d9;">#${p.rank}<\/text>`).join('')}
+            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 6}">${p.period.slice(5)}<\/text>`).join('')}
           <\/svg>`;
       }
     }
