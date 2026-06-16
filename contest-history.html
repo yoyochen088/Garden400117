@@ -220,6 +220,11 @@ function loadPeriod() {
   const period = document.getElementById('periodPicker').value;
   if (!period) return;
 
+  // 更新網址（方便複製分享）
+  const url = new URL(location.href);
+  url.searchParams.set('period', period);
+  history.replaceState(null, '', url);
+
   const data = allData.filter(d => d.period === period).sort((a, b) => b.score - a.score);
 
   if (!data.length) { showEmpty(); return; }

@@ -404,9 +404,9 @@ async function init() {
             <polygon class="chart-area" points="${areaStr}" />
             <polyline class="chart-line" points="${lineStr}" />
             ${points.map(p => `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" r="2.5"/>`).join('')}
-            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 6}">${(p.total/1000).toFixed(1)}k</text>`).join('')}
-            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 5}">${p.period.slice(5)}</text>`).join('')}
-          </svg>`;
+            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 6}">${(p.total/1000).toFixed(1)}k<\/text>`).join('')}
+            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 5}">${p.period.slice(5)}<\/text>`).join('')}
+          <\/svg>`;
       }
 
       // ── 排名走勢圖 ──
@@ -444,9 +444,9 @@ async function init() {
             <polygon class="rank-area" points="${areaStr}" />
             <polyline class="rank-line" points="${lineStr}" />
             ${points.map(p => `<circle class="rank-dot" cx="${p.x}" cy="${p.y}" r="2.5"/>`).join('')}
-            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 6}" style="fill:#4a90d9;">#${p.rank}</text>`).join('')}
-            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 5}">${p.period.slice(5)}</text>`).join('')}
-          </svg>`;
+            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 6}" style="fill:#4a90d9;">#${p.rank}<\/text>`).join('')}
+            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 5}">${p.period.slice(5)}<\/text>`).join('')}
+          <\/svg>`;
       }
     }
 
