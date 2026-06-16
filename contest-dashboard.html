@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>競賽儀表板 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a;
+      --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#fff;
+      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
+      --shadow:0 2px 12px rgba(233,106,30,.10); --radius:14px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+    main { max-width:1100px; margin:0 auto; padding:24px 16px; }
+
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+    .page-title { font-size:1.4rem; font-weight:900; color:var(--orange-dark); }
+    .page-subtitle { font-size:0.82rem; color:var(--text-muted); }
+    .btn-link { padding:8px 18px; border-radius:20px; font-size:0.85rem; font-weight:700; background:var(--orange); color:#fff; text-decoration:none; border:none; cursor:pointer; box-shadow:0 3px 12px rgba(233,106,30,.3); transition:transform .15s; }
+    .btn-link:hover { transform:translateY(-2px); }
+
+    /* 統計四格 */
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    .stat-box { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; }
+    .stat-box .sv { font-size:1.8rem; font-weight:900; color:var(--text); }
+    .stat-box .sl { font-size:0.78rem; color:var(--text-muted); margin-top:4px; }
+
+    /* 中間區塊 */
+    .mid-grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px; }
+    .card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; }
+    .card-title { font-size:0.9rem; font-weight:700; color:var(--orange-dark); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+
+    /* 趨勢圖佔位 */
+    .chart-placeholder { height:160px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.88rem; background:var(--bg); border-radius:10px; border:1px dashed var(--border); }
+
+    /* MVP / 進步王 */
+    .mvp-card { padding:14px 18px; border-radius:12px; margin-bottom:10px; }
+    .mvp-card .mc-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
+    .mvp-card .mc-name { font-size:1.1rem; font-weight:800; color:var(--text); }
+    .mvp-card .mc-score { font-size:0.9rem; font-weight:700; }
+    .mvp-1 { background:linear-gradient(135deg,#fff8f0,#fef0e7); border:1px solid #f8d5b0; }
+    .mvp-1 .mc-score { color:var(--orange); }
+    .mvp-2 { background:linear-gradient(135deg,#f0fff4,#e8f5e9); border:1px solid #a5d6a7; }
+    .mvp-2 .mc-score { color:#2e7d32; }
+
+    /* 排行榜 */
+    .rank-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+    .rank-table thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
+    .rank-table th { padding:10px 14px; text-align:left; font-weight:600; }
+    .rank-table td { padding:9px 14px; border-bottom:1px solid var(--border); }
+    .rank-table tbody tr:hover { background:var(--orange-light); }
+    .rank-more { text-align:center; padding:12px; }
+    .rank-more a { color:var(--orange); font-size:0.85rem; font-weight:600; text-decoration:none; }
+
+    /* 下方兩格 */
+    .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .history-stats { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .hs-item .hs-value { font-size:1.3rem; font-weight:900; color:var(--text); }
+    .hs-item .hs-label { font-size:0.72rem; color:var(--text-muted); margin-top:2px; }
+
+    /* 稱號分布長條 */
+    .title-bars { display:flex; flex-direction:column; gap:10px; }
+    .tb-row { display:flex; align-items:center; gap:10px; }
+    .tb-label { font-size:0.78rem; font-weight:600; width:70px; flex-shrink:0; }
+    .tb-bar-bg { flex:1; background:#f0e8e0; border-radius:4px; height:10px; overflow:hidden; }
+    .tb-bar-fill { height:100%; border-radius:4px; transition:width .6s; }
+    .tb-count { font-size:0.75rem; color:var(--text-muted); width:40px; text-align:right; flex-shrink:0; }
+    .tb-王者花匠 { background:linear-gradient(90deg,#e96a1e,#ff4e8a); }
+    .tb-大師花匠 { background:linear-gradient(90deg,#9b59b6,#c39bd3); }
+    .tb-黃金花匠 { background:linear-gradient(90deg,#f4c430,#ffd700); }
+    .tb-白銀花匠 { background:linear-gradient(90deg,#9e9e9e,#d4d4d4); }
+    .tb-青銅花匠 { background:linear-gradient(90deg,#cd7f32,#e8a96a); }
+    .tb-無稱號   { background:#ddd; }
+
+    .loading { text-align:center; padding:40px; color:var(--text-muted); }
+
+    @media(max-width:768px) {
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+      .mid-grid { grid-template-columns:1fr; }
+      .bottom-grid { grid-template-columns:1fr; }
+    }
+    @media(max-width:480px) {
+      .stats-grid { grid-template-columns:1fr 1fr; gap:10px; }
+      .stat-box .sv { font-size:1.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+<main>
+  <div class="page-header">
+    <div>
+      <div class="page-title">競賽儀表板</div>
+      <div class="page-subtitle" id="periodLabel">載入中...</div>
+    </div>
+    <a href="contest-history.html" class="btn-link">📋 完整戰績</a>
+  </div>
+
+  <!-- 統計四格 -->
+  <div class="stats-grid">
+    <div class="stat-box"><div class="sv" id="dTotal">-</div><div class="sl">公會總分</div></div>
+    <div class="stat-box"><div class="sv" id="dRank">-</div><div class="sl">公會排名</div></div>
+    <div class="stat-box"><div class="sv" id="dParticipation">-</div><div class="sl">參賽人數</div></div>
+    <div class="stat-box"><div class="sv" id="dRate">-</div><div class="sl">參賽率</div></div>
+  </div>
+
+  <!-- 中間：趨勢圖 + MVP -->
+  <div class="mid-grid">
+    <div class="card">
+      <div class="card-title">📈 公會總分趨勢</div>
+      <div class="chart-placeholder" id="chartArea">資料累積中...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">⭐ 本期亮點</div>
+      <div class="mvp-card mvp-1">
+        <div class="mc-label">🥇 本期 MVP</div>
+        <div class="mc-name" id="mvpName">-</div>
+        <div class="mc-score" id="mvpScore">-</div>
+      </div>
+      <div class="mvp-card mvp-2">
+        <div class="mc-label">📈 進步王</div>
+        <div class="mc-name" id="progressName">-</div>
+        <div class="mc-score" id="progressScore">資料累積中</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 本期排行榜 TOP 5 -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-title">🏅 本期排行榜</div>
+    <table class="rank-table">
+      <thead><tr><th>排名</th><th>暱稱</th><th>職位</th><th>分數</th></tr></thead>
+      <tbody id="rankBody"><tr><td colspan="4" class="loading">載入中...</td></tr></tbody>
+    </table>
+    <div class="rank-more"><a href="contest-history.html">查看完整排名 →</a></div>
+  </div>
+
+  <!-- 下方：公會歷史 + 稱號分布 -->
+  <div class="bottom-grid">
+    <div class="card">
+      <div class="card-title">📊 公會歷史</div>
+      <div class="history-stats">
+        <div class="hs-item"><div class="hs-value" id="hsHighest">-</div><div class="hs-label">歷史最高分</div></div>
+        <div class="hs-item"><div class="hs-value" id="hsBestRank">-</div><div class="hs-label">最佳排名</div></div>
+        <div class="hs-item"><div class="hs-value" id="hsAvg">-</div><div class="hs-label">平均總分</div></div>
+        <div class="hs-item"><div class="hs-value" id="hsPeriods">-</div><div class="hs-label">參賽期數</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎖 稱號分布</div>
+      <div class="title-bars" id="titleBars"><div class="loading">載入中...</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+async function init() {
+  try {
+    // 讀取成績資料
+    const cRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`);
+    const cData = await cRes.json();
+    const cRows = (cData.values || []).slice(1);
+    const allRecords = cRows.map(r => ({ period:r[0]||'', server:r[1]||'', nickname:r[2]||'', role:r[3]||'', score:Number(r[4])||0, title:r[5]||'' }));
+
+    // 讀取總結資料
+    let summaries = [];
+    try {
+      const sRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`);
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        summaries = (sData.values || []).slice(1).map(r => ({ period:r[0]||'', members:r[1]||'', total:r[2]||'', rank:r[3]||'', grade:r[4]||'' }));
+      }
+    } catch(e) {}
+
+    // 讀取公會成員數
+    let totalMembers = 0;
+    try {
+      const mRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:D?key=${API_KEY}`);
+      if (mRes.ok) {
+        const mData = await mRes.json();
+        totalMembers = (mData.values || []).slice(1).filter(r => (r[3]||'').toLowerCase() !== 'true').length;
+      }
+    } catch(e) {}
+
+    if (!allRecords.length) {
+      document.getElementById('periodLabel').textContent = '尚無資料';
+      return;
+    }
+
+    // 取得最新一期
+    const periods = [...new Set(allRecords.map(r => r.period))].sort();
+    const latestPeriod = periods[periods.length - 1];
+    const latestData = allRecords.filter(r => r.period === latestPeriod).sort((a,b) => b.score - a.score);
+    const latestSummary = summaries.find(s => s.period === latestPeriod);
+
+    document.getElementById('periodLabel').textContent = latestPeriod + ' 期 競賽成績';
+
+    // ── 統計四格 ──
+    const total = latestSummary ? Number(latestSummary.total) : latestData.reduce((s,d) => s + d.score, 0);
+    const participation = latestSummary ? latestSummary.members : latestData.length;
+    const rank = latestSummary ? latestSummary.rank : '-';
+    const rate = totalMembers ? Math.round(latestData.length / totalMembers * 100) + '%' : '-';
+
+    document.getElementById('dTotal').textContent = total.toLocaleString();
+    document.getElementById('dRank').textContent = rank;
+    document.getElementById('dParticipation').textContent = participation + (latestSummary ? '' : ' 人');
+    document.getElementById('dRate').textContent = rate;
+
+    // ── MVP ──
+    if (latestData.length) {
+      document.getElementById('mvpName').textContent = latestData[0].nickname;
+      document.getElementById('mvpScore').textContent = latestData[0].score + ' 分';
+    }
+
+    // ── 進步王（需要至少兩期）──
+    if (periods.length >= 2) {
+      const prevPeriod = periods[periods.length - 2];
+      const prevData = allRecords.filter(r => r.period === prevPeriod);
+      const prevMap = {};
+      prevData.forEach(d => { prevMap[d.nickname] = d.score; });
+
+      let maxProgress = -Infinity, progressMember = null;
+      latestData.forEach(d => {
+        if (prevMap[d.nickname] !== undefined) {
+          const diff = d.score - prevMap[d.nickname];
+          if (diff > maxProgress) { maxProgress = diff; progressMember = d; }
+        }
+      });
+      if (progressMember && maxProgress > 0) {
+        document.getElementById('progressName').textContent = progressMember.nickname;
+        document.getElementById('progressScore').textContent = '+' + maxProgress + ' 分';
+      }
+    }
+
+    // ── 排行榜 TOP 5 ──
+    const top5 = latestData.slice(0, 5);
+    document.getElementById('rankBody').innerHTML = top5.map((d, i) => `<tr>
+      <td>${i+1}</td><td>${d.nickname}</td>
+      <td><span class="role-badge" style="font-size:.75rem;">${d.role}</span></td>
+      <td style="font-weight:700;color:var(--orange);">${d.score}</td>
+    </tr>`).join('');
+
+    // ── 稱號分布 ──
+    const TITLES = ['王者花匠','大師花匠','黃金花匠','白銀花匠','青銅花匠','無稱號'];
+    const titleCounts = {};
+    TITLES.forEach(t => titleCounts[t] = 0);
+    latestData.forEach(d => { if (titleCounts[d.title] !== undefined) titleCounts[d.title]++; });
+    const maxCount = Math.max(...Object.values(titleCounts), 1);
+
+    document.getElementById('titleBars').innerHTML = TITLES.map(t => {
+      const cnt = titleCounts[t];
+      const pct = Math.round(cnt / maxCount * 100);
+      return `<div class="tb-row">
+        <span class="tb-label">${t}</span>
+        <div class="tb-bar-bg"><div class="tb-bar-fill tb-${t}" style="width:${pct}%"></div></div>
+        <span class="tb-count">${cnt} 人</span>
+      </div>`;
+    }).join('');
+
+    // ── 公會歷史 ──
+    if (summaries.length > 0) {
+      const totals = summaries.map(s => Number(s.total)).filter(n => n > 0);
+      document.getElementById('hsHighest').textContent = totals.length ? Math.max(...totals).toLocaleString() : '-';
+      document.getElementById('hsAvg').textContent = totals.length ? Math.round(totals.reduce((a,b)=>a+b,0)/totals.length).toLocaleString() : '-';
+      document.getElementById('hsPeriods').textContent = summaries.length;
+      // 最佳排名（取數字最小的）
+      const ranks = summaries.map(s => s.rank).filter(Boolean);
+      document.getElementById('hsBestRank').textContent = ranks.length ? ranks[0] : '-';
+    } else {
+      document.getElementById('hsHighest').textContent = total.toLocaleString();
+      document.getElementById('hsAvg').textContent = total.toLocaleString();
+      document.getElementById('hsPeriods').textContent = periods.length;
+      document.getElementById('hsBestRank').textContent = rank;
+    }
+
+    // ── 趨勢圖（需要 3 期以上）──
+    if (periods.length >= 3 && summaries.length >= 3) {
+      const chartData = periods.slice(-7).map(p => {
+        const s = summaries.find(x => x.period === p);
+        return { period: p, total: s ? Number(s.total) : 0 };
+      }).filter(d => d.total > 0);
+
+      if (chartData.length >= 3) {
+        const max = Math.max(...chartData.map(d => d.total));
+        document.getElementById('chartArea').innerHTML = `
+          <div style="display:flex;align-items:flex-end;gap:8px;height:140px;width:100%;padding:0 10px;">
+            ${chartData.map(d => {
+              const h = Math.round(d.total / max * 120);
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <div style="font-size:.65rem;color:var(--text-muted);">${(d.total/1000).toFixed(1)}k</div>
+                <div style="width:100%;max-width:40px;height:${h}px;background:linear-gradient(180deg,var(--orange),var(--orange-mid));border-radius:6px 6px 2px 2px;"></div>
+                <div style="font-size:.6rem;color:var(--text-muted);">${d.period.slice(5)}</div>
+              </div>`;
+            }).join('')}
+          </div>`;
+      }
+    }
+
+  } catch(e) {
+    document.getElementById('periodLabel').textContent = '⚠️ ' + e.message;
+  }
+}
+
+init();
+</script>
+<script src="header.js"></script>
+</body>
+</html>
