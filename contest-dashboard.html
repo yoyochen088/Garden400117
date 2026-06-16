@@ -53,8 +53,8 @@
     .rank-table th { padding:10px 14px; text-align:left; font-weight:600; }
     .rank-table td { padding:9px 14px; border-bottom:1px solid var(--border); }
     .rank-table tbody tr:hover { background:var(--orange-light); }
-    .rank-more { text-align:center; padding:12px; }
-    .rank-more a { color:var(--orange); font-size:0.85rem; font-weight:600; text-decoration:none; }
+    .rank-more { text-align:center; padding:14px; }
+    .rank-more .btn-link { display:inline-block; }
 
     /* 下方兩格 */
     .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -277,8 +277,16 @@ async function init() {
         document.getElementById('diffAvg').className = 'diff-chip ' + (avgDiff > 0 ? 'diff-up' : avgDiff < 0 ? 'diff-down' : 'diff-same');
         document.getElementById('diffAvg').textContent = (avgDiff >= 0 ? '▲' : '▼') + ' 均分 ' + (avgDiff >= 0 ? '+' : '') + avgDiff;
 
-        // 排名差異（需要從 rank 字串提取數字）
-        const extractRankNum = r => { const m = String(r).match(/第?(\d+)/); return m ? Number(m[1]) : null; };
+        // 排名差異
+        const cnNumMap = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
+        const extractRankNum = r => {
+          const s = String(r);
+          const numMatch = s.match(/第(\d+)/);
+          if (numMatch) return Number(numMatch[1]);
+          const cnMatch = s.match(/第([一二三四五六七八九十]+)/);
+          if (cnMatch) return cnNumMap[cnMatch[1]] || null;
+          return null;
+        };
         const currRankNum = extractRankNum(rank);
         const prevRankStr = prevSummary ? prevSummary.rank : '';
         const prevRankNum = extractRankNum(prevRankStr);
@@ -367,10 +375,12 @@ async function init() {
 
       if (chartData.length >= 3) {
         const max = Math.max(...chartData.map(d => d.total));
+        const min = Math.min(...chartData.map(d => d.total));
+        const range = max - min || 1;
         document.getElementById('chartArea').innerHTML = `
           <div style="display:flex;align-items:flex-end;gap:8px;height:140px;width:100%;padding:0 10px;">
             ${chartData.map(d => {
-              const h = Math.round(d.total / max * 120);
+              const h = Math.round(((d.total - min) / range) * 100) + 20;
               return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
                 <div style="font-size:.65rem;color:var(--text-muted);">${(d.total/1000).toFixed(1)}k</div>
                 <div style="width:100%;max-width:40px;height:${h}px;background:linear-gradient(180deg,var(--orange),var(--orange-mid));border-radius:6px 6px 2px 2px;"></div>
@@ -381,10 +391,18 @@ async function init() {
       }
 
       // ── 排名走勢圖 ──
-      const extractRankNum = r => { const m = String(r).match(/第?(\d+)/); return m ? Number(m[1]) : null; };
+      const cnNum = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
+      const extractRankNum2 = r => {
+        const s = String(r);
+        const numMatch = s.match(/第(\d+)/);
+        if (numMatch) return Number(numMatch[1]);
+        const cnMatch = s.match(/第([一二三四五六七八九十]+)/);
+        if (cnMatch) return cnNum[cnMatch[1]] || null;
+        return null;
+      };
       const rankData = periods.slice(-7).map(p => {
         const s = summaries.find(x => x.period === p);
-        return { period: p, rank: s ? extractRankNum(s.rank) : null };
+        return { period: p, rank: s ? extractRankNum2(s.rank) : null };
       }).filter(d => d.rank !== null);
 
       if (rankData.length >= 3) {
