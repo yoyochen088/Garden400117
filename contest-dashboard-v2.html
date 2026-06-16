@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>公會競賽戰報 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:#fff8ef; color:#5b3b1d; }
+    .container { width:100%; max-width:1200px; margin:0 auto; padding:0 20px; }
+
+    /* Hero */
+    .hero {
+      background:linear-gradient(160deg,#ffe9b7,#fff7eb);
+      padding:60px 0 50px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:4px;
+      background:linear-gradient(90deg,#c2510b,#e96a1e,#f4a46a,#e96a1e,#c2510b);
+    }
+    .hero h1 { font-size:2.6rem; color:#a35d00; margin-bottom:12px; }
+    .hero p { font-size:1.15rem; color:#8a5e28; }
+
+    /* Section */
+    .section { padding:50px 0; }
+    .section-title { font-size:1.8rem; color:#9a5400; margin-bottom:28px; font-weight:900; }
+
+    /* KPI Grid */
+    .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+    .kpi-card {
+      background:#fff; border-radius:20px; padding:30px 20px;
+      text-align:center; box-shadow:0 5px 20px rgba(0,0,0,.06);
+      transition:transform .2s;
+    }
+    .kpi-card:hover { transform:translateY(-4px); }
+    .kpi-title { color:#a96c18; font-size:0.9rem; font-weight:600; margin-bottom:12px; }
+    .kpi-value { font-size:2.6rem; font-weight:900; color:#5b3b1d; }
+
+    /* Trend Layout */
+    .trend-layout { display:grid; grid-template-columns:2fr 1fr; gap:28px; align-items:stretch; }
+    .chart-box {
+      background:#fff; border-radius:24px; padding:24px;
+      box-shadow:0 5px 20px rgba(0,0,0,.06);
+      position:relative; min-height:320px;
+    }
+    .chart-box canvas { width:100%!important; height:100%!important; }
+    .compare-box {
+      background:#fff; border-radius:24px; padding:30px;
+      box-shadow:0 5px 20px rgba(0,0,0,.06);
+      display:flex; flex-direction:column; justify-content:center; gap:20px;
+    }
+    .compare-item { font-size:1.1rem; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+    .compare-label { color:#8a5e28; }
+    .diff-badge { padding:6px 16px; border-radius:20px; font-weight:700; font-size:0.95rem; }
+    .diff-up { background:#e8f5e9; color:#2e7d32; }
+    .diff-down { background:#fce4ec; color:#c62828; }
+    .diff-same { background:#f5f5f5; color:#888; }
+
+    /* Highlight Grid */
+    .highlight-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    .highlight-card {
+      background:#fff; border-radius:24px; padding:28px 20px;
+      text-align:center; box-shadow:0 5px 20px rgba(0,0,0,.06);
+      transition:transform .2s;
+    }
+    .highlight-card:hover { transform:translateY(-4px); }
+    .highlight-card .hl-icon { font-size:2rem; margin-bottom:10px; }
+    .highlight-card .hl-label { font-size:0.82rem; color:#a96c18; font-weight:600; margin-bottom:8px; }
+    .highlight-card .hl-name { font-size:1.25rem; font-weight:900; color:#5b3b1d; }
+    .highlight-card .hl-score { font-size:0.9rem; color:#e96a1e; font-weight:700; margin-top:6px; }
+
+    /* Ranking */
+    .ranking-box {
+      background:#fff; border-radius:24px; padding:30px;
+      box-shadow:0 5px 20px rgba(0,0,0,.06);
+    }
+    .rank-item {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 12px; border-bottom:1px solid #f5ebe0;
+      transition:background .15s;
+    }
+    .rank-item:last-child { border-bottom:none; }
+    .rank-item:hover { background:#fff8ef; border-radius:12px; }
+    .rank-left { display:flex; align-items:center; gap:14px; }
+    .rank-num { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:800; }
+    .rn-1 { background:linear-gradient(135deg,#f4c430,#ffd700); color:#5a4000; }
+    .rn-2 { background:linear-gradient(135deg,#bdbdbd,#e0e0e0); color:#555; }
+    .rn-3 { background:linear-gradient(135deg,#cd7f32,#e8a96a); color:#fff; }
+    .rn-default { background:#fff3e0; color:#a35d00; }
+    .rank-name { font-weight:700; font-size:1rem; }
+    .rank-role { font-size:0.72rem; padding:2px 8px; border-radius:8px; margin-left:8px; font-weight:600; }
+    .role-會長 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
+    .role-副會長 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
+    .role-理事 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .role-菁英 { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
+    .role-成員 { background:#e8f5e9; color:#2e7d32; }
+    .rank-score { font-size:1.1rem; font-weight:900; color:#e96a1e; }
+    .view-btn {
+      display:inline-block; margin-top:24px; background:linear-gradient(135deg,#e96a1e,#ff9d2f);
+      color:#fff; padding:14px 32px; border-radius:16px; text-decoration:none;
+      font-weight:700; font-size:0.95rem; box-shadow:0 4px 16px rgba(233,106,30,.3);
+      transition:transform .15s;
+    }
+    .view-btn:hover { transform:translateY(-2px); }
+
+    /* History Grid */
+    .history-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+    .history-card {
+      background:#fff; border-radius:20px; padding:28px 20px;
+      text-align:center; box-shadow:0 5px 20px rgba(0,0,0,.06);
+    }
+    .history-label { font-size:0.85rem; color:#a96c18; font-weight:600; }
+    .history-value { font-size:2.2rem; font-weight:900; color:#5b3b1d; margin-top:10px; }
+
+    /* Title Distribution */
+    .title-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+    .title-chart-box {
+      background:#fff; border-radius:24px; padding:30px;
+      box-shadow:0 5px 20px rgba(0,0,0,.06);
+      display:flex; align-items:center; justify-content:center;
+      min-height:360px;
+    }
+    .title-list-box {
+      background:#fff; border-radius:24px; padding:30px;
+      box-shadow:0 5px 20px rgba(0,0,0,.06);
+    }
+    .title-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid #f5ebe0; }
+    .title-row:last-child { border-bottom:none; }
+    .title-name { font-weight:700; display:flex; align-items:center; gap:10px; }
+    .title-dot { width:12px; height:12px; border-radius:50%; }
+    .title-count { font-weight:800; font-size:1.1rem; color:#5b3b1d; }
+
+    /* Loading / Empty */
+    .loading { text-align:center; padding:60px; color:#a96c18; font-size:1rem; }
+
+    /* Responsive */
+    @media(max-width:900px) {
+      .kpi-grid { grid-template-columns:repeat(2,1fr); }
+      .trend-layout { grid-template-columns:1fr; }
+      .highlight-grid { grid-template-columns:1fr; }
+      .history-grid { grid-template-columns:repeat(2,1fr); }
+      .title-grid { grid-template-columns:1fr; }
+      .hero h1 { font-size:1.8rem; }
+    }
+    @media(max-width:480px) {
+      .kpi-value { font-size:1.8rem; }
+      .hero { padding:40px 0 35px; }
+    }
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <h1>🌸 公會競賽戰報 🌸</h1>
+    <p id="heroSubtitle">載入中...</p>
+  </div>
+</section>
+
+<!-- KPI -->
+<section class="section">
+  <div class="container">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-title">公會總分</div><div class="kpi-value" id="kpiTotal">-</div></div>
+      <div class="kpi-card"><div class="kpi-title">公會排名</div><div class="kpi-value" id="kpiRank">-</div></div>
+      <div class="kpi-card"><div class="kpi-title">參賽人數</div><div class="kpi-value" id="kpiCount">-</div></div>
+      <div class="kpi-card"><div class="kpi-title">平均分數</div><div class="kpi-value" id="kpiAvg">-</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 總分趨勢 + 與上期比較 -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">📈 公會總分趨勢</h2>
+    <div class="trend-layout">
+      <div class="chart-box"><canvas id="chartTotal"></canvas></div>
+      <div class="compare-box" id="compareSection">
+        <div class="loading">資料累積中...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 排名走勢 + 本期亮點 -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🏆 本期亮點</h2>
+    <div class="trend-layout">
+      <div class="chart-box"><canvas id="chartRank"></canvas></div>
+      <div style="display:flex;flex-direction:column;gap:16px;justify-content:center;">
+        <div class="highlight-grid" style="grid-template-columns:1fr;">
+          <div class="highlight-card">
+            <div class="hl-icon">👑</div>
+            <div class="hl-label">本期 MVP</div>
+            <div class="hl-name" id="mvpName">-</div>
+            <div class="hl-score" id="mvpScore">-</div>
+          </div>
+          <div class="highlight-card">
+            <div class="hl-icon">🚀</div>
+            <div class="hl-label">進步王</div>
+            <div class="hl-name" id="progressName">-</div>
+            <div class="hl-score" id="progressScore">資料累積中</div>
+          </div>
+          <div class="highlight-card">
+            <div class="hl-icon">🌱</div>
+            <div class="hl-label">潛力成員</div>
+            <div class="hl-name" id="potentialName">-</div>
+            <div class="hl-score" id="potentialScore">資料累積中</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOP 5 排行 -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🥇 本期排行榜</h2>
+    <div class="ranking-box">
+      <div id="rankList"><div class="loading">載入中...</div></div>
+      <div style="text-align:center;">
+        <a href="contest-history.html" id="rankMoreLink" class="view-btn">📋 查看完整競賽資料</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 歷史成就 -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🏅 歷史成就</h2>
+    <div class="history-grid">
+      <div class="history-card"><div class="history-label">歷史最高分</div><div class="history-value" id="hsHighest">-</div></div>
+      <div class="history-card"><div class="history-label">最佳排名</div><div class="history-value" id="hsBestRank">-</div></div>
+      <div class="history-card"><div class="history-label">平均總分</div><div class="history-value" id="hsAvg">-</div></div>
+      <div class="history-card"><div class="history-label">參賽期數</div><div class="history-value" id="hsPeriods">-</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 稱號分布 -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">🌺 稱號分布</h2>
+    <div class="title-grid">
+      <div class="title-chart-box"><canvas id="chartDonut"></canvas></div>
+      <div class="title-list-box" id="titleListBox"><div class="loading">載入中...</div></div>
+    </div>
+  </div>
+</section>
+
+<script>
+const cnNumMap = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
+function extractRankNum(r) {
+  const s = String(r);
+  const n = s.match(/第(\d+)/); if (n) return Number(n[1]);
+  const c = s.match(/第([一二三四五六七八九十]+)/); if (c) return cnNumMap[c[1]] || null;
+  return null;
+}
+
+const TITLES = ['王者花匠','大師花匠','黃金花匠','白銀花匠','青銅花匠','無稱號'];
+const TITLE_COLORS = ['#e96a1e','#9b59b6','#f4c430','#9e9e9e','#cd7f32','#ddd'];
+
+async function init() {
+  try {
+    const cRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`);
+    const cData = await cRes.json();
+    const allRecords = (cData.values||[]).slice(1).map(r=>({period:r[0]||'',nickname:r[2]||'',role:r[3]||'',score:Number(r[4])||0,title:r[5]||''}));
+
+    let summaries = [];
+    try {
+      const s = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`);
+      if(s.ok){ const d=await s.json(); summaries=(d.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:r[2]||'',rank:r[3]||'',grade:r[4]||''})); }
+    } catch(e){}
+
+    if (!allRecords.length) { document.getElementById('heroSubtitle').textContent='尚無競賽資料'; return; }
+
+    const periods = [...new Set(allRecords.map(r=>r.period))].sort();
+    const latestPeriod = periods[periods.length-1];
+    const latestData = allRecords.filter(r=>r.period===latestPeriod).sort((a,b)=>b.score-a.score);
+    const latestSummary = summaries.find(s=>s.period===latestPeriod);
+
+    // Hero subtitle
+    document.getElementById('heroSubtitle').textContent = latestPeriod + ' 期競賽成果統計';
+    document.getElementById('rankMoreLink').href = 'contest-history.html?period=' + latestPeriod;
+
+    // KPI
+    const total = latestSummary ? Number(latestSummary.total) : latestData.reduce((s,d)=>s+d.score,0);
+    const rank = latestSummary ? latestSummary.rank : '-';
+    const count = latestSummary ? latestSummary.members : latestData.length;
+    const avg = latestData.length ? Math.round(latestData.reduce((s,d)=>s+d.score,0)/latestData.length) : 0;
+
+    document.getElementById('kpiTotal').textContent = total.toLocaleString();
+    document.getElementById('kpiRank').textContent = rank;
+    document.getElementById('kpiCount').textContent = count + ' 人';
+    document.getElementById('kpiAvg').textContent = avg.toLocaleString();
+
+    // MVP
+    if (latestData.length) {
+      document.getElementById('mvpName').textContent = latestData[0].nickname;
+      document.getElementById('mvpScore').textContent = latestData[0].score.toLocaleString() + ' 分';
+    }
+
+    // 進步王 + 與上期比較
+    if (periods.length >= 2) {
+      const prev = periods[periods.length-2];
+      const prevData = allRecords.filter(r=>r.period===prev);
+      const prevMap = {}; prevData.forEach(d=>{prevMap[d.nickname]=d.score;});
+      let maxP=-Infinity, pM=null;
+      latestData.forEach(d=>{ if(prevMap[d.nickname]!==undefined){const diff=d.score-prevMap[d.nickname]; if(diff>maxP){maxP=diff;pM=d;}} });
+      if(pM&&maxP>0){ document.getElementById('progressName').textContent=pM.nickname; document.getElementById('progressScore').textContent='+'+maxP.toLocaleString()+' 分'; }
+
+      const prevSummary = summaries.find(s=>s.period===prev);
+      const prevTotal = prevSummary ? Number(prevSummary.total) : prevData.reduce((s,d)=>s+d.score,0);
+      const prevAvg = prevData.length ? Math.round(prevData.reduce((s,d)=>s+d.score,0)/prevData.length) : 0;
+      const tDiff = total - prevTotal, aDiff = avg - prevAvg;
+      const currRN = extractRankNum(rank), prevRN = extractRankNum(prevSummary?prevSummary.rank:'');
+      const rDiff = (currRN&&prevRN) ? prevRN-currRN : null;
+
+      document.getElementById('compareSection').innerHTML = `
+        <div class="compare-item"><span class="compare-label">總分</span><span class="diff-badge ${tDiff>=0?'diff-up':'diff-down'}">${tDiff>=0?'▲':'▼'} ${tDiff>=0?'+':''}${tDiff.toLocaleString()}</span></div>
+        <div class="compare-item"><span class="compare-label">排名</span><span class="diff-badge ${rDiff!==null?(rDiff>0?'diff-up':rDiff<0?'diff-down':'diff-same'):'diff-same'}">${rDiff>0?'▲ +'+rDiff:rDiff<0?'▼ '+rDiff:rDiff===0?'— 持平':'— 無資料'}</span></div>
+        <div class="compare-item"><span class="compare-label">均分</span><span class="diff-badge ${aDiff>=0?'diff-up':'diff-down'}">${aDiff>=0?'▲':'▼'} ${aDiff>=0?'+':''}${aDiff.toLocaleString()}</span></div>
+      `;
+    }
+
+    // 潛力成員
+    if (periods.length >= 3) {
+      const last3 = periods.slice(-3); const sp = {};
+      last3.forEach(p=>{sp[p]={};});
+      allRecords.filter(r=>last3.includes(r.period)).forEach(r=>{sp[r.period][r.nickname]=r.score;});
+      let best=null, bestG=0;
+      [...new Set(allRecords.map(r=>r.nickname))].forEach(n=>{
+        const s0=sp[last3[0]]?.[n], s1=sp[last3[1]]?.[n], s2=sp[last3[2]]?.[n];
+        if(s0&&s1&&s2&&s2>s1&&s1>s0){ const g=s2-s0; if(g>bestG){bestG=g;best=n;} }
+      });
+      if(best){ document.getElementById('potentialName').textContent=best; document.getElementById('potentialScore').textContent='連3期成長 +'+bestG.toLocaleString()+' 分'; }
+    }
+
+    // TOP 5 排行
+    document.getElementById('rankList').innerHTML = latestData.slice(0,5).map((d,i)=>{
+      const rnCls = i===0?'rn-1':i===1?'rn-2':i===2?'rn-3':'rn-default';
+      const emoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+      const roleCls = d.role ? `role-${d.role}` : '';
+      return `<div class="rank-item">
+        <div class="rank-left">
+          <div class="rank-num ${rnCls}">${emoji||i+1}</div>
+          <span class="rank-name">${d.nickname}<span class="rank-role ${roleCls}">${d.role}</span></span>
+        </div>
+        <span class="rank-score">${d.score.toLocaleString()}</span>
+      </div>`;
+    }).join('');
+
+    // 稱號分布 - Doughnut Chart
+    const tc = {}; TITLES.forEach(t=>tc[t]=0);
+    latestData.forEach(d=>{ if(tc[d.title]!==undefined) tc[d.title]++; });
+    const donutData = TITLES.map(t=>tc[t]);
+    const donutColors = TITLE_COLORS;
+
+    new Chart(document.getElementById('chartDonut'), {
+      type: 'doughnut',
+      data: { labels: TITLES, datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 2, borderColor: '#fff' }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position:'bottom', labels:{ font:{size:13}, padding:16 } } } }
+    });
+
+    // 稱號列表
+    document.getElementById('titleListBox').innerHTML = TITLES.map((t,i)=>
+      `<div class="title-row"><span class="title-name"><span class="title-dot" style="background:${TITLE_COLORS[i]}"></span>${t}</span><span class="title-count">${tc[t]} 人</span></div>`
+    ).join('');
+
+    // 歷史成就
+    if (summaries.length) {
+      const tots = summaries.map(s=>Number(s.total)).filter(n=>n>0);
+      document.getElementById('hsHighest').textContent = tots.length ? Math.max(...tots).toLocaleString() : '-';
+      document.getElementById('hsAvg').textContent = tots.length ? Math.round(tots.reduce((a,b)=>a+b,0)/tots.length).toLocaleString() : '-';
+      document.getElementById('hsPeriods').textContent = summaries.length;
+      // 最佳排名（數字最小的）
+      const rankNums = summaries.map(s=>extractRankNum(s.rank)).filter(n=>n!==null);
+      if (rankNums.length) {
+        const bestRankNum = Math.min(...rankNums);
+        const bestRankEntry = summaries.find(s=>extractRankNum(s.rank)===bestRankNum);
+        document.getElementById('hsBestRank').textContent = bestRankEntry ? bestRankEntry.rank : '#'+bestRankNum;
+      }
+    }
+
+    // Chart.js 總分趨勢
+    if (summaries.length >= 2) {
+      const cd = periods.slice(-7).map(p=>{const s=summaries.find(x=>x.period===p);return{period:p,total:s?Number(s.total):0};}).filter(d=>d.total>0);
+      if (cd.length >= 2) {
+        new Chart(document.getElementById('chartTotal'), {
+          type:'line',
+          data:{ labels:cd.map(d=>d.period.slice(5)), datasets:[{ label:'總分', data:cd.map(d=>d.total), borderColor:'#e96a1e', backgroundColor:'rgba(233,106,30,0.08)', fill:true, tension:0.35, pointRadius:6, pointBackgroundColor:'#e96a1e', pointBorderColor:'#fff', pointBorderWidth:2 }] },
+          options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:false, ticks:{callback:v=>v.toLocaleString()}, grid:{color:'#f5ebe0'}}, x:{grid:{display:false}} } }
+        });
+      }
+    }
+
+    // Chart.js 排名走勢
+    if (summaries.length >= 2) {
+      const rd = periods.slice(-7).map(p=>{const s=summaries.find(x=>x.period===p);return{period:p,rank:s?extractRankNum(s.rank):null};}).filter(d=>d.rank!==null);
+      if (rd.length >= 2) {
+        new Chart(document.getElementById('chartRank'), {
+          type:'line',
+          data:{ labels:rd.map(d=>d.period.slice(5)), datasets:[{ label:'排名', data:rd.map(d=>d.rank), borderColor:'#4a90d9', backgroundColor:'rgba(74,144,217,0.08)', fill:true, tension:0.35, pointRadius:6, pointBackgroundColor:'#4a90d9', pointBorderColor:'#fff', pointBorderWidth:2 }] },
+          options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{reverse:true, min:1, ticks:{stepSize:1, callback:v=>'#'+v}, grid:{color:'#f5ebe0'}}, x:{grid:{display:false}} } }
+        });
+      }
+    }
+
+  } catch(e) {
+    document.getElementById('heroSubtitle').textContent = '⚠️ ' + e.message;
+  }
+}
+
+init();
+</script>
+<script src="header.js"></script>
+</body>
+</html>
