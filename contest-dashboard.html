@@ -6,47 +6,28 @@
   <title>競賽儀表板 - 璀璨</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
   <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a;
-      --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#fff;
-      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
-      --shadow:0 2px 12px rgba(233,106,30,.10); --radius:14px;
-    }
+    :root { --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a; --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#fff; --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0; --shadow:0 2px 12px rgba(233,106,30,.10); --radius:14px; }
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
     main { max-width:1100px; margin:0 auto; padding:24px 16px; }
-
     .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
     .page-title { font-size:1.4rem; font-weight:900; color:var(--orange-dark); }
     .page-subtitle { font-size:0.82rem; color:var(--text-muted); }
-    .btn-link { padding:8px 18px; border-radius:20px; font-size:0.85rem; font-weight:700; background:var(--orange); color:#fff; text-decoration:none; border:none; cursor:pointer; box-shadow:0 3px 12px rgba(233,106,30,.3); transition:transform .15s; }
+    .btn-link { padding:8px 18px; border-radius:20px; font-size:0.85rem; font-weight:700; background:var(--orange); color:#fff; text-decoration:none; box-shadow:0 3px 12px rgba(233,106,30,.3); transition:transform .15s; display:inline-block; }
     .btn-link:hover { transform:translateY(-2px); }
-
-    /* 統計四格 */
     .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
     .stat-box { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; }
     .stat-box .sv { font-size:1.8rem; font-weight:900; color:var(--text); }
     .stat-box .sl { font-size:0.78rem; color:var(--text-muted); margin-top:4px; }
-
-    /* 中間區塊 */
     .mid-grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px; }
-    .card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; }
+    .card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; margin-bottom:16px; }
     .card-title { font-size:0.9rem; font-weight:700; color:var(--orange-dark); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
-
-    /* 趨勢圖 */
-    .chart-placeholder { min-height:80px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.88rem; background:var(--bg); border-radius:10px; border:1px dashed var(--border); }
-    .chart-svg { width:100%; height:auto; display:block; }
-    .chart-line { fill:none; stroke:var(--orange); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-    .chart-area { fill:url(#chartGrad); }
-    .chart-dot { fill:var(--orange); }
-    .chart-label { font-size:11px; fill:var(--text-muted); text-anchor:middle; }
-    .chart-value { font-size:10px; fill:var(--orange-dark); text-anchor:middle; font-weight:700; }
-    .rank-line { fill:none; stroke:#4a90d9; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-    .rank-area { fill:url(#rankGrad); }
-    .rank-dot { fill:#4a90d9; }
-
-    /* MVP / 進步王 */
+    .diff-chip { padding:6px 16px; border-radius:20px; font-size:0.82rem; font-weight:700; display:inline-flex; align-items:center; gap:4px; }
+    .diff-up { background:#e8f5e9; color:#2e7d32; }
+    .diff-down { background:#fce4ec; color:#c62828; }
+    .diff-same { background:#f5f5f5; color:#888; }
     .mvp-card { padding:14px 18px; border-radius:12px; margin-bottom:10px; }
     .mvp-card .mc-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
     .mvp-card .mc-name { font-size:1.1rem; font-weight:800; color:var(--text); }
@@ -55,8 +36,8 @@
     .mvp-1 .mc-score { color:var(--orange); }
     .mvp-2 { background:linear-gradient(135deg,#f0fff4,#e8f5e9); border:1px solid #a5d6a7; }
     .mvp-2 .mc-score { color:#2e7d32; }
-
-    /* 排行榜 */
+    .mvp-3 { background:linear-gradient(135deg,#f3e5f5,#ede7f6); border:1px solid #ce93d8; }
+    .mvp-3 .mc-score { color:#7b1fa2; }
     .rank-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
     .rank-table thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
     .rank-table th { padding:10px 14px; text-align:left; font-weight:600; }
@@ -64,14 +45,10 @@
     .rank-table tbody tr:hover { background:var(--orange-light); }
     .rank-more { text-align:center; padding:14px; }
     .rank-more .btn-link { display:inline-block; }
-
-    /* 下方兩格 */
     .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     .history-stats { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
     .hs-item .hs-value { font-size:1.3rem; font-weight:900; color:var(--text); }
     .hs-item .hs-label { font-size:0.72rem; color:var(--text-muted); margin-top:2px; }
-
-    /* 稱號分布長條 */
     .title-bars { display:flex; flex-direction:column; gap:10px; }
     .tb-row { display:flex; align-items:center; gap:10px; }
     .tb-label { font-size:0.78rem; font-weight:600; width:70px; flex-shrink:0; }
@@ -83,98 +60,64 @@
     .tb-黃金花匠 { background:linear-gradient(90deg,#f4c430,#ffd700); }
     .tb-白銀花匠 { background:linear-gradient(90deg,#9e9e9e,#d4d4d4); }
     .tb-青銅花匠 { background:linear-gradient(90deg,#cd7f32,#e8a96a); }
-    .tb-無稱號   { background:#ddd; }
-
+    .tb-無稱號 { background:#ddd; }
     .loading { text-align:center; padding:40px; color:var(--text-muted); }
-
-    /* 與上期差異 */
-    .diff-chip { padding:6px 16px; border-radius:20px; font-size:0.82rem; font-weight:700; display:inline-flex; align-items:center; gap:4px; }
-    .diff-up { background:#e8f5e9; color:#2e7d32; }
-    .diff-down { background:#fce4ec; color:#c62828; }
-    .diff-same { background:#f5f5f5; color:#888; }
-
-    @media(max-width:768px) {
-      .stats-grid { grid-template-columns:repeat(2,1fr); }
-      .mid-grid { grid-template-columns:1fr; }
-      .bottom-grid { grid-template-columns:1fr; }
-    }
-    @media(max-width:480px) {
-      .stats-grid { grid-template-columns:1fr 1fr; gap:10px; }
-      .stat-box .sv { font-size:1.4rem; }
-    }
+    .chart-wrap { position:relative; height:220px; }
+    @media(max-width:768px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .mid-grid { grid-template-columns:1fr; } .bottom-grid { grid-template-columns:1fr; } }
+    @media(max-width:480px) { .stat-box .sv { font-size:1.4rem; } }
   </style>
 </head>
 <body>
 <div id="site-header"></div>
 <main>
   <div class="page-header">
-    <div>
-      <div class="page-title">競賽儀表板</div>
-      <div class="page-subtitle" id="periodLabel">載入中...</div>
-    </div>
-    <a href="contest-history.html" class="btn-link">📋 歷史戰績</a>
+    <div><div class="page-title">公會數據儀表板</div><div class="page-subtitle" id="periodLabel">載入中...</div></div>
+    <a href="contest-history.html" id="rankMoreLink" class="btn-link">📋 歷史戰績</a>
   </div>
-
-  <!-- 統計四格 -->
   <div class="stats-grid">
     <div class="stat-box"><div class="sv" id="dTotal">-</div><div class="sl">公會總分</div></div>
     <div class="stat-box"><div class="sv" id="dRank">-</div><div class="sl">公會排名</div></div>
     <div class="stat-box"><div class="sv" id="dParticipation">-</div><div class="sl">參賽人數</div></div>
-    <div class="stat-box"><div class="sv" id="dRate">-</div><div class="sl">平均分數</div></div>
+    <div class="stat-box"><div class="sv" id="dAvg">-</div><div class="sl">平均分數</div></div>
   </div>
 
-  <!-- 與上期差異 -->
-  <div id="diffSection" style="display:none;margin-bottom:24px;">
-    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
-      <div class="diff-chip" id="diffTotal"></div>
-      <div class="diff-chip" id="diffRank"></div>
-      <div class="diff-chip" id="diffAvg"></div>
-    </div>
-  </div>
-
-  <!-- 中間：趨勢圖 + MVP -->
+  <!-- 趨勢圖 + 與上期差異 -->
   <div class="mid-grid">
     <div class="card">
       <div class="card-title">📈 公會總分趨勢</div>
-      <div class="chart-placeholder" id="chartArea">資料累積中...</div>
+      <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 與上期比較</div>
+      <div id="diffSection"><div class="loading">資料累積中</div></div>
+    </div>
+  </div>
+
+  <!-- 排名走勢 + 本期亮點 -->
+  <div class="mid-grid">
+    <div class="card">
+      <div class="card-title">📉 排名走勢（越高越好）</div>
+      <div class="chart-wrap"><canvas id="chartRank"></canvas></div>
     </div>
     <div class="card">
       <div class="card-title">⭐ 本期亮點</div>
-      <div class="mvp-card mvp-1">
-        <div class="mc-label">🥇 本期 MVP</div>
-        <div class="mc-name" id="mvpName">-</div>
-        <div class="mc-score" id="mvpScore">-</div>
-      </div>
-      <div class="mvp-card mvp-2">
-        <div class="mc-label">📈 進步王</div>
-        <div class="mc-name" id="progressName">-</div>
-        <div class="mc-score" id="progressScore">資料累積中</div>
-      </div>
-      <div class="mvp-card mvp-2" style="background:linear-gradient(135deg,#f3e5f5,#ede7f6);border-color:#ce93d8;" id="potentialCard">
-        <div class="mc-label">🚀 潛力成員</div>
-        <div class="mc-name" id="potentialName">-</div>
-        <div class="mc-score" id="potentialScore" style="color:#7b1fa2;">資料累積中</div>
-      </div>
+      <div class="mvp-card mvp-1"><div class="mc-label">🥇 本期 MVP</div><div class="mc-name" id="mvpName">-</div><div class="mc-score" id="mvpScore">-</div></div>
+      <div class="mvp-card mvp-2"><div class="mc-label">📈 進步王</div><div class="mc-name" id="progressName">-</div><div class="mc-score" id="progressScore">資料累積中</div></div>
+      <div class="mvp-card mvp-3"><div class="mc-label">🚀 潛力成員</div><div class="mc-name" id="potentialName">-</div><div class="mc-score" id="potentialScore">資料累積中</div></div>
     </div>
   </div>
 
-  <!-- 排名走勢圖 -->
-  <div class="card" style="margin-bottom:24px;">
-    <div class="card-title">📉 排名走勢（數字越小越靠前）</div>
-    <div class="chart-placeholder" id="rankChartArea">資料累積中...</div>
-  </div>
-
-  <!-- 本期排行榜 TOP 5 -->
-  <div class="card" style="margin-bottom:24px;">
-    <div class="card-title">🏅 本期排行榜</div>
+  <!-- 排行榜 -->
+  <div class="card">
+    <div class="card-title">🏅 本期排行榜 TOP 5</div>
     <table class="rank-table">
       <thead><tr><th>排名</th><th>暱稱</th><th>職位</th><th>分數</th></tr></thead>
       <tbody id="rankBody"><tr><td colspan="4" class="loading">載入中...</td></tr></tbody>
     </table>
-    <div class="rank-more"><a href="contest-history.html" id="rankMoreLink" class="btn-link" style="font-size:0.85rem;padding:8px 20px;">📋 查看完整排名 →</a></div>
+    <div class="rank-more"><a href="contest-history.html" id="rankMoreLink2" class="btn-link" style="font-size:0.85rem;padding:8px 20px;">📋 查看完整排名 →</a></div>
   </div>
 
-  <!-- 下方：公會歷史 + 稱號分布 -->
+  <!-- 公會歷史 + 稱號分布 -->
   <div class="bottom-grid">
     <div class="card">
       <div class="card-title">📊 公會歷史</div>
@@ -193,268 +136,120 @@
 </main>
 
 <script>
-async function init() {
-  try {
-    // 讀取成績資料
-    const cRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`);
-    const cData = await cRes.json();
-    const cRows = (cData.values || []).slice(1);
-    const allRecords = cRows.map(r => ({ period:r[0]||'', server:r[1]||'', nickname:r[2]||'', role:r[3]||'', score:Number(r[4])||0, title:r[5]||'' }));
-
-    // 讀取總結資料
-    let summaries = [];
-    try {
-      const sRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`);
-      if (sRes.ok) {
-        const sData = await sRes.json();
-        summaries = (sData.values || []).slice(1).map(r => ({ period:r[0]||'', members:r[1]||'', total:r[2]||'', rank:r[3]||'', grade:r[4]||'' }));
-      }
-    } catch(e) {}
-
-    // 讀取公會成員數
-    let totalMembers = 0;
-    try {
-      const mRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:D?key=${API_KEY}`);
-      if (mRes.ok) {
-        const mData = await mRes.json();
-        totalMembers = (mData.values || []).slice(1).filter(r => (r[3]||'').toLowerCase() !== 'true').length;
-      }
-    } catch(e) {}
-
-    if (!allRecords.length) {
-      document.getElementById('periodLabel').textContent = '尚無資料';
-      return;
-    }
-
-    // 取得最新一期
-    const periods = [...new Set(allRecords.map(r => r.period))].sort();
-    const latestPeriod = periods[periods.length - 1];
-    const latestData = allRecords.filter(r => r.period === latestPeriod).sort((a,b) => b.score - a.score);
-    const latestSummary = summaries.find(s => s.period === latestPeriod);
-
-    document.getElementById('periodLabel').textContent = latestPeriod + ' 期 競賽成績';
-    document.getElementById('rankMoreLink').href = 'contest-history.html?period=' + latestPeriod;
-
-    // ── 統計四格 ──
-    const total = latestSummary ? Number(latestSummary.total) : latestData.reduce((s,d) => s + d.score, 0);
-    const participation = latestSummary ? latestSummary.members : latestData.length;
-    const rank = latestSummary ? latestSummary.rank : '-';
-    const avg = latestData.length ? Math.round(latestData.reduce((s,d) => s+d.score, 0) / latestData.length) : '-';
-
-    document.getElementById('dTotal').textContent = total.toLocaleString();
-    document.getElementById('dRank').textContent = rank;
-    document.getElementById('dParticipation').textContent = (latestSummary ? latestSummary.members : latestData.length) + ' 人';
-    document.getElementById('dRate').textContent = avg;
-
-    // ── MVP ──
-    if (latestData.length) {
-      document.getElementById('mvpName').textContent = latestData[0].nickname;
-      document.getElementById('mvpScore').textContent = latestData[0].score + ' 分';
-    }
-
-    // ── 進步王（需要至少兩期）──
-    if (periods.length >= 2) {
-      const prevPeriod = periods[periods.length - 2];
-      const prevData = allRecords.filter(r => r.period === prevPeriod);
-      const prevMap = {};
-      prevData.forEach(d => { prevMap[d.nickname] = d.score; });
-
-      let maxProgress = -Infinity, progressMember = null;
-      latestData.forEach(d => {
-        if (prevMap[d.nickname] !== undefined) {
-          const diff = d.score - prevMap[d.nickname];
-          if (diff > maxProgress) { maxProgress = diff; progressMember = d; }
-        }
-      });
-      if (progressMember && maxProgress > 0) {
-        document.getElementById('progressName').textContent = progressMember.nickname;
-        document.getElementById('progressScore').textContent = '+' + maxProgress + ' 分';
-      }
-
-      // ── 與上期差異 ──
-      const prevSummary = summaries.find(s => s.period === prevPeriod);
-      const diffSection = document.getElementById('diffSection');
-      if (prevSummary || prevData.length) {
-        diffSection.style.display = '';
-        const prevTotal = prevSummary ? Number(prevSummary.total) : prevData.reduce((s,d) => s+d.score, 0);
-        const totalDiff = total - prevTotal;
-        document.getElementById('diffTotal').className = 'diff-chip ' + (totalDiff > 0 ? 'diff-up' : totalDiff < 0 ? 'diff-down' : 'diff-same');
-        document.getElementById('diffTotal').textContent = (totalDiff >= 0 ? '▲' : '▼') + ' 總分 ' + (totalDiff >= 0 ? '+' : '') + totalDiff.toLocaleString();
-
-        const prevAvg = prevData.length ? Math.round(prevData.reduce((s,d)=>s+d.score,0)/prevData.length) : 0;
-        const avgDiff = avg - prevAvg;
-        document.getElementById('diffAvg').className = 'diff-chip ' + (avgDiff > 0 ? 'diff-up' : avgDiff < 0 ? 'diff-down' : 'diff-same');
-        document.getElementById('diffAvg').textContent = (avgDiff >= 0 ? '▲' : '▼') + ' 均分 ' + (avgDiff >= 0 ? '+' : '') + avgDiff;
-
-        // 排名差異
-        const cnNumMap = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
-        const extractRankNum = r => {
-          const s = String(r);
-          const numMatch = s.match(/第(\d+)/);
-          if (numMatch) return Number(numMatch[1]);
-          const cnMatch = s.match(/第([一二三四五六七八九十]+)/);
-          if (cnMatch) return cnNumMap[cnMatch[1]] || null;
-          return null;
-        };
-        const currRankNum = extractRankNum(rank);
-        const prevRankStr = prevSummary ? prevSummary.rank : '';
-        const prevRankNum = extractRankNum(prevRankStr);
-        if (currRankNum && prevRankNum) {
-          const rankDiff = prevRankNum - currRankNum; // 正=進步
-          document.getElementById('diffRank').className = 'diff-chip ' + (rankDiff > 0 ? 'diff-up' : rankDiff < 0 ? 'diff-down' : 'diff-same');
-          document.getElementById('diffRank').textContent = (rankDiff > 0 ? '▲' : rankDiff < 0 ? '▼' : '—') + ' 排名 ' + (rankDiff > 0 ? '+' + rankDiff : rankDiff === 0 ? '持平' : rankDiff);
-        } else {
-          document.getElementById('diffRank').className = 'diff-chip diff-same';
-          document.getElementById('diffRank').textContent = '— 排名 -';
-        }
-      }
-    }
-
-    // ── 潛力成員（最近 3 期持續成長）──
-    if (periods.length >= 3) {
-      const last3 = periods.slice(-3);
-      const scoreByPeriod = {};
-      last3.forEach(p => { scoreByPeriod[p] = {}; });
-      allRecords.filter(r => last3.includes(r.period)).forEach(r => { scoreByPeriod[r.period][r.nickname] = r.score; });
-
-      let bestStreak = null, bestGrowth = 0;
-      const allNames = [...new Set(allRecords.map(r => r.nickname))];
-      allNames.forEach(name => {
-        const s0 = scoreByPeriod[last3[0]]?.[name];
-        const s1 = scoreByPeriod[last3[1]]?.[name];
-        const s2 = scoreByPeriod[last3[2]]?.[name];
-        if (s0 && s1 && s2 && s2 > s1 && s1 > s0) {
-          const growth = s2 - s0;
-          if (growth > bestGrowth) { bestGrowth = growth; bestStreak = name; }
-        }
-      });
-      if (bestStreak) {
-        document.getElementById('potentialName').textContent = bestStreak;
-        document.getElementById('potentialScore').textContent = '連 3 期成長 +' + bestGrowth + ' 分';
-      }
-    }
-
-    // ── 排行榜 TOP 5 ──
-    const top5 = latestData.slice(0, 5);
-    document.getElementById('rankBody').innerHTML = top5.map((d, i) => `<tr>
-      <td>${i+1}</td><td>${d.nickname}</td>
-      <td><span class="role-badge" style="font-size:.75rem;">${d.role}</span></td>
-      <td style="font-weight:700;color:var(--orange);">${d.score}</td>
-    </tr>`).join('');
-
-    // ── 稱號分布 ──
-    const TITLES = ['王者花匠','大師花匠','黃金花匠','白銀花匠','青銅花匠','無稱號'];
-    const titleCounts = {};
-    TITLES.forEach(t => titleCounts[t] = 0);
-    latestData.forEach(d => { if (titleCounts[d.title] !== undefined) titleCounts[d.title]++; });
-    const maxCount = Math.max(...Object.values(titleCounts), 1);
-
-    document.getElementById('titleBars').innerHTML = TITLES.map(t => {
-      const cnt = titleCounts[t];
-      const pct = Math.round(cnt / maxCount * 100);
-      return `<div class="tb-row">
-        <span class="tb-label">${t}</span>
-        <div class="tb-bar-bg"><div class="tb-bar-fill tb-${t}" style="width:${pct}%"></div></div>
-        <span class="tb-count">${cnt} 人</span>
-      </div>`;
-    }).join('');
-
-    // ── 公會歷史 ──
-    if (summaries.length > 0) {
-      const totals = summaries.map(s => Number(s.total)).filter(n => n > 0);
-      document.getElementById('hsHighest').textContent = totals.length ? Math.max(...totals).toLocaleString() : '-';
-      document.getElementById('hsAvg').textContent = totals.length ? Math.round(totals.reduce((a,b)=>a+b,0)/totals.length).toLocaleString() : '-';
-      document.getElementById('hsPeriods').textContent = summaries.length;
-      // 最佳排名（取數字最小的）
-      const ranks = summaries.map(s => s.rank).filter(Boolean);
-      document.getElementById('hsBestRank').textContent = ranks.length ? ranks[0] : '-';
-    } else {
-      document.getElementById('hsHighest').textContent = total.toLocaleString();
-      document.getElementById('hsAvg').textContent = total.toLocaleString();
-      document.getElementById('hsPeriods').textContent = periods.length;
-      document.getElementById('hsBestRank').textContent = rank;
-    }
-
-    // ── 趨勢圖（需要 3 期以上）──
-    if (periods.length >= 3 && summaries.length >= 3) {
-      const chartData = periods.slice(-7).map(p => {
-        const s = summaries.find(x => x.period === p);
-        return { period: p, total: s ? Number(s.total) : 0 };
-      }).filter(d => d.total > 0);
-
-      if (chartData.length >= 3) {
-        const max = Math.max(...chartData.map(d => d.total));
-        const min = Math.min(...chartData.map(d => d.total));
-        const range = max - min || 1;
-        const w = 400, h = 180, px = 40, py = 30, pb = 25;
-        const points = chartData.map((d, i) => {
-          const x = px + (i / (chartData.length - 1)) * (w - px * 2);
-          const y = py + (1 - (d.total - min) / range) * (h - py - pb);
-          return { x, y, ...d };
-        });
-        const lineStr = points.map(p => `${p.x},${p.y}`).join(' ');
-        const areaStr = `${points[0].x},${h - pb} ${lineStr} ${points[points.length-1].x},${h - pb}`;
-
-        document.getElementById('chartArea').innerHTML = `
-          <svg viewBox="0 0 ${w} ${h}" class="chart-svg">
-            <defs><linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#e96a1e" stop-opacity="0.2"/>
-              <stop offset="100%" stop-color="#e96a1e" stop-opacity="0.02"/>
-            <\/linearGradient><\/defs>
-            <polygon class="chart-area" points="${areaStr}" />
-            <polyline class="chart-line" points="${lineStr}" />
-            ${points.map(p => `<circle class="chart-dot" cx="${p.x}" cy="${p.y}" r="4"/>`).join('')}
-            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 10}">${(p.total/1000).toFixed(1)}k<\/text>`).join('')}
-            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 6}">${p.period.slice(5)}<\/text>`).join('')}
-          <\/svg>`;
-      }
-
-      // ── 排名走勢圖 ──
-      const cnNum = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
-      const extractRankNum2 = r => {
-        const s = String(r);
-        const numMatch = s.match(/第(\d+)/);
-        if (numMatch) return Number(numMatch[1]);
-        const cnMatch = s.match(/第([一二三四五六七八九十]+)/);
-        if (cnMatch) return cnNum[cnMatch[1]] || null;
-        return null;
-      };
-      const rankData = periods.slice(-7).map(p => {
-        const s = summaries.find(x => x.period === p);
-        return { period: p, rank: s ? extractRankNum2(s.rank) : null };
-      }).filter(d => d.rank !== null);
-
-      if (rankData.length >= 3) {
-        const maxRank = Math.max(...rankData.map(d => d.rank), 5);
-        const w = 400, h = 180, px = 40, py = 30, pb = 25;
-        const points = rankData.map((d, i) => {
-          const x = px + (i / (rankData.length - 1)) * (w - px * 2);
-          const y = py + ((d.rank - 1) / (maxRank - 1 || 1)) * (h - py - pb);
-          return { x, y, ...d };
-        });
-        const lineStr = points.map(p => `${p.x},${p.y}`).join(' ');
-        const areaStr = `${points[0].x},${h - pb} ${lineStr} ${points[points.length-1].x},${h - pb}`;
-
-        document.getElementById('rankChartArea').innerHTML = `
-          <svg viewBox="0 0 ${w} ${h}" class="chart-svg">
-            <defs><linearGradient id="rankGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#4a90d9" stop-opacity="0.15"/>
-              <stop offset="100%" stop-color="#4a90d9" stop-opacity="0.02"/>
-            </linearGradient></defs>
-            <polygon class="rank-area" points="${areaStr}" />
-            <polyline class="rank-line" points="${lineStr}" />
-            ${points.map(p => `<circle class="rank-dot" cx="${p.x}" cy="${p.y}" r="4"/>`).join('')}
-            ${points.map(p => `<text class="chart-value" x="${p.x}" y="${p.y - 10}" style="fill:#4a90d9;">#${p.rank}<\/text>`).join('')}
-            ${points.map(p => `<text class="chart-label" x="${p.x}" y="${h - 6}">${p.period.slice(5)}<\/text>`).join('')}
-          <\/svg>`;
-      }
-    }
-
-  } catch(e) {
-    document.getElementById('periodLabel').textContent = '⚠️ ' + e.message;
-  }
+const cnNumMap = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
+function extractRankNum(r) {
+  const s = String(r);
+  const n = s.match(/第(\d+)/); if (n) return Number(n[1]);
+  const c = s.match(/第([一二三四五六七八九十]+)/); if (c) return cnNumMap[c[1]] || null;
+  return null;
 }
 
+async function init() {
+  try {
+    const cRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`);
+    const cData = await cRes.json();
+    const allRecords = (cData.values||[]).slice(1).map(r=>({period:r[0]||'',nickname:r[2]||'',role:r[3]||'',score:Number(r[4])||0,title:r[5]||''}));
+
+    let summaries = [];
+    try { const s=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`); if(s.ok){const d=await s.json(); summaries=(d.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:r[2]||'',rank:r[3]||'',grade:r[4]||''}));} } catch(e){}
+
+    if (!allRecords.length) { document.getElementById('periodLabel').textContent='尚無資料'; return; }
+
+    const periods = [...new Set(allRecords.map(r=>r.period))].sort();
+    const latestPeriod = periods[periods.length-1];
+    const latestData = allRecords.filter(r=>r.period===latestPeriod).sort((a,b)=>b.score-a.score);
+    const latestSummary = summaries.find(s=>s.period===latestPeriod);
+
+    document.getElementById('periodLabel').textContent = latestPeriod + ' 期';
+    document.getElementById('rankMoreLink').href = 'contest-history.html?period=' + latestPeriod;
+    document.getElementById('rankMoreLink2').href = 'contest-history.html?period=' + latestPeriod;
+
+    // 統計
+    const total = latestSummary ? Number(latestSummary.total) : latestData.reduce((s,d)=>s+d.score,0);
+    const rank = latestSummary ? latestSummary.rank : '-';
+    const count = latestSummary ? latestSummary.members : latestData.length;
+    const avg = latestData.length ? Math.round(latestData.reduce((s,d)=>s+d.score,0)/latestData.length) : 0;
+    document.getElementById('dTotal').textContent = total.toLocaleString();
+    document.getElementById('dRank').textContent = rank;
+    document.getElementById('dParticipation').textContent = count + ' 人';
+    document.getElementById('dAvg').textContent = avg;
+
+    // MVP
+    if (latestData.length) { document.getElementById('mvpName').textContent=latestData[0].nickname; document.getElementById('mvpScore').textContent=latestData[0].score+' 分'; }
+
+    // 進步王 + 與上期差異
+    if (periods.length >= 2) {
+      const prev = periods[periods.length-2];
+      const prevData = allRecords.filter(r=>r.period===prev);
+      const prevMap = {}; prevData.forEach(d=>{prevMap[d.nickname]=d.score;});
+      let maxP=-Infinity,pM=null;
+      latestData.forEach(d=>{ if(prevMap[d.nickname]!==undefined){const diff=d.score-prevMap[d.nickname]; if(diff>maxP){maxP=diff;pM=d;}} });
+      if(pM&&maxP>0){document.getElementById('progressName').textContent=pM.nickname; document.getElementById('progressScore').textContent='+'+maxP+' 分';}
+
+      const prevSummary = summaries.find(s=>s.period===prev);
+      const prevTotal = prevSummary ? Number(prevSummary.total) : prevData.reduce((s,d)=>s+d.score,0);
+      const prevAvg = prevData.length ? Math.round(prevData.reduce((s,d)=>s+d.score,0)/prevData.length) : 0;
+      const tDiff = total - prevTotal, aDiff = avg - prevAvg;
+      const currRN = extractRankNum(rank), prevRN = extractRankNum(prevSummary?prevSummary.rank:'');
+      const rDiff = (currRN&&prevRN) ? prevRN-currRN : null;
+
+      document.getElementById('diffSection').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="diff-chip ${tDiff>=0?'diff-up':'diff-down'}">${tDiff>=0?'▲':'▼'} 總分 ${tDiff>=0?'+':''}${tDiff.toLocaleString()}</div>
+          <div class="diff-chip ${rDiff!==null?(rDiff>0?'diff-up':rDiff<0?'diff-down':'diff-same'):'diff-same'}">${rDiff>0?'▲':rDiff<0?'▼':'—'} 排名 ${rDiff!==null?(rDiff>0?'+'+rDiff:rDiff===0?'持平':rDiff):'-'}</div>
+          <div class="diff-chip ${aDiff>=0?'diff-up':'diff-down'}">${aDiff>=0?'▲':'▼'} 均分 ${aDiff>=0?'+':''}${aDiff}</div>
+        </div>`;
+    }
+
+    // 潛力成員
+    if (periods.length >= 3) {
+      const last3=periods.slice(-3); const sp={};
+      last3.forEach(p=>{sp[p]={};});
+      allRecords.filter(r=>last3.includes(r.period)).forEach(r=>{sp[r.period][r.nickname]=r.score;});
+      let best=null,bestG=0;
+      [...new Set(allRecords.map(r=>r.nickname))].forEach(n=>{
+        const s0=sp[last3[0]]?.[n],s1=sp[last3[1]]?.[n],s2=sp[last3[2]]?.[n];
+        if(s0&&s1&&s2&&s2>s1&&s1>s0){const g=s2-s0;if(g>bestG){bestG=g;best=n;}}
+      });
+      if(best){document.getElementById('potentialName').textContent=best; document.getElementById('potentialScore').textContent='連3期成長 +'+bestG+' 分';}
+    }
+
+    // TOP 5
+    document.getElementById('rankBody').innerHTML = latestData.slice(0,5).map((d,i)=>`<tr><td>${i+1}</td><td>${d.nickname}</td><td>${d.role}</td><td style="font-weight:700;color:var(--orange);">${d.score}</td></tr>`).join('');
+
+    // 稱號分布
+    const TITLES=['王者花匠','大師花匠','黃金花匠','白銀花匠','青銅花匠','無稱號'];
+    const tc={};TITLES.forEach(t=>tc[t]=0); latestData.forEach(d=>{if(tc[d.title]!==undefined)tc[d.title]++;});
+    const mx=Math.max(...Object.values(tc),1);
+    document.getElementById('titleBars').innerHTML=TITLES.map(t=>`<div class="tb-row"><span class="tb-label">${t}</span><div class="tb-bar-bg"><div class="tb-bar-fill tb-${t}" style="width:${Math.round(tc[t]/mx*100)}%"></div></div><span class="tb-count">${tc[t]}人</span></div>`).join('');
+
+    // 公會歷史
+    if(summaries.length){
+      const tots=summaries.map(s=>Number(s.total)).filter(n=>n>0);
+      document.getElementById('hsHighest').textContent=tots.length?Math.max(...tots).toLocaleString():'-';
+      document.getElementById('hsAvg').textContent=tots.length?Math.round(tots.reduce((a,b)=>a+b,0)/tots.length).toLocaleString():'-';
+      document.getElementById('hsPeriods').textContent=summaries.length;
+      document.getElementById('hsBestRank').textContent=summaries.map(s=>s.rank).filter(Boolean)[0]||'-';
+    }
+
+    // Chart.js 總分趨勢
+    if (summaries.length >= 2) {
+      const cd = periods.slice(-7).map(p=>{const s=summaries.find(x=>x.period===p);return{period:p,total:s?Number(s.total):0};}).filter(d=>d.total>0);
+      if (cd.length>=2) {
+        new Chart(document.getElementById('chartTotal'),{type:'line',data:{labels:cd.map(d=>d.period.slice(5)),datasets:[{label:'總分',data:cd.map(d=>d.total),borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.1)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#e96a1e'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>v.toLocaleString()}},x:{grid:{display:false}}}}});
+      }
+    }
+
+    // Chart.js 排名走勢
+    if (summaries.length >= 2) {
+      const rd = periods.slice(-7).map(p=>{const s=summaries.find(x=>x.period===p);return{period:p,rank:s?extractRankNum(s.rank):null};}).filter(d=>d.rank!==null);
+      if (rd.length>=2) {
+        new Chart(document.getElementById('chartRank'),{type:'line',data:{labels:rd.map(d=>d.period.slice(5)),datasets:[{label:'排名',data:rd.map(d=>d.rank),borderColor:'#4a90d9',backgroundColor:'rgba(74,144,217,0.1)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#4a90d9'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{reverse:true,min:1,ticks:{stepSize:1,callback:v=>'#'+v}},x:{grid:{display:false}}}}});
+      }
+    }
+
+  } catch(e) { document.getElementById('periodLabel').textContent='⚠️ '+e.message; }
+}
 init();
 </script>
 <script src="header.js"></script>
