@@ -65,35 +65,34 @@
     .rank-title-badge { font-size:0.7rem; color:var(--text-muted); margin-top:2px; }
 
     /* 稱號分隔 */
-    .rank-title-divider { padding:8px 18px; background:var(--orange-light); font-size:0.82rem; font-weight:700; color:var(--orange-dark); border-bottom:1px solid var(--border); }
+    .rank-title-divider { padding:8px 18px; background:var(--orange-light); font-size:0.82rem; font-weight:700; color:var(--orange-dark); border-bottom:1px solid var(--border); scroll-margin-top:80px; }
 
     .loading { text-align:center; padding:40px; color:var(--text-muted); }
     .empty-state { text-align:center; padding:40px; color:var(--text-muted); font-size:0.9rem; }
 
-    /* 總結卷軸卡片 */
+    /* 總結卡片 */
     .summary-scroll {
-      background: linear-gradient(160deg, #fffdf5, #fef8e8);
-      border-radius: 24px; border: 2px solid #e8d5a3;
-      box-shadow: 0 8px 32px rgba(200,160,60,0.15);
+      background: linear-gradient(160deg, #fff8f5, #fef0e7);
+      border-radius: 20px; border: 2px solid var(--border);
+      box-shadow: 0 8px 32px rgba(233,106,30,0.12);
       padding: 28px 24px; margin-bottom: 24px; text-align: center;
       position: relative; overflow: hidden;
     }
     .summary-scroll::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
-      background: linear-gradient(90deg, #d4a843, #f0d060, #d4a843);
-      border-radius: 24px 24px 0 0;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+      background: linear-gradient(90deg, #c2510b, #e96a1e, #f4a46a, #e96a1e, #c2510b);
+      border-radius: 20px 20px 0 0;
     }
-    .scroll-title { font-size: 1.3rem; font-weight: 900; color: #8b5e00; margin-bottom: 18px; }
+    .scroll-title { font-size: 1.3rem; font-weight: 900; color: var(--orange-dark); margin-bottom: 18px; }
     .scroll-body { display: flex; flex-direction: column; gap: 10px; }
-    .scroll-line { font-size: 0.95rem; color: #5a4520; line-height: 1.6; }
-    .scroll-highlight { font-size: 1.15rem; font-weight: 900; color: #2e7d32; }
+    .scroll-line { font-size: 0.95rem; color: var(--text); line-height: 1.6; }
+    .scroll-highlight { font-size: 1.15rem; font-weight: 900; color: var(--orange); }
     .scroll-grade {
-      margin-top: 12px; display: inline-block;
-      background: linear-gradient(135deg, #d4a843, #f0d060);
-      color: #5a3800; font-weight: 900; font-size: 1rem;
+      margin-top: 14px; display: inline-block;
+      background: linear-gradient(135deg, #c2510b, #e96a1e);
+      color: #fff; font-weight: 900; font-size: 1rem;
       padding: 8px 24px; border-radius: 24px;
-      border: 2px solid #c49a30;
-      box-shadow: 0 3px 12px rgba(200,160,60,0.3);
+      box-shadow: 0 3px 12px rgba(233,106,30,0.35);
     }
 
     @media(max-width:600px) {
@@ -248,7 +247,7 @@ function loadPeriod() {
   document.getElementById('titleDist').style.display = '';
   document.getElementById('titleDist').innerHTML = TITLES
     .filter(t => titleCounts[t] > 0)
-    .map(t => `<span class="title-chip tc-${t}">${t} ${titleCounts[t]} 人</span>`)
+    .map(t => `<span class="title-chip tc-${t}" onclick="scrollToTitle('${t}')" style="cursor:pointer;">${t} ${titleCounts[t]} 人</span>`)
     .join('');
 
   // 排名列表
@@ -258,7 +257,7 @@ function loadPeriod() {
     let divider = '';
     if (d.title && d.title !== lastTitle) {
       lastTitle = d.title;
-      divider = `<div class="rank-title-divider">🏅 ${d.title}</div>`;
+      divider = `<div class="rank-title-divider" id="title-${d.title}">🏅 ${d.title}</div>`;
     }
     const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-default';
     const roleClass = d.role ? `role-${d.role}` : '';
@@ -273,6 +272,11 @@ function loadPeriod() {
   }).join('');
 
   document.getElementById('emptyState').style.display = 'none';
+}
+
+function scrollToTitle(title) {
+  const el = document.getElementById('title-' + title);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function showEmpty() {
