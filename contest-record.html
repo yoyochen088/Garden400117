@@ -114,23 +114,20 @@
   <!-- 對手排名截圖 -->
   <div class="card">
     <div class="card-title">⚔️ 對手排名（選填）</div>
-    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
-      <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
-        <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
-        <div class="dz-text" style="font-size:0.85rem;">上傳對手排名截圖</div>
-        <div class="dz-sub">排名畫面，辨識公會名稱與分數</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+      <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="padding:10px 20px;margin-bottom:0;display:inline-block;">
+        <span class="dz-text" style="font-size:0.85rem;">📷 上傳截圖辨識</span>
       </div>
       <input type="file" id="opponent-file" accept="image/*" style="display:none;" onchange="handleOpponentFile(this.files[0])" />
-      <div id="opponentResult" style="flex:2;min-width:260px;">
-        <table class="result-table" id="opponentTable" style="display:none;">
-          <thead><tr><th>#</th><th>公會名稱</th><th>分數</th><th></th></tr></thead>
-          <tbody id="opponentBody"></tbody>
-        </table>
-        <div class="btn-row" id="opponentBtnRow" style="display:none;">
-          <button class="btn btn-secondary" onclick="addOpponentRow()">＋ 手動新增</button>
-          <button class="btn btn-primary" onclick="saveOpponents()">💾 儲存對手排名</button>
-        </div>
-      </div>
+      <span style="font-size:0.8rem;color:var(--text-muted);">或直接手動填寫下方表格</span>
+    </div>
+    <table class="result-table" id="opponentTable">
+      <thead><tr><th style="width:40px;">#</th><th>公會名稱</th><th style="width:90px;">分數</th><th style="width:30px;"></th></tr></thead>
+      <tbody id="opponentBody"></tbody>
+    </table>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="addOpponentRow()">＋ 新增一列</button>
+      <button class="btn btn-primary" onclick="saveOpponents()">💾 儲存對手排名</button>
     </div>
     <div id="opponentStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
   </div>
@@ -736,8 +733,19 @@ async function saveToSheet() {
     btn.disabled = false; btn.textContent = '💾 儲存到 Sheet';
   }
 }
-// ── 對手排名辨識 ──
-let opponentData = [];
+// ── 對手排名（手動輸入 + OCR 輔助） ──
+let opponentData = [
+  { rank:1, name:'', score:'' },
+  { rank:2, name:'', score:'' },
+  { rank:3, name:'', score:'' },
+  { rank:4, name:'', score:'' },
+  { rank:5, name:'', score:'' },
+  { rank:6, name:'', score:'' }
+];
+
+renderOpponentTable();
+
+// 拖放支援
 const oppDz = document.getElementById('opponentDropZone');
 oppDz.addEventListener('dragover', e => { e.preventDefault(); oppDz.classList.add('drag-over'); });
 oppDz.addEventListener('dragleave', () => oppDz.classList.remove('drag-over'));
@@ -761,152 +769,116 @@ async function handleOpponentFile(file) {
     const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'DOCUMENT_TEXT_DETECTION' }] }] })
+      body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }] })
     });
     const data = await res.json();
+    const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
 
-    // 用座標分群方式解析
-    const pages = data.responses?.[0]?.fullTextAnnotation?.pages || [];
-    opponentData = parseOpponentByCoords(pages);
-    renderOpponentTable();
-
-    status.style.color = '#2e7d32';
-    status.textContent = `✅ 辨識完成！共 ${opponentData.length} 筆`;
+    // 用「船隻」作為錨點，之後的內容才是排名資料
+    const parsed = parseOpponentAfterAnchor(text);
+    if (parsed.length) {
+      opponentData = parsed;
+      renderOpponentTable();
+      status.style.color = '#2e7d32';
+      status.textContent = `✅ 辨識完成！共 ${parsed.length} 筆，請確認`;
+    } else {
+      status.style.color = '#e65100';
+      status.textContent = '⚠️ 未能辨識到排名資料，請手動填寫';
+    }
   } catch(e) {
     status.style.color = '#c62828';
     status.textContent = '❌ 辨識失敗：' + e.message;
   }
 }
 
-function parseOpponentByCoords(pages) {
-  // 收集所有 word 及其座標
-  const words = [];
-  for (const page of pages) {
-    const pageW = page.width || 1;
-    const pageH = page.height || 1;
-    for (const block of (page.blocks || [])) {
-      for (const para of (block.paragraphs || [])) {
-        for (const word of (para.words || [])) {
-          const text = word.symbols.map(s => s.text).join('');
-          const v = word.boundingBox?.vertices || [];
-          const x = v[0]?.x || 0;
-          const y = v[0]?.y || 0;
-          const x2 = v[2]?.x || x;
-          const y2 = v[2]?.y || y;
-          words.push({ text, x, y, x2, y2, cx: (x + x2) / 2, cy: (y + y2) / 2, w: x2 - x, h: y2 - y });
-        }
-      }
-    }
-  }
+function parseOpponentAfterAnchor(text) {
+  // 找到「船隻」或「船只」之後的文字作為排名資料區
+  const anchorIdx = text.search(/船[隻只]/);
+  const rankText = anchorIdx >= 0 ? text.slice(anchorIdx) : text;
 
-  if (!words.length) return [];
+  // 清理文字
+  const cleaned = rankText
+    .replace(/船[隻只]/g, '')
+    .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ');
 
-  // 圖片寬高（用最大座標估算）
-  const imgW = Math.max(...words.map(w => w.x2)) * 1.05;
-  const imgH = Math.max(...words.map(w => w.y2)) * 1.05;
-
-  // 排除頂部 UI 區域（約上方 20% 是按鈕列）
-  const topCutoff = imgH * 0.18;
-  const contentWords = words.filter(w => w.y > topCutoff);
-
-  // 按 Y 座標分群（每個公會佔一個橫條）
-  // 用 Y 座標排序後，Y 差距 > 某閾值就視為新的一行
-  contentWords.sort((a, b) => a.cy - b.cy);
-
-  const rowGap = imgH * 0.06; // 行間距閾值（約圖片高度 6%）
-  const rows = [];
-  let currentRow = [];
-  let lastY = -9999;
-
-  for (const w of contentWords) {
-    if (w.cy - lastY > rowGap && currentRow.length) {
-      rows.push(currentRow);
-      currentRow = [];
-    }
-    currentRow.push(w);
-    lastY = w.cy;
-  }
-  if (currentRow.length) rows.push(currentRow);
-
-  // 從每行中提取：名次(左側單數字1~9) + 公會名(中文2~6字) + 分數(左半邊的4~5位數)
-  const NOISE = ['任務','排名','競賽','榮譽','獎勵','船隻','甲級','乙級','丙級','聯賽','天','時','萬','商店'];
+  // 策略：依序找 {1位數字(名次)} + {中文2~8字(公會名)} + {4~5位數字(分數)}
+  // 重複匹配直到沒有為止
   const results = [];
+  const pattern = /([1-9])\s*[.。]?\s*([\u4e00-\u9fff\w]{2,8})\s*(\d{4,5})/g;
+  let m;
+  while ((m = pattern.exec(cleaned)) !== null) {
+    const rank = parseInt(m[1]);
+    const name = m[2].trim();
+    const score = parseInt(m[3]);
 
-  for (const row of rows) {
-    // 按 X 排序
-    row.sort((a, b) => a.x - b.x);
+    // 排除 UI 雜訊
+    const NOISE = ['甲級聯賽','乙級聯賽','丙級聯賽','競賽榮譽','任務排名'];
+    if (NOISE.some(n => name.includes(n))) continue;
 
-    let rank = null;
-    let name = null;
-    let score = null;
+    results.push({ rank, name, score });
+  }
 
-    for (const w of row) {
-      const t = w.text.trim();
-
-      // 名次：單獨的 1~9 數字，在左側 15% 範圍內
-      if (!rank && /^[1-9]$/.test(t) && w.cx < imgW * 0.15) {
-        rank = parseInt(t);
-        continue;
-      }
-
-      // 分數：4~5 位數字，在左半邊（排除右側寶箱區域，右側 > 50%）
-      if (!score && /^\d{4,5}$/.test(t) && w.cx < imgW * 0.5) {
-        score = parseInt(t);
-        continue;
-      }
-
-      // 公會名：2~6 字中文，在左側 40% 範圍，排除雜訊
-      if (!name && /^[\u4e00-\u9fff]{2,6}$/.test(t) && w.cx < imgW * 0.4) {
-        if (!NOISE.some(n => t.includes(n))) {
-          name = t;
+  // 如果正則沒抓到，試另一個方式：逐行掃描
+  if (!results.length) {
+    const lines = rankText.split('\n').map(l => l.trim()).filter(l => l);
+    let currentRank = 0;
+    for (const line of lines) {
+      // 名次行：只有一個數字 1~9
+      if (/^[1-9]$/.test(line)) { currentRank = parseInt(line); continue; }
+      // 分數行：4~5 位數字
+      if (/^\d{4,5}$/.test(line) && currentRank > 0) {
+        // 找前面最近的中文行作為公會名
+        const nameIdx = lines.indexOf(line) - 1;
+        if (nameIdx >= 0) {
+          const prevLine = lines[nameIdx];
+          if (/[\u4e00-\u9fff]/.test(prevLine) && prevLine.length <= 8) {
+            results.push({ rank: currentRank, name: prevLine, score: parseInt(line) });
+          }
         }
+        currentRank = 0;
+        continue;
       }
-    }
-
-    // 有找到名次+分數就記錄（名字可能 OCR 沒抓到，先放空讓使用者填）
-    if (rank && score) {
-      results.push({ rank, name: name || '（請填入）', score });
-    } else if (name && score) {
-      // 沒找到名次但有名字+分數
-      results.push({ rank: results.length + 1, name, score });
     }
   }
 
   // 按名次排序
   results.sort((a, b) => a.rank - b.rank);
-
   return results;
 }
 
 function renderOpponentTable() {
-  const table = document.getElementById('opponentTable');
   const tbody = document.getElementById('opponentBody');
-  const btnRow = document.getElementById('opponentBtnRow');
-  table.style.display = '';
-  btnRow.style.display = '';
-
   tbody.innerHTML = opponentData.map((d, i) =>
-    `<tr${d.name === '璀璨' ? ' style="background:#fef0e7;font-weight:700;"' : ''}>
-      <td>${d.rank}</td>
-      <td><input value="${d.name}" onchange="opponentData[${i}].name=this.value" /></td>
-      <td><input type="number" value="${d.score}" onchange="opponentData[${i}].score=Number(this.value)" style="width:80px;" /></td>
-      <td><button onclick="opponentData.splice(${i},1);renderOpponentTable();" style="background:none;border:none;color:#e65100;cursor:pointer;">✕</button></td>
+    `<tr>
+      <td style="text-align:center;font-weight:700;color:#a08050;">${d.rank}</td>
+      <td><input value="${d.name}" onchange="opponentData[${i}].name=this.value" placeholder="公會名稱" /></td>
+      <td><input type="number" value="${d.score}" onchange="opponentData[${i}].score=Number(this.value)" placeholder="分數" style="width:80px;" /></td>
+      <td><button onclick="opponentData.splice(${i},1);opponentData.forEach((d,j)=>d.rank=j+1);renderOpponentTable();" style="background:none;border:none;color:#e65100;cursor:pointer;">✕</button></td>
     </tr>`
   ).join('');
 }
 
 function addOpponentRow() {
-  opponentData.push({ rank: opponentData.length + 1, name: '', score: 0 });
+  opponentData.push({ rank: opponentData.length + 1, name: '', score: '' });
   renderOpponentTable();
 }
 
 async function saveOpponents() {
   const period = document.getElementById('periodInput').value.trim();
   if (!period) { alert('請填入競賽期數'); return; }
-  if (!opponentData.length) { alert('沒有對手資料可儲存'); return; }
+
+  // 過濾掉空白列
+  const validData = opponentData.filter(d => d.name && d.score);
+  if (!validData.length) { alert('請至少填入一筆對手資料'); return; }
+
+  const status = document.getElementById('opponentStatus');
+  status.style.display = 'block';
+  status.style.color = '#1565c0';
+  status.textContent = '⏳ 儲存中...';
 
   try {
-    const records = opponentData.map(d => ([period, d.rank, d.name, d.score]));
+    const records = validData.map(d => ([period, d.rank, d.name, Number(d.score)]));
     const params = encodeURIComponent(JSON.stringify({
       action: 'addContestOpponents',
       records: records
@@ -916,9 +888,11 @@ async function saveOpponents() {
       img.onload = img.onerror = () => resolve();
       img.src = `${APPS_SCRIPT_URL}?data=${params}`;
     });
-    alert(`✅ 已儲存 ${opponentData.length} 筆對手排名！`);
+    status.style.color = '#2e7d32';
+    status.textContent = `✅ 已儲存 ${validData.length} 筆對手排名！`;
   } catch(e) {
-    alert('❌ 儲存失敗：' + e.message);
+    status.style.color = '#c62828';
+    status.textContent = '❌ 儲存失敗：' + e.message;
   }
 }
 
