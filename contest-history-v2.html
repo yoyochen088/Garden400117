@@ -21,8 +21,9 @@
       background:linear-gradient(180deg,#fff8ed,#ffefd4);
       border-bottom:3px solid #f0c866;
     }
-    .hero h1 { font-size:2rem; font-weight:900; color:#a35d00; margin-bottom:8px; }
+    .hero h1 { font-size:2rem; font-weight:900; color:#a35d00; margin-bottom:12px; }
     .hero p { font-size:0.9rem; color:#9e7040; }
+    .hero .period-bar { margin-top:8px; }
     .hero-nav-link {
       display:inline-block; padding:9px 22px; border-radius:18px;
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
@@ -175,19 +176,9 @@
 <!-- Hero -->
 <section class="hero">
   <h1>🏆 歷史競賽戰績</h1>
-  <p>查看每期公會競賽成績</p>
-</section>
-
-<!-- 期數選擇 + 返回 -->
-<section class="section" style="padding-bottom:0;">
-  <div class="container">
-    <div class="period-bar">
-      <label>期數：</label>
-      <select id="periodPicker" onchange="loadPeriod()"><option value="">載入中...</option></select>
-    </div>
-    <div style="text-align:center;margin-top:12px;">
-      <a href="contest-dashboard-v2.html" class="hero-nav-link">← 返回本期公會競賽戰報</a>
-    </div>
+  <div class="period-bar">
+    <label>期數：</label>
+    <select id="periodPicker" onchange="loadPeriod()"><option value="">載入中...</option></select>
   </div>
 </section>
 
@@ -236,6 +227,9 @@
 <div class="empty-state" id="emptyState" style="display:none;">尚無競賽資料</div>
 
 <!-- 回到頂部 -->
+<div style="text-align:center;padding:32px 0 48px;">
+  <a href="contest-dashboard-v2.html" class="hero-nav-link">← 返回本期公會競賽戰報</a>
+</div>
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
 
 <script>

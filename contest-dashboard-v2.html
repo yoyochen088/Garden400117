@@ -130,24 +130,24 @@
     .podium-2 .podium-score { font-size:0.85rem; font-weight:800; color:#8b5a00; }
     .podium-3 .podium-score { font-size:0.8rem; font-weight:700; color:#8b5a00; }
     .top5-rest { border-top:1px solid #f5deb3; padding-top:8px; }
-    .rest-item { display:flex; align-items:center; padding:6px 4px; font-size:0.92rem; gap:8px; }
+    .rest-item { display:flex; align-items:center; padding:6px 4px; font-size:0.92rem; gap:12px; }
     .rest-rank { font-weight:700; color:#a08050; width:20px; flex-shrink:0; }
     .rest-name { flex:1; font-weight:700; color:#4a3520; }
-    .rest-role { font-size:0.7rem; padding:2px 7px; border-radius:8px; font-weight:600; margin-left:6px; }
+    .rest-role { font-size:0.7rem; padding:2px 7px; border-radius:8px; font-weight:600; margin-left:10px; }
     .rr-會長 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
     .rr-副會長 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
     .rr-理事 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
     .rr-菁英 { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
     .rr-成員 { background:#e8f5e9; color:#2e7d32; }
-    .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:700; white-space:nowrap; flex-shrink:0; }
+    .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:700; white-space:nowrap; flex-shrink:0; margin-left:8px; }
     .rt-王者花匠 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
     .rt-大師花匠 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
     .rt-黃金花匠 { background:linear-gradient(135deg,#f4c430,#ffd700); color:#5a4000; }
     .rt-白銀花匠 { background:linear-gradient(135deg,#9e9e9e,#d4d4d4); color:#fff; }
     .rt-青銅花匠 { background:linear-gradient(135deg,#cd7f32,#e8a96a); color:#fff; }
     .rt-無稱號 { background:#f0f0f0; color:#888; }
-    .rest-score { font-weight:900; color:#e96a1e; font-size:1.05rem; flex-shrink:0; white-space:nowrap; }
-    .rest-score-top { font-weight:900; color:#e96a1e; font-size:1.1rem; flex-shrink:0; white-space:nowrap; }
+    .rest-score { font-weight:900; color:#e96a1e; font-size:1.05rem; flex-shrink:0; white-space:nowrap; margin-left:8px; }
+    .rest-score-top { font-weight:900; color:#e96a1e; font-size:1.1rem; flex-shrink:0; white-space:nowrap; margin-left:8px; }
     .view-more {
       display:inline-block; margin-top:12px;
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
@@ -204,7 +204,6 @@
     <h1>本期公會競賽戰報</h1>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
       <span class="period-badge" id="periodBadge">載入中...</span>
-      <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
     </div>
   </div>
 </section>
@@ -212,6 +211,9 @@
 <!-- KPI -->
 <section class="section" style="padding-top:0;">
   <div class="container">
+    <div style="text-align:right;margin-bottom:12px;">
+      <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
+    </div>
     <div class="kpi-row">
       <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-label">公會總分</div><div class="kpi-value" id="kpiTotal">-</div></div>
       <div class="kpi-card"><div class="kpi-icon">🎖️</div><div class="kpi-label">公會排名</div><div class="kpi-value" id="kpiRank">-</div></div>
