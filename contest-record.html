@@ -135,10 +135,10 @@
     <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
       <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
         <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
-        <div class="dz-text" style="font-size:0.85rem;">上傳對手排名截圖</div>
-        <div class="dz-sub">排名畫面，辨識公會名稱與分數</div>
+        <div class="dz-text" style="font-size:0.85rem;">上傳對手排名截圖（可多張）</div>
+        <div class="dz-sub">排名畫面，辨識公會名稱與分數，多張會合併</div>
       </div>
-      <input type="file" id="opponent-file" accept="image/*" style="display:none;" onchange="handleOpponentFile(this.files[0])" />
+      <input type="file" id="opponent-file" accept="image/*" multiple style="display:none;" onchange="handleOpponentFiles(this.files)" />
       <div id="opponentResult" style="flex:2;min-width:260px;">
         <table class="result-table" id="opponentTable" style="display:none;">
           <thead><tr><th>#</th><th>公會名稱</th><th>分數</th><th></th></tr></thead>
@@ -774,37 +774,62 @@ let opponentData = [];
 const oppDz = document.getElementById('opponentDropZone');
 oppDz.addEventListener('dragover', e => { e.preventDefault(); oppDz.classList.add('drag-over'); });
 oppDz.addEventListener('dragleave', () => oppDz.classList.remove('drag-over'));
-oppDz.addEventListener('drop', e => { e.preventDefault(); oppDz.classList.remove('drag-over'); handleOpponentFile(e.dataTransfer.files[0]); });
+oppDz.addEventListener('drop', e => { e.preventDefault(); oppDz.classList.remove('drag-over'); handleOpponentFiles(e.dataTransfer.files); });
 
-async function handleOpponentFile(file) {
-  if (!file || !file.type.startsWith('image/')) return;
+async function handleOpponentFiles(fileList) {
+  const files = [...fileList].filter(f => f.type.startsWith('image/'));
+  if (!files.length) return;
   const status = document.getElementById('opponentStatus');
   status.style.display = 'block';
   status.style.color = '#1565c0';
-  status.textContent = '⏳ 辨識對手排名中...';
+  status.textContent = `⏳ 辨識 ${files.length} 張截圖中...`;
 
   try {
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+    let allParsed = [];
+
+    for (let fi = 0; fi < files.length; fi++) {
+      status.textContent = `⏳ 辨識第 ${fi+1}/${files.length} 張...`;
+
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(files[fi]);
+      });
+
+      const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }] })
+      });
+      const data = await res.json();
+      const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
+
+      const parsed = parseOpponentText(text);
+      allParsed = allParsed.concat(parsed);
+    }
+
+    // 去重（同公會名只保留一筆）
+    const seen = new Set();
+    allParsed = allParsed.filter(d => {
+      if (seen.has(d.name)) return false;
+      seen.add(d.name);
+      return true;
     });
 
-    const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }] })
-    });
-    const data = await res.json();
-    const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
+    // 按分數大到小重新編排名次
+    allParsed.sort((a, b) => b.score - a.score);
+    allParsed.forEach((d, i) => d.rank = i + 1);
 
-    // 解析對手排名
-    opponentData = parseOpponentText(text);
-    renderOpponentTable();
-
-    status.style.color = '#2e7d32';
-    status.textContent = `✅ 辨識完成！共 ${opponentData.length} 筆`;
+    if (allParsed.length) {
+      opponentData = allParsed;
+      renderOpponentTable();
+      status.style.color = '#2e7d32';
+      status.textContent = `✅ 辨識完成！共 ${allParsed.length} 筆，請確認`;
+    } else {
+      status.style.color = '#e65100';
+      status.textContent = '⚠️ 未能辨識到排名資料，請手動填寫';
+    }
   } catch(e) {
     status.style.color = '#c62828';
     status.textContent = '❌ 辨識失敗：' + e.message;
