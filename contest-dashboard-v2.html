@@ -27,13 +27,12 @@
     .hero-content { text-align:center; }
     .hero-link {
       display:inline-flex; align-items:center; gap:6px;
-      padding:10px 22px; border-radius:24px;
-      background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff;
+      padding:8px 18px; border-radius:20px;
+      background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
       text-decoration:none; font-weight:700; font-size:0.85rem;
-      box-shadow:0 4px 16px rgba(74,144,217,.25); transition:transform .15s;
-      position:absolute; right:20px; top:50%; transform:translateY(-50%);
+      box-shadow:0 3px 12px rgba(233,106,30,.25); transition:transform .15s;
     }
-    .hero-link:hover { transform:translateY(calc(-50% - 2px)); }
+    .hero-link:hover { transform:translateY(-2px); }
     .hero h1 {
       font-size:2.2rem; font-weight:900; color:#a35d00;
       margin-bottom:6px;
@@ -203,9 +202,11 @@
 <section class="hero">
   <div class="hero-content">
     <h1>本期公會競賽戰報</h1>
-    <div class="period-badge" id="periodBadge">載入中...</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+      <span class="period-badge" id="periodBadge">載入中...</span>
+      <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
+    </div>
   </div>
-  <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
 </section>
 
 <!-- KPI -->
