@@ -73,6 +73,24 @@
     .lbl { font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-bottom:3px; display:block; }
     #summaryResult input { padding:7px 10px; border:1.5px solid var(--orange-mid); border-radius:7px; font-size:0.88rem; background:var(--bg); color:var(--text); outline:none; }
     #summaryResult input:focus { border-color:var(--orange); }
+    /* Lightbox 示意圖 */
+    .help-btn {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:22px; height:22px; border-radius:50%; background:var(--orange-mid);
+      color:#fff; font-size:0.75rem; font-weight:700; cursor:pointer;
+      margin-left:6px; border:none; vertical-align:middle;
+    }
+    .help-btn:hover { background:var(--orange); }
+    .help-lightbox {
+      position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999;
+      display:none; align-items:center; justify-content:center; padding:20px;
+    }
+    .help-lightbox.show { display:flex; }
+    .help-lightbox img { max-width:90%; max-height:90vh; border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,.4); }
+    .help-lightbox-close {
+      position:absolute; top:16px; right:20px; color:#fff; font-size:2rem;
+      cursor:pointer; background:none; border:none; line-height:1;
+    }
   </style>
 </head>
 <body>
@@ -92,7 +110,7 @@
 
   <!-- 總結截圖 -->
   <div class="card">
-    <div class="card-title">📊 公會總結（選填）</div>
+    <div class="card-title">📊 公會總結）<button class="help-btn" onclick="showHelp('images/contest/總結截圖示意圖.jpg')" title="查看示意圖">?</button></div>
     <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
       <div class="drop-zone" id="summaryDropZone" onclick="document.getElementById('summary-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
         <div class="dz-icon" style="font-size:1.6rem;">📊</div>
@@ -113,7 +131,7 @@
 
   <!-- 對手排名截圖 -->
   <div class="card">
-    <div class="card-title">⚔️ 對手排名（選填）</div>
+    <div class="card-title">⚔️ 對手排名<button class="help-btn" onclick="showHelp('images/contest/對手排名示意圖.jpg')" title="查看示意圖">?</button></div>
     <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
       <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
         <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
@@ -137,7 +155,7 @@
 
   <!-- 上傳 -->
   <div class="card">
-    <div class="card-title">📷 上傳成員截圖</div>
+    <div class="card-title">📷 上傳成員截圖<button class="help-btn" onclick="showHelp('images/contest/成員截圖示意圖.jpg')" title="查看示意圖">?</button></div>
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('file-input').click()">
       <div class="dz-icon">📂</div>
       <div class="dz-text">點擊或拖曳截圖到這裡</div>
@@ -184,7 +202,22 @@
   </div>
 </main>
 
+<!-- 示意圖 Lightbox -->
+<div class="help-lightbox" id="helpLightbox" onclick="closeHelp()">
+  <button class="help-lightbox-close" onclick="closeHelp()">✕</button>
+  <img id="helpImg" src="" alt="示意圖" />
+</div>
+
 <script>
+// ── 示意圖 Lightbox ──
+function showHelp(imgSrc) {
+  document.getElementById('helpImg').src = imgSrc;
+  document.getElementById('helpLightbox').classList.add('show');
+}
+function closeHelp() {
+  document.getElementById('helpLightbox').classList.remove('show');
+}
+
 let uploadedFiles = [];
 let parsedData = [];
 
