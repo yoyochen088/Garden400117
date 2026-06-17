@@ -84,16 +84,19 @@
     .diff-down { color:#c62828; }
     .diff-same { color:#888; }
 
-    /* 亮點 */
-    .highlight-list { display:flex; flex-direction:column; gap:10px; }
+    /* 亮點 — 色塊風格 */
+    .highlight-list { display:flex; flex-direction:column; gap:12px; }
     .hl-item {
-      display:flex; align-items:center; gap:10px; padding:10px 12px;
-      background:#fffbf5; border-radius:12px; border:1px solid #f5deb3;
+      padding:14px 16px; border-radius:14px;
     }
-    .hl-icon { font-size:1.4rem; flex-shrink:0; }
-    .hl-info { flex:1; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
-    .hl-label { font-size:0.72rem; color:#a08050; font-weight:600; white-space:nowrap; }
-    .hl-name { font-size:1.05rem; font-weight:900; color:#4a3520; }
+    .hl-mvp { background:#fff3e0; border:1.5px solid #f4a46a; }
+    .hl-progress { background:#e8f5e9; border:1.5px solid #a5d6a7; }
+    .hl-potential { background:#f3e5f5; border:1.5px solid #ce93d8; }
+    .hl-top { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+    .hl-icon { font-size:1.1rem; }
+    .hl-label { font-size:0.8rem; color:#8b5a00; font-weight:600; }
+    .hl-name { font-size:1.3rem; font-weight:900; color:#4a3520; }
+    .hl-score { font-size:1rem; font-weight:800; color:#e96a1e; margin-top:2px; }
 
     /* ===== BOTTOM GRID: TOP5 左大 + 右側上下 ===== */
     .bottom-grid {
@@ -118,11 +121,18 @@
     .podium-1 .podium-score { font-size:1.1rem; font-weight:900; color:#e96a1e; }
     .podium-2 .podium-score { font-size:0.9rem; font-weight:800; color:#8b5a00; }
     .podium-3 .podium-score { font-size:0.85rem; font-weight:700; color:#8b5a00; }
-    .podium-medal { position:absolute; top:-10px; right:-8px; font-size:1.3rem; }
     .top5-rest { border-top:1px solid #f5deb3; padding-top:12px; }
-    .rest-item { display:flex; justify-content:space-between; align-items:center; padding:8px 4px; font-size:0.95rem; }
-    .rest-rank { font-weight:700; color:#a08050; margin-right:10px; }
-    .rest-score { font-weight:800; color:#e96a1e; font-size:1rem; }
+    .rest-item { display:flex; align-items:center; padding:8px 4px; font-size:0.95rem; gap:10px; }
+    .rest-rank { font-weight:700; color:#a08050; width:20px; flex-shrink:0; }
+    .rest-name { flex:1; font-weight:700; color:#4a3520; }
+    .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:600; white-space:nowrap; }
+    .rt-王者花匠 { background:#fff3e0; color:#e96a1e; }
+    .rt-大師花匠 { background:#f3e5f5; color:#9b59b6; }
+    .rt-黃金花匠 { background:#fffde7; color:#f4a430; }
+    .rt-白銀花匠 { background:#f5f5f5; color:#757575; }
+    .rt-青銅花匠 { background:#fbe9e7; color:#cd7f32; }
+    .rt-無稱號 { background:#f5f5f5; color:#999; }
+    .rest-score { font-weight:900; color:#e96a1e; font-size:1.05rem; flex-shrink:0; }
     .view-more {
       display:inline-block; margin-top:12px;
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
@@ -223,9 +233,21 @@
       <div class="card">
         <div class="section-title">本期亮點</div>
         <div class="highlight-list">
-          <div class="hl-item"><div class="hl-icon">👑</div><div class="hl-info"><div class="hl-label">本期MVP</div><div class="hl-name" id="mvpName">-</div></div></div>
-          <div class="hl-item"><div class="hl-icon">🚀</div><div class="hl-info"><div class="hl-label">進步王</div><div class="hl-name" id="progressName">-</div></div></div>
-          <div class="hl-item"><div class="hl-icon">🌱</div><div class="hl-info"><div class="hl-label">潛力成員</div><div class="hl-name" id="potentialName">-</div></div></div>
+          <div class="hl-item hl-mvp">
+            <div class="hl-top"><span class="hl-icon">👑</span><span class="hl-label">本期 MVP</span></div>
+            <div class="hl-name" id="mvpName">-</div>
+            <div class="hl-score" id="mvpScore">-</div>
+          </div>
+          <div class="hl-item hl-progress">
+            <div class="hl-top"><span class="hl-icon">🚀</span><span class="hl-label">進步王</span></div>
+            <div class="hl-name" id="progressName">-</div>
+            <div class="hl-score" id="progressScore">資料累積中</div>
+          </div>
+          <div class="hl-item hl-potential">
+            <div class="hl-top"><span class="hl-icon">🌱</span><span class="hl-label">潛力成員</span></div>
+            <div class="hl-name" id="potentialName">-</div>
+            <div class="hl-score" id="potentialScore">資料累積中</div>
+          </div>
         </div>
       </div>
     </div>
@@ -315,7 +337,10 @@ async function init() {
     document.getElementById('kpiAvg').textContent = avg.toLocaleString();
 
     // MVP
-    if (latestData.length) document.getElementById('mvpName').textContent = latestData[0].nickname + '　' + latestData[0].score + ' 分';
+    if (latestData.length) {
+      document.getElementById('mvpName').textContent = latestData[0].nickname;
+      document.getElementById('mvpScore').textContent = latestData[0].score.toLocaleString() + ' 分';
+    }
 
     // 進步王
     if (periods.length >= 2) {
@@ -324,7 +349,10 @@ async function init() {
       const prevMap = {}; prevData.forEach(d=>{prevMap[d.nickname]=d.score;});
       let maxP=-Infinity,pM=null;
       latestData.forEach(d=>{ if(prevMap[d.nickname]!==undefined){const diff=d.score-prevMap[d.nickname]; if(diff>maxP){maxP=diff;pM=d;}} });
-      if(pM&&maxP>0) document.getElementById('progressName').textContent = pM.nickname + '　+' + maxP + ' 分';
+      if(pM&&maxP>0) {
+        document.getElementById('progressName').textContent = pM.nickname;
+        document.getElementById('progressScore').textContent = '+' + maxP + ' 分';
+      }
 
       // 與上期比較
       const prevSummary = summaries.find(s=>s.period===prev);
@@ -351,7 +379,10 @@ async function init() {
         const s0=sp[last3[0]]?.[n],s1=sp[last3[1]]?.[n],s2=sp[last3[2]]?.[n];
         if(s0&&s1&&s2&&s2>s1&&s1>s0){const g=s2-s0;if(g>bestG){bestG=g;best=n;}}
       });
-      if(best) document.getElementById('potentialName').textContent = best + '　連3期成長 +' + bestG + ' 分';
+      if(best) {
+        document.getElementById('potentialName').textContent = best;
+        document.getElementById('potentialScore').textContent = '連3期成長 +' + bestG + ' 分';
+      }
     }
 
     // TOP 5 - Podium (前三) + Rest (4-5)
@@ -362,15 +393,16 @@ async function init() {
     const podiumOrder = [1,0,2].filter(i=>top5[i]).map(i=>({d:top5[i],rank:i}));
     document.getElementById('top5Podium').innerHTML = podiumOrder.map(({d,rank}) => {
       return `<div class="podium-item ${podiumCls[rank]}">
-        <div class="podium-avatar"><span class="podium-medal">${medals[rank]}</span><span style="font-size:1.8rem;">${medals[rank]}</span></div>
+        <div class="podium-avatar">${medals[rank]}</div>
         <div class="podium-name">${d.nickname}</div>
         <div class="podium-score">${d.score.toLocaleString()}</div>
       </div>`;
     }).join('');
 
     document.getElementById('top5Rest').innerHTML = top5.map((d,i) => {
-      if (i < 3) return `<div class="rest-item"><span><span class="rest-rank">${i+1}</span>${d.nickname}</span><span class="rest-score">${d.score.toLocaleString()}</span></div>`;
-      return `<div class="rest-item"><span><span class="rest-rank">${i+1}</span>${d.nickname}</span><span class="rest-score">${d.score.toLocaleString()}</span></div>`;
+      const titleCls = d.title ? `rt-${d.title}` : '';
+      const titleBadge = d.title ? `<span class="rest-title ${titleCls}">${d.title}</span>` : '';
+      return `<div class="rest-item"><span class="rest-rank">${i+1}</span><span class="rest-name">${d.nickname}</span>${titleBadge}<span class="rest-score">${d.score.toLocaleString()}</span></div>`;
     }).join('');
 
     // 稱號分布
