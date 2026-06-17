@@ -761,13 +761,13 @@ async function handleOpponentFile(file) {
     const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }] })
+      body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'DOCUMENT_TEXT_DETECTION' }] }] })
     });
     const data = await res.json();
-    const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
 
-    // 解析對手排名
-    opponentData = parseOpponentText(text);
+    // 用座標分群方式解析
+    const pages = data.responses?.[0]?.fullTextAnnotation?.pages || [];
+    opponentData = parseOpponentByCoords(pages);
     renderOpponentTable();
 
     status.style.color = '#2e7d32';
@@ -778,38 +778,102 @@ async function handleOpponentFile(file) {
   }
 }
 
-function parseOpponentText(text) {
+function parseOpponentByCoords(pages) {
+  // 收集所有 word 及其座標
+  const words = [];
+  for (const page of pages) {
+    const pageW = page.width || 1;
+    const pageH = page.height || 1;
+    for (const block of (page.blocks || [])) {
+      for (const para of (block.paragraphs || [])) {
+        for (const word of (para.words || [])) {
+          const text = word.symbols.map(s => s.text).join('');
+          const v = word.boundingBox?.vertices || [];
+          const x = v[0]?.x || 0;
+          const y = v[0]?.y || 0;
+          const x2 = v[2]?.x || x;
+          const y2 = v[2]?.y || y;
+          words.push({ text, x, y, x2, y2, cx: (x + x2) / 2, cy: (y + y2) / 2, w: x2 - x, h: y2 - y });
+        }
+      }
+    }
+  }
+
+  if (!words.length) return [];
+
+  // 圖片寬高（用最大座標估算）
+  const imgW = Math.max(...words.map(w => w.x2)) * 1.05;
+  const imgH = Math.max(...words.map(w => w.y2)) * 1.05;
+
+  // 排除頂部 UI 區域（約上方 20% 是按鈕列）
+  const topCutoff = imgH * 0.18;
+  const contentWords = words.filter(w => w.y > topCutoff);
+
+  // 按 Y 座標分群（每個公會佔一個橫條）
+  // 用 Y 座標排序後，Y 差距 > 某閾值就視為新的一行
+  contentWords.sort((a, b) => a.cy - b.cy);
+
+  const rowGap = imgH * 0.06; // 行間距閾值（約圖片高度 6%）
+  const rows = [];
+  let currentRow = [];
+  let lastY = -9999;
+
+  for (const w of contentWords) {
+    if (w.cy - lastY > rowGap && currentRow.length) {
+      rows.push(currentRow);
+      currentRow = [];
+    }
+    currentRow.push(w);
+    lastY = w.cy;
+  }
+  if (currentRow.length) rows.push(currentRow);
+
+  // 從每行中提取：名次(左側單數字1~9) + 公會名(中文2~6字) + 分數(左半邊的4~5位數)
+  const NOISE = ['任務','排名','競賽','榮譽','獎勵','船隻','甲級','乙級','丙級','聯賽','天','時','萬','商店'];
   const results = [];
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
-  // 嘗試匹配：數字(名次) + 文字(公會名) + 數字(分數)
-  for (const line of lines) {
-    // 模式1: "1 璀璨 14012" 或 "2 愛戀櫻花雨 11859"
-    const m = line.match(/^(\d{1,2})\s+(.+?)\s+(\d{4,6})$/);
-    if (m) {
-      results.push({ rank: parseInt(m[1]), name: m[2].trim(), score: parseInt(m[3]) });
-      continue;
+  for (const row of rows) {
+    // 按 X 排序
+    row.sort((a, b) => a.x - b.x);
+
+    let rank = null;
+    let name = null;
+    let score = null;
+
+    for (const w of row) {
+      const t = w.text.trim();
+
+      // 名次：單獨的 1~9 數字，在左側 15% 範圍內
+      if (!rank && /^[1-9]$/.test(t) && w.cx < imgW * 0.15) {
+        rank = parseInt(t);
+        continue;
+      }
+
+      // 分數：4~5 位數字，在左半邊（排除右側寶箱區域，右側 > 50%）
+      if (!score && /^\d{4,5}$/.test(t) && w.cx < imgW * 0.5) {
+        score = parseInt(t);
+        continue;
+      }
+
+      // 公會名：2~6 字中文，在左側 40% 範圍，排除雜訊
+      if (!name && /^[\u4e00-\u9fff]{2,6}$/.test(t) && w.cx < imgW * 0.4) {
+        if (!NOISE.some(n => t.includes(n))) {
+          name = t;
+        }
+      }
     }
-    // 模式2: 只有公會名+分數（沒名次）
-    const m2 = line.match(/^(.{2,10})\s+(\d{4,6})$/);
-    if (m2 && !m2[1].match(/^\d+$/)) {
-      results.push({ rank: results.length + 1, name: m2[1].trim(), score: parseInt(m2[2]) });
+
+    // 有找到名次+分數就記錄（名字可能 OCR 沒抓到，先放空讓使用者填）
+    if (rank && score) {
+      results.push({ rank, name: name || '（請填入）', score });
+    } else if (name && score) {
+      // 沒找到名次但有名字+分數
+      results.push({ rank: results.length + 1, name, score });
     }
   }
 
-  // 如果沒解析到，試逐行找分數
-  if (!results.length) {
-    const scoreLines = lines.filter(l => /\d{4,6}/.test(l));
-    const nameLines = lines.filter(l => !(/^\d+$/.test(l)) && !(/\d{4,6}/.test(l)) && l.length >= 2 && l.length <= 10);
-    for (let i = 0; i < Math.min(scoreLines.length, nameLines.length); i++) {
-      const score = parseInt(scoreLines[i].match(/(\d{4,6})/)[1]);
-      results.push({ rank: i + 1, name: nameLines[i], score });
-    }
-  }
-
-  // 按分數排序
-  results.sort((a, b) => b.score - a.score);
-  results.forEach((d, i) => d.rank = i + 1);
+  // 按名次排序
+  results.sort((a, b) => a.rank - b.rank);
 
   return results;
 }
