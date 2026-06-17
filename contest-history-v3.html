@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>競賽戰績 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <script src="config.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Segoe UI','Microsoft JhengHei',sans-serif;
+      background:linear-gradient(180deg,#fffaf3 0%,#fff5e6 100%);
+      color:#4a3520; min-height:100vh;
+    }
+    .container { max-width:1100px; margin:0 auto; padding:0 16px; }
+
+    /* Hero */
+    .hero {
+      text-align:center; padding:44px 20px 32px;
+      background:linear-gradient(180deg,#fff8ed,#ffefd4);
+      border-bottom:3px solid #f0c866;
+      position:relative; overflow:hidden;
+    }
+    .hero-vine-left {
+      position:absolute; left:0; top:0; bottom:0; width:60px;
+      background:url('assets/contest/hero-vine.png') left top / contain no-repeat;
+      opacity:0.7;
+    }
+    .hero-fairy {
+      position:absolute; right:16px; bottom:-10px; height:160px; opacity:0.8;
+    }
+    .hero h1 { font-size:2rem; font-weight:900; color:#a35d00; margin-bottom:8px; position:relative; }
+    .hero p { font-size:0.9rem; color:#9e7040; margin-bottom:16px; position:relative; }
+    .hero-nav { position:relative; }
+    .hero-nav a {
+      display:inline-block; padding:9px 22px; border-radius:18px;
+      background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
+      text-decoration:none; font-weight:700; font-size:0.85rem;
+      box-shadow:0 3px 12px rgba(233,106,30,.25); transition:transform .15s;
+    }
+    .hero-nav a:hover { transform:translateY(-2px); }
+
+    /* Divider */
+    .section-divider {
+      width:100%; height:30px; background:url('assets/contest/divider-floral.png') center / contain repeat-x; margin:0; opacity:0.6;
+    }
+
+    /* Section */
+    .section { padding:32px 0; }
+    .section-title {
+      font-size:1.05rem; font-weight:800; color:#8b5a00;
+      margin-bottom:14px; display:flex; align-items:center; gap:8px;
+    }
+    .section-title::before { content:''; width:4px; height:16px; background:#e96a1e; border-radius:2px; }
+
+    /* Period Bar */
+    .period-bar { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px; }
+    .period-bar label { font-size:0.92rem; font-weight:700; color:#8b5a00; }
+    .period-bar select {
+      padding:9px 16px; border:2px solid #f0c866; border-radius:12px;
+      font-size:0.92rem; background:#fff; color:#4a3520; outline:none; cursor:pointer;
+    }
+    .period-bar select:focus { border-color:#e96a1e; }
+
+    /* Summary */
+    .summary-card {
+      background:linear-gradient(160deg,#fffaf3,#ffefd4);
+      border-radius:20px; border:2px solid #f0c866;
+      box-shadow:0 6px 24px rgba(233,106,30,0.08);
+      padding:28px 24px; text-align:center; position:relative; overflow:hidden;
+    }
+    .summary-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:4px;
+      background:linear-gradient(90deg,#c2510b,#e96a1e,#f4a46a,#e96a1e,#c2510b);
+    }
+    .scroll-title { font-size:1.3rem; font-weight:900; color:#a35d00; margin-bottom:14px; }
+    .scroll-line { font-size:0.95rem; color:#5b3b1d; line-height:1.8; }
+    .scroll-highlight { font-size:1.15rem; font-weight:900; color:#e96a1e; }
+    .scroll-grade {
+      margin-top:14px; display:inline-block;
+      background:linear-gradient(135deg,#c2510b,#e96a1e);
+      color:#fff; font-weight:900; font-size:0.95rem;
+      padding:8px 24px; border-radius:20px;
+      box-shadow:0 3px 12px rgba(233,106,30,.3);
+    }
+    .summary-trophy {
+      width:64px; height:64px; margin-bottom:12px;
+    }
+
+    /* KPI */
+    .kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .kpi-card {
+      background:#fff; border-radius:16px; padding:18px 12px;
+      text-align:center; box-shadow:0 3px 14px rgba(180,120,40,.06);
+      border:1px solid #f5deb3;
+    }
+    .kpi-icon { margin-bottom:6px; }
+    .kpi-icon img { width:48px; height:48px; object-fit:contain; }
+    .kpi-value { font-size:1.7rem; font-weight:900; color:#4a3520; }
+    .kpi-label { font-size:0.78rem; color:#a08050; margin-top:4px; font-weight:600; }
+
+    /* Title Chips */
+    .title-chips { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    .title-chip {
+      padding:6px 16px; border-radius:20px; font-size:0.82rem; font-weight:700; cursor:pointer;
+      transition:transform .15s, box-shadow .15s;
+    }
+    .title-chip:hover { transform:translateY(-2px); box-shadow:0 3px 10px rgba(0,0,0,.1); }
+    .tc-王者花匠 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
+    .tc-大師花匠 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .tc-黃金花匠 { background:linear-gradient(135deg,#f4c430,#ffd700); color:#5a4000; }
+    .tc-白銀花匠 { background:linear-gradient(135deg,#9e9e9e,#d4d4d4); color:#fff; }
+    .tc-青銅花匠 { background:linear-gradient(135deg,#cd7f32,#e8a96a); color:#fff; }
+    .tc-無稱號 { background:#f0f0f0; color:#888; }
+
+    /* Ranking */
+    .ranking-box {
+      background:#fff; border-radius:18px; overflow:hidden;
+      box-shadow:0 4px 20px rgba(180,120,40,.06); border:1px solid #f5deb3;
+    }
+    .ranking-header {
+      background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff;
+      padding:16px 24px; font-size:1rem; font-weight:800;
+    }
+    .rank-list { padding:0; }
+    .rank-item {
+      display:flex; align-items:center; gap:12px;
+      padding:13px 24px; border-bottom:1px solid #f9edd8; transition:background .15s;
+    }
+    .rank-item:last-child { border-bottom:none; }
+    .rank-item:hover { background:#fffbf5; }
+    .rank-num {
+      width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-size:0.82rem; font-weight:800; flex-shrink:0;
+    }
+    .rn-1 { background:linear-gradient(135deg,#f4c430,#ffd700); color:#5a4000; }
+    .rn-2 { background:linear-gradient(135deg,#bdbdbd,#e0e0e0); color:#555; }
+    .rn-3 { background:linear-gradient(135deg,#cd7f32,#e8a96a); color:#fff; }
+    .rn-default { background:#fff3e0; color:#a35d00; }
+    .rank-info { flex:1; min-width:0; }
+    .rank-name { font-size:0.92rem; font-weight:700; color:#4a3520; }
+    .rank-role { font-size:0.7rem; padding:2px 7px; border-radius:8px; margin-left:6px; font-weight:600; }
+    .role-會長 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
+    .role-副會長 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
+    .role-理事 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .role-菁英 { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
+    .role-成員 { background:#e8f5e9; color:#2e7d32; }
+    .rank-server { font-size:0.7rem; color:#a08050; margin-top:2px; }
+    .rank-score { font-size:1.05rem; font-weight:900; color:#e96a1e; flex-shrink:0; }
+    .rank-title-divider {
+      padding:9px 24px; background:linear-gradient(90deg,#fffaf3,#ffefd4);
+      font-size:0.85rem; font-weight:800; color:#a35d00;
+      border-bottom:1px solid #f9edd8; scroll-margin-top:80px;
+    }
+
+    /* Loading / Empty */
+    .loading { text-align:center; padding:50px; color:#a08050; }
+    .empty-state { text-align:center; padding:50px; color:#a08050; font-size:0.95rem; }
+
+    @media(max-width:768px) {
+      .kpi-row { grid-template-columns:1fr 1fr 1fr; gap:10px; }
+      .kpi-value { font-size:1.3rem; }
+      .hero h1 { font-size:1.5rem; }
+      .rank-item { padding:11px 16px; }
+      .title-chips { overflow-x:auto; flex-wrap:nowrap; justify-content:flex-start; }
+      .hero-fairy { display:none; }
+      .hero-vine-left { display:none; }
+    }
+    @media(max-width:480px) {
+      .kpi-row { grid-template-columns:1fr; gap:8px; }
+    }
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-vine-left"></div>
+  <img src="assets/contest/hero-fairy.png" class="hero-fairy" alt="" />
+  <h1>🏆 競賽戰績</h1>
+  <p>查看每期公會競賽成績</p>
+  <div class="hero-nav"><a href="contest-dashboard-v3.html">← 返回儀表板</a></div>
+</section>
+
+<!-- 期數選擇 -->
+<section class="section" style="padding-bottom:0;">
+  <div class="container">
+    <div class="period-bar">
+      <label>期數：</label>
+      <select id="periodPicker" onchange="loadPeriod()"><option value="">載入中...</option></select>
+    </div>
+  </div>
+</section>
+
+<!-- 總結 -->
+<section class="section" id="summarySection" style="display:none;">
+  <div class="container">
+    <div class="summary-card">
+      <img src="assets/contest/legend-trophy.png" class="summary-trophy" alt="" />
+      <div class="scroll-title">🏆 競賽結果</div>
+      <div class="scroll-line">在 <span class="scroll-highlight" id="hMembers">-</span> 名公會成員的共同努力下</div>
+      <div class="scroll-line">總獲得 <span class="scroll-highlight" id="hTotal">-</span> 積分</div>
+      <div class="scroll-line">位列 <span class="scroll-highlight" id="hRank">-</span></div>
+      <div><span class="scroll-grade" id="hGrade">-</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 分隔線 -->
+<div class="section-divider" id="divider1" style="display:none;"></div>
+
+<!-- 統計 -->
+<section class="section" id="statsSection" style="display:none;padding-top:0;">
+  <div class="container">
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-icon"><img src="assets/contest/icon-trophy.png" alt=""></div><div class="kpi-value" id="statTotal">-</div><div class="kpi-label">公會總分</div></div>
+      <div class="kpi-card"><div class="kpi-icon"><img src="assets/contest/icon-people.png" alt=""></div><div class="kpi-value" id="statCount">-</div><div class="kpi-label">參賽人數</div></div>
+      <div class="kpi-card"><div class="kpi-icon"><img src="assets/contest/icon-chart.png" alt=""></div><div class="kpi-value" id="statAvg">-</div><div class="kpi-label">平均分數</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 稱號 -->
+<section class="section" id="titleSection" style="display:none;padding-top:0;padding-bottom:16px;">
+  <div class="container">
+    <div class="title-chips" id="titleDist"></div>
+  </div>
+</section>
+
+<!-- 分隔線 -->
+<div class="section-divider" id="divider2" style="display:none;"></div>
+
+<!-- 排名 -->
+<section class="section" id="rankSection" style="display:none;padding-top:0;">
+  <div class="container">
+    <div class="ranking-box">
+      <div class="ranking-header">📋 成員排名</div>
+      <div class="rank-list" id="rankList"></div>
+    </div>
+  </div>
+</section>
+
+<div class="loading" id="loadingState">載入中...</div>
+<div class="empty-state" id="emptyState" style="display:none;">尚無競賽資料</div>
+
+<script>
+let allData = [], periods = [], summaryData = [];
+
+async function init() {
+  try {
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`);
+    if (!res.ok) throw new Error('讀取失敗');
+    const data = await res.json();
+    const rows = (data.values || []);
+    if (rows.length <= 1) { showEmpty(); return; }
+
+    allData = rows.slice(1).map(r => ({
+      period:r[0]||'', server:r[1]||'', nickname:r[2]||'',
+      role:r[3]||'', score:Number(r[4])||0, title:r[5]||''
+    }));
+
+    try {
+      const sRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`);
+      if (sRes.ok) { const sData = await sRes.json(); summaryData = (sData.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:r[2]||'',rank:r[3]||'',grade:r[4]||''})); }
+    } catch(e){}
+
+    periods = [...new Set(allData.map(d=>d.period))].sort().reverse();
+    const sel = document.getElementById('periodPicker');
+    sel.innerHTML = periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+    document.getElementById('loadingState').style.display = 'none';
+
+    const urlParams = new URLSearchParams(location.search);
+    const urlPeriod = urlParams.get('period');
+    if (urlPeriod && periods.includes(urlPeriod)) sel.value = urlPeriod;
+
+    loadPeriod();
+  } catch(e) { document.getElementById('loadingState').textContent = '⚠️ ' + e.message; }
+}
+
+function loadPeriod() {
+  const period = document.getElementById('periodPicker').value;
+  if (!period) return;
+
+  const url = new URL(location.href);
+  url.searchParams.set('period', period);
+  history.replaceState(null, '', url);
+
+  const data = allData.filter(d=>d.period===period).sort((a,b)=>b.score-a.score);
+  if (!data.length) { showEmpty(); return; }
+
+  // 總結
+  const summary = summaryData.find(s=>s.period===period);
+  const summarySection = document.getElementById('summarySection');
+  if (summary) {
+    summarySection.style.display = '';
+    document.getElementById('hMembers').textContent = summary.members;
+    document.getElementById('hTotal').textContent = Number(summary.total).toLocaleString();
+    document.getElementById('hRank').textContent = summary.rank;
+    document.getElementById('hGrade').textContent = summary.grade;
+  } else { summarySection.style.display = 'none'; }
+
+  // 統計
+  const total = data.reduce((s,d)=>s+d.score,0);
+  const count = data.length;
+  const avg = Math.round(total/count);
+  document.getElementById('statTotal').textContent = total.toLocaleString();
+  document.getElementById('statCount').textContent = count + ' 人';
+  document.getElementById('statAvg').textContent = avg.toLocaleString();
+  document.getElementById('statsSection').style.display = '';
+  document.getElementById('divider1').style.display = '';
+
+  // 稱號
+  const TITLES = ['王者花匠','大師花匠','黃金花匠','白銀花匠','青銅花匠','無稱號'];
+  const tc = {}; TITLES.forEach(t=>tc[t]=0);
+  data.forEach(d=>{ if(tc[d.title]!==undefined) tc[d.title]++; });
+  document.getElementById('titleSection').style.display = '';
+  document.getElementById('titleDist').innerHTML = TITLES
+    .filter(t=>tc[t]>0)
+    .map(t=>`<span class="title-chip tc-${t}" onclick="scrollToTitle('${t}')">${t} ${tc[t]} 人</span>`)
+    .join('');
+
+  // 排名
+  document.getElementById('rankSection').style.display = '';
+  document.getElementById('divider2').style.display = '';
+  let lastTitle = '';
+  document.getElementById('rankList').innerHTML = data.map((d,i) => {
+    let divider = '';
+    if (d.title && d.title !== lastTitle) { lastTitle = d.title; divider = `<div class="rank-title-divider" id="title-${d.title}">🏅 ${d.title}</div>`; }
+    const rnCls = i===0?'rn-1':i===1?'rn-2':i===2?'rn-3':'rn-default';
+    const roleCls = d.role?`role-${d.role}`:'';
+    return divider + `<div class="rank-item">
+      <div class="rank-num ${rnCls}">${i+1}</div>
+      <div class="rank-info"><div class="rank-name">${d.nickname}<span class="rank-role ${roleCls}">${d.role}</span></div><div class="rank-server">${d.server}</div></div>
+      <div class="rank-score">${d.score.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('emptyState').style.display = 'none';
+}
+
+function scrollToTitle(title) { const el = document.getElementById('title-'+title); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+
+function showEmpty() {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('summarySection').style.display = 'none';
+  document.getElementById('statsSection').style.display = 'none';
+  document.getElementById('titleSection').style.display = 'none';
+  document.getElementById('rankSection').style.display = 'none';
+  document.getElementById('divider1').style.display = 'none';
+  document.getElementById('divider2').style.display = 'none';
+  document.getElementById('emptyState').style.display = '';
+}
+
+init();
+</script>
+<script src="header.js"></script>
+</body>
+</html>

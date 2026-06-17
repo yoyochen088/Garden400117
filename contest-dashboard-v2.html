@@ -63,21 +63,22 @@
       border:1px solid #f5deb3;
     }
 
-    /* ===== MID GRID: 趨勢+比較+亮點 ===== */
-    .mid-grid {
-      display:grid; grid-template-columns:1.6fr 0.8fr 0.8fr; gap:16px;
-      align-items:stretch;
+    /* ===== MID GRID: Row1 趨勢+比較, Row2 排名+亮點 ===== */
+    .row-grid {
+      display:grid; grid-template-columns:1.5fr 1fr; gap:16px; margin-bottom:16px;
     }
-    .mid-grid > .card { display:flex; flex-direction:column; }
+    .row-grid > .card { display:flex; flex-direction:column; }
 
-    /* 與上期比較 */
-    .trend-inner { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; align-items:center; }
-    .compare-panel {
-      background:#fffbf5; border-radius:12px; border:1px solid #f5deb3; padding:14px 16px;
-    }
+    /* 與上期比較 — 卡片格式 */
     .compare-list { display:flex; flex-direction:column; gap:10px; }
-    .compare-item { display:flex; justify-content:space-between; align-items:center; font-size:0.88rem; }
-    .compare-label { color:#8b5a00; font-weight:600; }
+    .compare-item {
+      display:flex; align-items:center; gap:10px; padding:10px 12px;
+      background:#fffbf5; border-radius:12px; border:1px solid #f5deb3;
+    }
+    .compare-icon { font-size:1.2rem; flex-shrink:0; }
+    .compare-info { flex:1; }
+    .compare-label { font-size:0.72rem; color:#a08050; font-weight:600; }
+    .compare-value { font-size:0.95rem; font-weight:800; color:#4a3520; }
     .diff-badge { padding:4px 12px; border-radius:14px; font-weight:700; font-size:0.82rem; }
     .diff-up { background:#e8f5e9; color:#2e7d32; }
     .diff-down { background:#fce4ec; color:#c62828; }
@@ -94,11 +95,11 @@
     .hl-label { font-size:0.72rem; color:#a08050; font-weight:600; }
     .hl-name { font-size:0.95rem; font-weight:800; color:#4a3520; }
 
-    /* ===== BOTTOM GRID ===== */
+    /* ===== BOTTOM GRID: TOP5 左大 + 右側上下 ===== */
     .bottom-grid {
-      display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;
-      align-items:center;
+      display:grid; grid-template-columns:1.2fr 1fr; gap:16px;
     }
+    .bottom-right { display:flex; flex-direction:column; gap:16px; }
 
     /* TOP 5 */
     .top5-podium { display:flex; justify-content:center; align-items:flex-end; gap:8px; margin-bottom:16px; padding-top:16px; }
@@ -159,8 +160,7 @@
     /* ===== RESPONSIVE ===== */
     @media(max-width:900px) {
       .kpi-row { grid-template-columns:repeat(2,1fr); margin-top:-16px; }
-      .mid-grid { grid-template-columns:1fr; }
-      .trend-inner { grid-template-columns:1fr; }
+      .row-grid { grid-template-columns:1fr; }
       .bottom-grid { grid-template-columns:1fr; }
     }
     @media(max-width:480px) {
@@ -192,24 +192,34 @@
   </div>
 </section>
 
-<!-- 趨勢 + 與上期比較 + 本期亮點 -->
+<!-- Row 1: 總分趨勢 + 與上期比較 -->
 <section class="section">
   <div class="container">
-    <div class="mid-grid">
-      <!-- 總分趨勢 + 與上期比較（合併在一格） -->
+    <div class="row-grid">
       <div class="card">
         <div class="section-title">公會總分趨勢</div>
-        <div class="trend-inner">
-          <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
-          <div class="compare-panel" id="compareInline"></div>
+        <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="section-title">與上期比較</div>
+        <div class="compare-list" id="compareInline">
+          <div class="compare-item"><div class="compare-icon">📊</div><div class="compare-info"><div class="compare-label">總分增減</div><div class="compare-value">-</div></div></div>
+          <div class="compare-item"><div class="compare-icon">🎖️</div><div class="compare-info"><div class="compare-label">排名增減</div><div class="compare-value">-</div></div></div>
+          <div class="compare-item"><div class="compare-icon">📈</div><div class="compare-info"><div class="compare-label">均分增減</div><div class="compare-value">-</div></div></div>
         </div>
       </div>
-      <!-- 排名走勢 -->
+    </div>
+  </div>
+</section>
+
+<!-- Row 2: 排名走勢 + 本期亮點 -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="row-grid">
       <div class="card">
         <div class="section-title">排名走勢</div>
         <div class="chart-wrap"><canvas id="chartRank"></canvas></div>
       </div>
-      <!-- 本期亮點 -->
       <div class="card">
         <div class="section-title">本期亮點</div>
         <div class="highlight-list">
@@ -222,36 +232,37 @@
   </div>
 </section>
 
-<!-- TOP5 + 傳奇紀錄 + 稱號分布 -->
+<!-- TOP5 (左大) + 傳奇紀錄 / 稱號分布 (右上下) -->
 <section class="section">
   <div class="container">
     <div class="bottom-grid">
-      <!-- TOP 5 -->
+      <!-- TOP 5 (左) -->
       <div class="card">
         <div class="section-title">本期排行榜 TOP 5</div>
         <div id="top5Podium" class="top5-podium"></div>
         <div id="top5Rest" class="top5-rest"></div>
         <div style="text-align:center;"><a href="contest-history-v2.html" id="rankMoreLink" class="view-more">查看完整排行榜 →</a></div>
       </div>
-      <!-- 公會傳奇紀錄 -->
-      <div class="card">
-        <div class="section-title">公會傳奇紀錄</div>
-        <div class="legend-grid">
-          <div class="legend-item"><div class="legend-label">歷史最高分</div><div class="legend-value" id="hsHighest">-</div></div>
-          <div class="legend-item"><div class="legend-label">最佳排名</div><div class="legend-value" id="hsBestRank">-</div></div>
-          <div class="legend-item"><div class="legend-label">平均總分</div><div class="legend-value" id="hsAvg">-</div></div>
-          <div class="legend-item"><div class="legend-label">參賽期數</div><div class="legend-value" id="hsPeriods">-</div></div>
-        </div>
-      </div>
-      <!-- 稱號分布 -->
-      <div class="card">
-        <div class="section-title">稱號分布</div>
-        <div class="title-section">
-          <div class="title-chart-wrap">
-            <canvas id="chartDonut"></canvas>
-            <div class="title-center"><strong id="donutTotal">-</strong>人</div>
+      <!-- 右側上下 -->
+      <div class="bottom-right">
+        <div class="card">
+          <div class="section-title">公會傳奇紀錄</div>
+          <div class="legend-grid">
+            <div class="legend-item"><div class="legend-label">歷史最高分</div><div class="legend-value" id="hsHighest">-</div></div>
+            <div class="legend-item"><div class="legend-label">最佳排名</div><div class="legend-value" id="hsBestRank">-</div></div>
+            <div class="legend-item"><div class="legend-label">平均總分</div><div class="legend-value" id="hsAvg">-</div></div>
+            <div class="legend-item"><div class="legend-label">參賽期數</div><div class="legend-value" id="hsPeriods">-</div></div>
           </div>
-          <div class="title-list" id="titleList"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">稱號分布</div>
+          <div class="title-section">
+            <div class="title-chart-wrap">
+              <canvas id="chartDonut"></canvas>
+              <div class="title-center"><strong id="donutTotal">-</strong>人</div>
+            </div>
+            <div class="title-list" id="titleList"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -324,11 +335,10 @@ async function init() {
       const rDiff = (currRN&&prevRN) ? prevRN-currRN : null;
 
       document.getElementById('compareInline').innerHTML = `
-        <div class="compare-list">
-          <div class="compare-item"><span class="compare-label">總分增減</span><span class="diff-badge ${tDiff>=0?'diff-up':'diff-down'}">${tDiff>=0?'+':''}${tDiff.toLocaleString()} ↑</span></div>
-          <div class="compare-item"><span class="compare-label">排名增減</span><span class="diff-badge ${rDiff!==null?(rDiff>0?'diff-up':rDiff<0?'diff-down':'diff-same'):'diff-same'}">${rDiff>0?'+'+rDiff:rDiff===0?'持平':rDiff!==null?rDiff:'-'} ↑</span></div>
-          <div class="compare-item"><span class="compare-label">均分增減</span><span class="diff-badge ${aDiff>=0?'diff-up':'diff-down'}">${aDiff>=0?'+':''}${aDiff} ↑</span></div>
-        </div>`;
+          <div class="compare-item"><div class="compare-icon">📊</div><div class="compare-info"><div class="compare-label">總分增減</div><div class="compare-value"><span class="diff-badge ${tDiff>=0?'diff-up':'diff-down'}">${tDiff>=0?'+':''}${tDiff.toLocaleString()} ${tDiff>=0?'↑':'↓'}</span></div></div></div>
+          <div class="compare-item"><div class="compare-icon">🎖️</div><div class="compare-info"><div class="compare-label">排名增減</div><div class="compare-value"><span class="diff-badge ${rDiff!==null?(rDiff>0?'diff-up':rDiff<0?'diff-down':'diff-same'):'diff-same'}">${rDiff>0?'+'+rDiff+' ↑':rDiff===0?'持平':rDiff!==null?rDiff+' ↓':'—'}</span></div></div></div>
+          <div class="compare-item"><div class="compare-icon">📈</div><div class="compare-info"><div class="compare-label">均分增減</div><div class="compare-value"><span class="diff-badge ${aDiff>=0?'diff-up':'diff-down'}">${aDiff>=0?'+':''}${aDiff} ${aDiff>=0?'↑':'↓'}</span></div></div></div>
+      `;
     }
 
     // 潛力成員
@@ -412,7 +422,7 @@ async function init() {
         new Chart(document.getElementById('chartRank'),{
           type:'line',
           data:{labels:rd.map(d=>d.period.slice(5)),datasets:[{data:rd.map(d=>d.rank),borderColor:'#4a90d9',backgroundColor:'rgba(74,144,217,0.06)',fill:true,tension:0.35,pointRadius:5,pointBackgroundColor:'#4a90d9',pointBorderColor:'#fff',pointBorderWidth:2}]},
-          options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,bottom:10}},plugins:{legend:{display:false}},scales:{y:{reverse:true,min:Math.max(1,Math.min(...rd.map(d=>d.rank))-1),max:Math.max(...rd.map(d=>d.rank))+2,ticks:{stepSize:1,callback:v=>'#'+v},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}
+          options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:10,bottom:10}},plugins:{legend:{display:false}},scales:{y:{reverse:true,min:0,max:Math.max(...rd.map(d=>d.rank))+1,ticks:{stepSize:1,callback:v=>v===0?'':'#'+v},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}
         });
       }
     }
