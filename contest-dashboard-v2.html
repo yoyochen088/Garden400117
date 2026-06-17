@@ -362,15 +362,16 @@ async function init() {
     const podiumOrder = [1,0,2].filter(i=>top5[i]).map(i=>({d:top5[i],rank:i}));
     document.getElementById('top5Podium').innerHTML = podiumOrder.map(({d,rank}) => {
       return `<div class="podium-item ${podiumCls[rank]}">
-        <div class="podium-avatar"><span class="podium-medal">${medals[rank]}</span>👤</div>
+        <div class="podium-avatar"><span class="podium-medal">${medals[rank]}</span><span style="font-size:1.8rem;">${medals[rank]}</span></div>
         <div class="podium-name">${d.nickname}</div>
         <div class="podium-score">${d.score.toLocaleString()}</div>
       </div>`;
     }).join('');
 
-    document.getElementById('top5Rest').innerHTML = top5.slice(3).map((d,i) =>
-      `<div class="rest-item"><span><span class="rest-rank">${i+4}</span>${d.nickname}</span><span class="rest-score">${d.score.toLocaleString()}</span></div>`
-    ).join('');
+    document.getElementById('top5Rest').innerHTML = top5.map((d,i) => {
+      if (i < 3) return `<div class="rest-item"><span><span class="rest-rank">${i+1}</span>${d.nickname}</span><span class="rest-score">${d.score.toLocaleString()}</span></div>`;
+      return `<div class="rest-item"><span><span class="rest-rank">${i+1}</span>${d.nickname}</span><span class="rest-score">${d.score.toLocaleString()}</span></div>`;
+    }).join('');
 
     // 稱號分布
     const tc={}; TITLES.forEach(t=>tc[t]=0);

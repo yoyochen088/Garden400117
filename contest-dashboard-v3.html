@@ -397,8 +397,8 @@ async function init() {
       </div>`;
     }).join('');
 
-    document.getElementById('top5Rest').innerHTML = top5.slice(3).map((d,i) =>
-      `<div class="rest-item"><span><span class="rest-rank">${i+4}</span>${d.nickname}</span><span class="rest-score">${d.score.toLocaleString()}</span></div>`
+    document.getElementById('top5Rest').innerHTML = top5.map((d,i) =>
+      `<div class="rest-item"><span><span class="rest-rank">${i+1}</span>${d.nickname}</span><span class="rest-score">${d.score.toLocaleString()}</span></div>`
     ).join('');
 
     // 稱號分布
