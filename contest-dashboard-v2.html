@@ -126,14 +126,17 @@
     .rest-item { display:flex; align-items:center; padding:6px 4px; font-size:0.92rem; gap:10px; }
     .rest-rank { font-weight:700; color:#a08050; width:20px; flex-shrink:0; }
     .rest-name { flex:1; font-weight:700; color:#4a3520; }
-    .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:600; white-space:nowrap; }
-    .rt-王者花匠 { background:#fff3e0; color:#e96a1e; }
-    .rt-大師花匠 { background:#f3e5f5; color:#9b59b6; }
-    .rt-黃金花匠 { background:#fffde7; color:#f4a430; }
-    .rt-白銀花匠 { background:#f5f5f5; color:#757575; }
-    .rt-青銅花匠 { background:#fbe9e7; color:#cd7f32; }
-    .rt-無稱號 { background:#f5f5f5; color:#999; }
+    .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:700; white-space:nowrap; }
+    .rt-王者花匠 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
+    .rt-大師花匠 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .rt-黃金花匠 { background:linear-gradient(135deg,#f4c430,#ffd700); color:#5a4000; }
+    .rt-白銀花匠 { background:linear-gradient(135deg,#9e9e9e,#d4d4d4); color:#fff; }
+    .rt-青銅花匠 { background:linear-gradient(135deg,#cd7f32,#e8a96a); color:#fff; }
+    .rt-無稱號 { background:#f0f0f0; color:#888; }
     .rest-score { font-weight:900; color:#e96a1e; font-size:1.05rem; flex-shrink:0; }
+    .rest-score-top { font-weight:900; color:#e96a1e; font-size:1.1rem; flex-shrink:0; }
+    .rest-score-top::before { content:'🌿 '; font-size:0.85rem; }
+    .rest-score-top::after { content:' 🌿'; font-size:0.85rem; }
     .view-more {
       display:inline-block; margin-top:12px;
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
@@ -403,7 +406,8 @@ async function init() {
     document.getElementById('top5Rest').innerHTML = top5.map((d,i) => {
       const titleCls = d.title ? `rt-${d.title}` : '';
       const titleBadge = d.title ? `<span class="rest-title ${titleCls}">${d.title}</span>` : '';
-      return `<div class="rest-item"><span class="rest-rank">${i+1}</span><span class="rest-name">${d.nickname}</span>${titleBadge}<span class="rest-score">${d.score.toLocaleString()}</span></div>`;
+      const scoreCls = i < 3 ? 'rest-score-top' : 'rest-score';
+      return `<div class="rest-item"><span class="rest-rank">${i+1}</span><span class="rest-name">${d.nickname}</span>${titleBadge}<span class="${scoreCls}">${d.score.toLocaleString()}</span></div>`;
     }).join('');
 
     // 稱號分布
