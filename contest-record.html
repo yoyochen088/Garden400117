@@ -774,8 +774,7 @@ async function handleOpponentFile(file) {
     const data = await res.json();
     const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
 
-    // 用「船隻」作為錨點，之後的內容才是排名資料
-    const parsed = parseOpponentAfterAnchor(text);
+    const parsed = parseOpponentText(text);
     if (parsed.length) {
       opponentData = parsed;
       renderOpponentTable();
@@ -791,59 +790,50 @@ async function handleOpponentFile(file) {
   }
 }
 
-function parseOpponentAfterAnchor(text) {
-  // 找到「船隻」或「船只」之後的文字作為排名資料區
-  const anchorIdx = text.search(/船[隻只]/);
-  const rankText = anchorIdx >= 0 ? text.slice(anchorIdx) : text;
-
-  // 清理文字
-  const cleaned = rankText
-    .replace(/船[隻只]/g, '')
-    .replace(/\n/g, ' ')
-    .replace(/\s+/g, ' ');
-
-  // 策略：依序找 {1位數字(名次)} + {中文2~8字(公會名)} + {4~5位數字(分數)}
-  // 重複匹配直到沒有為止
+function parseOpponentText(text) {
   const results = [];
-  const pattern = /([1-9])\s*[.。]?\s*([\u4e00-\u9fff\w]{2,8})\s*(\d{4,5})/g;
-  let m;
-  while ((m = pattern.exec(cleaned)) !== null) {
-    const rank = parseInt(m[1]);
-    const name = m[2].trim();
-    const score = parseInt(m[3]);
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
-    // 排除 UI 雜訊
-    const NOISE = ['甲級聯賽','乙級聯賽','丙級聯賽','競賽榮譽','任務排名'];
-    if (NOISE.some(n => name.includes(n))) continue;
+  // 找到「船隻」或「船只」之後才開始解析
+  let startIdx = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (/船[隻只]/.test(lines[i])) { startIdx = i + 1; break; }
+  }
+  const dataLines = lines.slice(startIdx);
 
-    results.push({ rank, name, score });
+  for (const line of dataLines) {
+    // 模式1: "1 璀璨 14012" 或 "2 愛戀櫻花雨 11859"
+    const m = line.match(/^(\d{1,2})\s+(.+?)\s+(\d{4,6})$/);
+    if (m) {
+      results.push({ rank: parseInt(m[1]), name: m[2].trim(), score: parseInt(m[3]) });
+      continue;
+    }
+    // 模式2: 只有公會名+分數（沒名次）
+    const m2 = line.match(/^(.{2,10})\s+(\d{4,6})$/);
+    if (m2 && !m2[1].match(/^\d+$/)) {
+      results.push({ rank: results.length + 1, name: m2[1].trim(), score: parseInt(m2[2]) });
+    }
   }
 
-  // 如果正則沒抓到，試另一個方式：逐行掃描
+  // 如果從錨點後沒找到，fallback 全文掃描
   if (!results.length) {
-    const lines = rankText.split('\n').map(l => l.trim()).filter(l => l);
-    let currentRank = 0;
     for (const line of lines) {
-      // 名次行：只有一個數字 1~9
-      if (/^[1-9]$/.test(line)) { currentRank = parseInt(line); continue; }
-      // 分數行：4~5 位數字
-      if (/^\d{4,5}$/.test(line) && currentRank > 0) {
-        // 找前面最近的中文行作為公會名
-        const nameIdx = lines.indexOf(line) - 1;
-        if (nameIdx >= 0) {
-          const prevLine = lines[nameIdx];
-          if (/[\u4e00-\u9fff]/.test(prevLine) && prevLine.length <= 8) {
-            results.push({ rank: currentRank, name: prevLine, score: parseInt(line) });
-          }
-        }
-        currentRank = 0;
+      const m = line.match(/^(\d{1,2})\s+(.+?)\s+(\d{4,6})$/);
+      if (m) {
+        results.push({ rank: parseInt(m[1]), name: m[2].trim(), score: parseInt(m[3]) });
         continue;
+      }
+      const m2 = line.match(/^(.{2,10})\s+(\d{4,6})$/);
+      if (m2 && !m2[1].match(/^\d+$/)) {
+        results.push({ rank: results.length + 1, name: m2[1].trim(), score: parseInt(m2[2]) });
       }
     }
   }
 
-  // 按名次排序
-  results.sort((a, b) => a.rank - b.rank);
+  // 按分數排序
+  results.sort((a, b) => b.score - a.score);
+  results.forEach((d, i) => d.rank = i + 1);
+
   return results;
 }
 
