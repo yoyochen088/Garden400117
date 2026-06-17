@@ -31,6 +31,7 @@
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
       text-decoration:none; font-weight:700; font-size:0.85rem;
       box-shadow:0 3px 12px rgba(233,106,30,.25); transition:transform .15s;
+      position:absolute; right:calc((100% - 1100px)/2 + 16px); bottom:14px;
     }
     .hero-link:hover { transform:translateY(-2px); }
     .hero h1 {
@@ -56,7 +57,7 @@
     .kpi-value { font-size:1.9rem; font-weight:900; color:#4a3520; }
 
     /* ===== SECTION ===== */
-    .section { padding:36px 0; }
+    .section { padding:20px 0; }
     .section-title {
       font-size:1.1rem; font-weight:800; color:#8b5a00;
       margin-bottom:16px; display:flex; align-items:center; gap:8px;
@@ -93,6 +94,10 @@
 
     /* 亮點 — 色塊風格 */
     .highlight-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .highlight-card {
+      background:#fff; border-radius:18px; padding:22px;
+      box-shadow:0 4px 20px rgba(180,120,40,.06); border:1px solid #f5deb3;
+    }
     .highlight-list { display:flex; flex-direction:column; gap:12px; }
     .hl-item {
       padding:14px 16px; border-radius:14px;
@@ -204,11 +209,9 @@
 <section class="hero">
   <div class="hero-content">
     <h1>本期公會競賽戰報</h1>
-    <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
-      <span class="period-badge" id="periodBadge">載入中...</span>
-      <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
-    </div>
+    <span class="period-badge" id="periodBadge">載入中...</span>
   </div>
+  <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
 </section>
 
 <!-- KPI -->
@@ -256,22 +259,24 @@
 <!-- Row 3: 本期亮點 (三格) -->
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="section-title">本期亮點</div>
-    <div class="highlight-grid">
-      <div class="hl-item hl-mvp">
-        <div class="hl-top"><span class="hl-icon">👑</span><span class="hl-label">本期 MVP</span></div>
-        <div class="hl-name" id="mvpName">-</div>
-        <div class="hl-score" id="mvpScore">-</div>
-      </div>
-      <div class="hl-item hl-progress">
-        <div class="hl-top"><span class="hl-icon">🚀</span><span class="hl-label">進步王</span></div>
-        <div class="hl-name" id="progressName">-</div>
-        <div class="hl-score" id="progressScore">資料累積中</div>
-      </div>
-      <div class="hl-item hl-potential">
-        <div class="hl-top"><span class="hl-icon">🌱</span><span class="hl-label">潛力成員</span></div>
-        <div class="hl-name" id="potentialName">-</div>
-        <div class="hl-score" id="potentialScore">資料累積中</div>
+    <div class="highlight-card">
+      <div class="section-title">本期亮點</div>
+      <div class="highlight-grid">
+        <div class="hl-item hl-mvp">
+          <div class="hl-top"><span class="hl-icon">👑</span><span class="hl-label">本期 MVP</span></div>
+          <div class="hl-name" id="mvpName">-</div>
+          <div class="hl-score" id="mvpScore">-</div>
+        </div>
+        <div class="hl-item hl-progress">
+          <div class="hl-top"><span class="hl-icon">🚀</span><span class="hl-label">進步王</span></div>
+          <div class="hl-name" id="progressName">-</div>
+          <div class="hl-score" id="progressScore">資料累積中</div>
+        </div>
+        <div class="hl-item hl-potential">
+          <div class="hl-top"><span class="hl-icon">🌱</span><span class="hl-label">潛力成員</span></div>
+          <div class="hl-name" id="potentialName">-</div>
+          <div class="hl-score" id="potentialScore">資料累積中</div>
+        </div>
       </div>
     </div>
   </div>
