@@ -111,6 +111,30 @@
     <div id="summaryStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
   </div>
 
+  <!-- 對手排名截圖 -->
+  <div class="card">
+    <div class="card-title">⚔️ 對手排名（選填）</div>
+    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+      <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
+        <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
+        <div class="dz-text" style="font-size:0.85rem;">上傳對手排名截圖</div>
+        <div class="dz-sub">排名畫面，辨識公會名稱與分數</div>
+      </div>
+      <input type="file" id="opponent-file" accept="image/*" style="display:none;" onchange="handleOpponentFile(this.files[0])" />
+      <div id="opponentResult" style="flex:2;min-width:260px;">
+        <table class="result-table" id="opponentTable" style="display:none;">
+          <thead><tr><th>#</th><th>公會名稱</th><th>分數</th><th></th></tr></thead>
+          <tbody id="opponentBody"></tbody>
+        </table>
+        <div class="btn-row" id="opponentBtnRow" style="display:none;">
+          <button class="btn btn-secondary" onclick="addOpponentRow()">＋ 手動新增</button>
+          <button class="btn btn-primary" onclick="saveOpponents()">💾 儲存對手排名</button>
+        </div>
+      </div>
+    </div>
+    <div id="opponentStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
+  </div>
+
   <!-- 上傳 -->
   <div class="card">
     <div class="card-title">📷 上傳成員截圖</div>
@@ -712,6 +736,128 @@ async function saveToSheet() {
     btn.disabled = false; btn.textContent = '💾 儲存到 Sheet';
   }
 }
+// ── 對手排名辨識 ──
+let opponentData = [];
+const oppDz = document.getElementById('opponentDropZone');
+oppDz.addEventListener('dragover', e => { e.preventDefault(); oppDz.classList.add('drag-over'); });
+oppDz.addEventListener('dragleave', () => oppDz.classList.remove('drag-over'));
+oppDz.addEventListener('drop', e => { e.preventDefault(); oppDz.classList.remove('drag-over'); handleOpponentFile(e.dataTransfer.files[0]); });
+
+async function handleOpponentFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const status = document.getElementById('opponentStatus');
+  status.style.display = 'block';
+  status.style.color = '#1565c0';
+  status.textContent = '⏳ 辨識對手排名中...';
+
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }] })
+    });
+    const data = await res.json();
+    const text = data.responses?.[0]?.fullTextAnnotation?.text || '';
+
+    // 解析對手排名
+    opponentData = parseOpponentText(text);
+    renderOpponentTable();
+
+    status.style.color = '#2e7d32';
+    status.textContent = `✅ 辨識完成！共 ${opponentData.length} 筆`;
+  } catch(e) {
+    status.style.color = '#c62828';
+    status.textContent = '❌ 辨識失敗：' + e.message;
+  }
+}
+
+function parseOpponentText(text) {
+  const results = [];
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+  // 嘗試匹配：數字(名次) + 文字(公會名) + 數字(分數)
+  for (const line of lines) {
+    // 模式1: "1 璀璨 14012" 或 "2 愛戀櫻花雨 11859"
+    const m = line.match(/^(\d{1,2})\s+(.+?)\s+(\d{4,6})$/);
+    if (m) {
+      results.push({ rank: parseInt(m[1]), name: m[2].trim(), score: parseInt(m[3]) });
+      continue;
+    }
+    // 模式2: 只有公會名+分數（沒名次）
+    const m2 = line.match(/^(.{2,10})\s+(\d{4,6})$/);
+    if (m2 && !m2[1].match(/^\d+$/)) {
+      results.push({ rank: results.length + 1, name: m2[1].trim(), score: parseInt(m2[2]) });
+    }
+  }
+
+  // 如果沒解析到，試逐行找分數
+  if (!results.length) {
+    const scoreLines = lines.filter(l => /\d{4,6}/.test(l));
+    const nameLines = lines.filter(l => !(/^\d+$/.test(l)) && !(/\d{4,6}/.test(l)) && l.length >= 2 && l.length <= 10);
+    for (let i = 0; i < Math.min(scoreLines.length, nameLines.length); i++) {
+      const score = parseInt(scoreLines[i].match(/(\d{4,6})/)[1]);
+      results.push({ rank: i + 1, name: nameLines[i], score });
+    }
+  }
+
+  // 按分數排序
+  results.sort((a, b) => b.score - a.score);
+  results.forEach((d, i) => d.rank = i + 1);
+
+  return results;
+}
+
+function renderOpponentTable() {
+  const table = document.getElementById('opponentTable');
+  const tbody = document.getElementById('opponentBody');
+  const btnRow = document.getElementById('opponentBtnRow');
+  table.style.display = '';
+  btnRow.style.display = '';
+
+  tbody.innerHTML = opponentData.map((d, i) =>
+    `<tr${d.name === '璀璨' ? ' style="background:#fef0e7;font-weight:700;"' : ''}>
+      <td>${d.rank}</td>
+      <td><input value="${d.name}" onchange="opponentData[${i}].name=this.value" /></td>
+      <td><input type="number" value="${d.score}" onchange="opponentData[${i}].score=Number(this.value)" style="width:80px;" /></td>
+      <td><button onclick="opponentData.splice(${i},1);renderOpponentTable();" style="background:none;border:none;color:#e65100;cursor:pointer;">✕</button></td>
+    </tr>`
+  ).join('');
+}
+
+function addOpponentRow() {
+  opponentData.push({ rank: opponentData.length + 1, name: '', score: 0 });
+  renderOpponentTable();
+}
+
+async function saveOpponents() {
+  const period = document.getElementById('periodInput').value.trim();
+  if (!period) { alert('請填入競賽期數'); return; }
+  if (!opponentData.length) { alert('沒有對手資料可儲存'); return; }
+
+  try {
+    const records = opponentData.map(d => ([period, d.rank, d.name, d.score]));
+    const params = encodeURIComponent(JSON.stringify({
+      action: 'addContestOpponents',
+      records: records
+    }));
+    await new Promise(resolve => {
+      const img = new Image();
+      img.onload = img.onerror = () => resolve();
+      img.src = `${APPS_SCRIPT_URL}?data=${params}`;
+    });
+    alert(`✅ 已儲存 ${opponentData.length} 筆對手排名！`);
+  } catch(e) {
+    alert('❌ 儲存失敗：' + e.message);
+  }
+}
+
 </script>
 <script src="header.js"></script>
 </body>
