@@ -92,6 +92,7 @@
     .diff-same { color:#888; }
 
     /* 亮點 — 色塊風格 */
+    .highlight-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
     .highlight-list { display:flex; flex-direction:column; gap:12px; }
     .hl-item {
       padding:14px 16px; border-radius:14px;
@@ -184,8 +185,9 @@
 
     /* ===== RESPONSIVE ===== */
     @media(max-width:900px) {
-      .kpi-row { grid-template-columns:repeat(2,1fr); margin-top:-16px; }
+      .kpi-row { grid-template-columns:repeat(2,1fr); }
       .row-grid { grid-template-columns:1fr; }
+      .highlight-grid { grid-template-columns:1fr; }
       .bottom-grid { grid-template-columns:1fr; }
     }
     @media(max-width:480px) {
@@ -204,16 +206,14 @@
     <h1>本期公會競賽戰報</h1>
     <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
       <span class="period-badge" id="periodBadge">載入中...</span>
+      <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
     </div>
   </div>
 </section>
 
 <!-- KPI -->
-<section class="section" style="padding-top:0;">
+<section class="section" style="padding-top:16px;">
   <div class="container">
-    <div style="text-align:right;margin-bottom:12px;position:relative;z-index:3;">
-      <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
-    </div>
     <div class="kpi-row">
       <div class="kpi-card"><div class="kpi-icon">🏆</div><div class="kpi-label">公會總分</div><div class="kpi-value" id="kpiTotal">-</div></div>
       <div class="kpi-card"><div class="kpi-icon">🎖️</div><div class="kpi-label">公會排名</div><div class="kpi-value" id="kpiRank">-</div></div>
@@ -243,33 +243,35 @@
   </div>
 </section>
 
-<!-- Row 2: 排名走勢 + 本期亮點 -->
+<!-- Row 2: 排名走勢 (獨立一行扁的) -->
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="row-grid">
-      <div class="card">
-        <div class="section-title">排名走勢</div>
-        <div class="chart-wrap"><canvas id="chartRank"></canvas></div>
+    <div class="card">
+      <div class="section-title">排名走勢</div>
+      <div class="chart-wrap" style="min-height:120px;max-height:140px;"><canvas id="chartRank"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- Row 3: 本期亮點 (三格) -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="section-title">本期亮點</div>
+    <div class="highlight-grid">
+      <div class="hl-item hl-mvp">
+        <div class="hl-top"><span class="hl-icon">👑</span><span class="hl-label">本期 MVP</span></div>
+        <div class="hl-name" id="mvpName">-</div>
+        <div class="hl-score" id="mvpScore">-</div>
       </div>
-      <div class="card">
-        <div class="section-title">本期亮點</div>
-        <div class="highlight-list">
-          <div class="hl-item hl-mvp">
-            <div class="hl-top"><span class="hl-icon">👑</span><span class="hl-label">本期 MVP</span></div>
-            <div class="hl-name" id="mvpName">-</div>
-            <div class="hl-score" id="mvpScore">-</div>
-          </div>
-          <div class="hl-item hl-progress">
-            <div class="hl-top"><span class="hl-icon">🚀</span><span class="hl-label">進步王</span></div>
-            <div class="hl-name" id="progressName">-</div>
-            <div class="hl-score" id="progressScore">資料累積中</div>
-          </div>
-          <div class="hl-item hl-potential">
-            <div class="hl-top"><span class="hl-icon">🌱</span><span class="hl-label">潛力成員</span></div>
-            <div class="hl-name" id="potentialName">-</div>
-            <div class="hl-score" id="potentialScore">資料累積中</div>
-          </div>
-        </div>
+      <div class="hl-item hl-progress">
+        <div class="hl-top"><span class="hl-icon">🚀</span><span class="hl-label">進步王</span></div>
+        <div class="hl-name" id="progressName">-</div>
+        <div class="hl-score" id="progressScore">資料累積中</div>
+      </div>
+      <div class="hl-item hl-potential">
+        <div class="hl-top"><span class="hl-icon">🌱</span><span class="hl-label">潛力成員</span></div>
+        <div class="hl-name" id="potentialName">-</div>
+        <div class="hl-score" id="potentialScore">資料累積中</div>
       </div>
     </div>
   </div>
