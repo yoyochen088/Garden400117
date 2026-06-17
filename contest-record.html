@@ -814,7 +814,7 @@ function parseOpponentText(text) {
   const scoreCounts = {};
   for (const s of allScores) scoreCounts[s] = (scoreCounts[s] || 0) + 1;
 
-  // 只保留每個分數的第一次出現，且排除出現超過2次的
+  // 只保留每個分數的第一次出現，且排除出現超過2次的（寶箱）
   const uniqueScores = [];
   const seenScores = new Set();
   for (const s of allScores) {
@@ -824,7 +824,10 @@ function parseOpponentText(text) {
     }
   }
 
-  // 按出現順序配對：第 N 個公會名 = 第 N 名，配第 N 個分數
+  // 分數按大到小排序（第一名分數最高，依序遞減）
+  uniqueScores.sort((a, b) => b - a);
+
+  // 按順序配對：第 N 個公會名 = 第 N 名，配排序後第 N 個分數
   const count = Math.min(names.length, uniqueScores.length);
   for (let i = 0; i < count; i++) {
     results.push({ rank: i + 1, name: names[i], score: uniqueScores[i] });
