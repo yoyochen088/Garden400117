@@ -22,14 +22,26 @@
       border-bottom:3px solid #f0c866;
     }
     .hero h1 { font-size:2rem; font-weight:900; color:#a35d00; margin-bottom:8px; }
-    .hero p { font-size:0.9rem; color:#9e7040; margin-bottom:16px; }
-    .hero-nav a {
+    .hero p { font-size:0.9rem; color:#9e7040; }
+    .hero-nav-link {
       display:inline-block; padding:9px 22px; border-radius:18px;
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
       text-decoration:none; font-weight:700; font-size:0.85rem;
       box-shadow:0 3px 12px rgba(233,106,30,.25); transition:transform .15s;
     }
-    .hero-nav a:hover { transform:translateY(-2px); }
+    .hero-nav-link:hover { transform:translateY(-2px); }
+
+    /* 回到頂部 */
+    .back-to-top {
+      position:fixed; bottom:24px; right:24px; width:44px; height:44px;
+      border-radius:50%; background:linear-gradient(135deg,#e96a1e,#f4a46a);
+      color:#fff; font-size:1.2rem; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 16px rgba(233,106,30,.3); cursor:pointer;
+      opacity:0; transition:opacity .3s, transform .15s; pointer-events:none; z-index:99;
+      text-decoration:none;
+    }
+    .back-to-top.show { opacity:1; pointer-events:auto; }
+    .back-to-top:hover { transform:translateY(-3px); }
 
     /* Section */
     .section { padding:32px 0; }
@@ -164,15 +176,17 @@
 <section class="hero">
   <h1>🏆 歷史競賽戰績</h1>
   <p>查看每期公會競賽成績</p>
-  <div class="hero-nav"><a href="contest-dashboard-v2.html">返回本期公會競賽戰報</a></div>
 </section>
 
-<!-- 期數選擇 -->
+<!-- 期數選擇 + 返回 -->
 <section class="section" style="padding-bottom:0;">
   <div class="container">
     <div class="period-bar">
       <label>期數：</label>
       <select id="periodPicker" onchange="loadPeriod()"><option value="">載入中...</option></select>
+    </div>
+    <div style="text-align:center;margin-top:12px;">
+      <a href="contest-dashboard-v2.html" class="hero-nav-link">← 返回本期公會競賽戰報</a>
     </div>
   </div>
 </section>
@@ -220,6 +234,9 @@
 
 <div class="loading" id="loadingState">載入中...</div>
 <div class="empty-state" id="emptyState" style="display:none;">尚無競賽資料</div>
+
+<!-- 回到頂部 -->
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
 
 <script>
 let allData = [], periods = [], summaryData = [];
@@ -326,6 +343,13 @@ function showEmpty() {
 }
 
 init();
+
+// 回到頂部按鈕顯示/隱藏
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backToTop');
+  if (window.scrollY > 400) btn.classList.add('show');
+  else btn.classList.remove('show');
+});
 </script>
 <script src="header.js"></script>
 </body>
