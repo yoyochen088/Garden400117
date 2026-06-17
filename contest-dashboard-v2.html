@@ -23,6 +23,15 @@
       border-bottom:3px solid #f0c866;
       position:relative;
     }
+    .hero-link {
+      position:absolute; top:20px; right:20px;
+      display:inline-flex; align-items:center; gap:6px;
+      padding:10px 22px; border-radius:24px;
+      background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
+      text-decoration:none; font-weight:700; font-size:0.9rem;
+      box-shadow:0 4px 16px rgba(233,106,30,.3); transition:transform .15s;
+    }
+    .hero-link:hover { transform:translateY(-2px); }
     .hero h1 {
       font-size:2.2rem; font-weight:900; color:#a35d00;
       margin-bottom:6px;
@@ -108,13 +117,17 @@
     /* TOP 5 */
     .top5-podium { display:flex; justify-content:center; align-items:flex-end; gap:16px; margin-bottom:12px; padding:12px 0; }
     .podium-item { text-align:center; }
-    .podium-avatar {
-      border-radius:50%; background:#fff3e0; display:flex; align-items:center; justify-content:center;
-      margin:0 auto 6px; border:3px solid #f0c866; position:relative;
+    .podium-frame {
+      margin:0 auto 6px; position:relative; display:flex; align-items:center; justify-content:center;
     }
-    .podium-1 .podium-avatar { width:80px; height:80px; font-size:3rem; border-color:#ffd700; box-shadow:0 6px 20px rgba(255,215,0,.35); }
-    .podium-2 .podium-avatar { width:62px; height:62px; font-size:2.2rem; border-color:#c0c0c0; box-shadow:0 4px 14px rgba(192,192,192,.3); }
-    .podium-3 .podium-avatar { width:54px; height:54px; font-size:1.8rem; border-color:#cd7f32; box-shadow:0 4px 12px rgba(205,127,50,.25); }
+    .podium-frame img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; }
+    .podium-frame .podium-medal { position:relative; z-index:1; }
+    .podium-1 .podium-frame { width:88px; height:88px; }
+    .podium-1 .podium-medal { font-size:3rem; }
+    .podium-2 .podium-frame { width:68px; height:68px; }
+    .podium-2 .podium-medal { font-size:2.2rem; }
+    .podium-3 .podium-frame { width:58px; height:58px; }
+    .podium-3 .podium-medal { font-size:1.8rem; }
     .podium-1 .podium-name { font-size:1rem; font-weight:900; }
     .podium-2 .podium-name { font-size:0.85rem; font-weight:700; }
     .podium-3 .podium-name { font-size:0.8rem; font-weight:700; }
@@ -123,20 +136,18 @@
     .podium-2 .podium-score { font-size:0.85rem; font-weight:800; color:#8b5a00; }
     .podium-3 .podium-score { font-size:0.8rem; font-weight:700; color:#8b5a00; }
     .top5-rest { border-top:1px solid #f5deb3; padding-top:8px; }
-    .rest-item { display:flex; align-items:center; padding:6px 4px; font-size:0.92rem; gap:10px; }
+    .rest-item { display:flex; align-items:center; padding:6px 4px; font-size:0.92rem; gap:8px; }
     .rest-rank { font-weight:700; color:#a08050; width:20px; flex-shrink:0; }
     .rest-name { flex:1; font-weight:700; color:#4a3520; }
-    .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:700; white-space:nowrap; }
+    .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:700; white-space:nowrap; flex-shrink:0; }
     .rt-王者花匠 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
     .rt-大師花匠 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
     .rt-黃金花匠 { background:linear-gradient(135deg,#f4c430,#ffd700); color:#5a4000; }
     .rt-白銀花匠 { background:linear-gradient(135deg,#9e9e9e,#d4d4d4); color:#fff; }
     .rt-青銅花匠 { background:linear-gradient(135deg,#cd7f32,#e8a96a); color:#fff; }
     .rt-無稱號 { background:#f0f0f0; color:#888; }
-    .rest-score { font-weight:900; color:#e96a1e; font-size:1.05rem; flex-shrink:0; }
-    .rest-score-top { font-weight:900; color:#e96a1e; font-size:1.1rem; flex-shrink:0; }
-    .rest-score-top::before { content:'🌿 '; font-size:0.85rem; }
-    .rest-score-top::after { content:' 🌿'; font-size:0.85rem; }
+    .rest-score { font-weight:900; color:#e96a1e; font-size:1.05rem; flex-shrink:0; white-space:nowrap; }
+    .rest-score-top { font-weight:900; color:#e96a1e; font-size:1.1rem; flex-shrink:0; white-space:nowrap; }
     .view-more {
       display:inline-block; margin-top:12px;
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
@@ -189,6 +200,7 @@
 
 <!-- HERO -->
 <section class="hero">
+  <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
   <h1>本期公會競賽戰報</h1>
   <div class="period-badge" id="periodBadge">載入中...</div>
   <div class="date-line" id="dateLine"></div>
@@ -393,11 +405,15 @@ async function init() {
     const top5 = latestData.slice(0,5);
     const medals = ['🥇','🥈','🥉'];
     const podiumCls = ['podium-1','podium-2','podium-3'];
+    const frameImgs = ['assets/contest/frame-gold.png','assets/contest/frame-silver.png','assets/contest/frame-bronze.png'];
     // 顯示順序：2,1,3（銀、金、銅）
     const podiumOrder = [1,0,2].filter(i=>top5[i]).map(i=>({d:top5[i],rank:i}));
     document.getElementById('top5Podium').innerHTML = podiumOrder.map(({d,rank}) => {
       return `<div class="podium-item ${podiumCls[rank]}">
-        <div class="podium-avatar">${medals[rank]}</div>
+        <div class="podium-frame">
+          <img src="${frameImgs[rank]}" alt="">
+          <span class="podium-medal">${medals[rank]}</span>
+        </div>
         <div class="podium-name">${d.nickname}</div>
         <div class="podium-score">${d.score.toLocaleString()}</div>
       </div>`;
