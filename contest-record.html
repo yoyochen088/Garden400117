@@ -782,34 +782,53 @@ function parseOpponentText(text) {
   const results = [];
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
-  // 嘗試匹配：數字(名次) + 文字(公會名) + 數字(分數)
-  for (const line of lines) {
-    // 模式1: "1 璀璨 14012" 或 "2 愛戀櫻花雨 11859"
-    const m = line.match(/^(\d{1,2})\s+(.+?)\s+(\d{4,6})$/);
-    if (m) {
-      results.push({ rank: parseInt(m[1]), name: m[2].trim(), score: parseInt(m[3]) });
-      continue;
-    }
-    // 模式2: 只有公會名+分數（沒名次）
-    const m2 = line.match(/^(.{2,10})\s+(\d{4,6})$/);
-    if (m2 && !m2[1].match(/^\d+$/)) {
-      results.push({ rank: results.length + 1, name: m2[1].trim(), score: parseInt(m2[2]) });
+  // 找到「船隻」或「船只」之後才開始解析
+  let startIdx = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (/船[隻只]/.test(lines[i])) { startIdx = i + 1; break; }
+  }
+  const dataLines = lines.slice(startIdx);
+
+  // 已知 UI 雜訊
+  const NOISE = ['甲級聯賽','乙級聯賽','丙級聯賽','甲級','乙級','丙級','聯賽',
+    '競賽榮譽','競賽','榮譽','任務','排名','獎勵','船隻','船只','商店'];
+
+  // 按出現順序收集公會名（中文2~6字，不在雜訊裡，去重）
+  const names = [];
+  for (const line of dataLines) {
+    const nameMatches = line.match(/[\u4e00-\u9fff]{2,6}/g) || [];
+    for (const n of nameMatches) {
+      if (NOISE.includes(n) || NOISE.some(noise => n.includes(noise))) continue;
+      if (!names.includes(n)) names.push(n);
     }
   }
 
-  // 如果沒解析到，試逐行找分數
-  if (!results.length) {
-    const scoreLines = lines.filter(l => /\d{4,6}/.test(l));
-    const nameLines = lines.filter(l => !(/^\d+$/.test(l)) && !(/\d{4,6}/.test(l)) && l.length >= 2 && l.length <= 10);
-    for (let i = 0; i < Math.min(scoreLines.length, nameLines.length); i++) {
-      const score = parseInt(scoreLines[i].match(/(\d{4,6})/)[1]);
-      results.push({ rank: i + 1, name: nameLines[i], score });
+  // 按出現順序收集分數（4~5位數字）
+  const allScores = [];
+  for (const line of dataLines) {
+    const scoreMatches = line.match(/\d{4,5}/g) || [];
+    for (const s of scoreMatches) allScores.push(parseInt(s));
+  }
+
+  // 統計每個分數出現次數，出現超過2次的是寶箱數字要排除
+  const scoreCounts = {};
+  for (const s of allScores) scoreCounts[s] = (scoreCounts[s] || 0) + 1;
+
+  // 只保留每個分數的第一次出現，且排除出現超過2次的
+  const uniqueScores = [];
+  const seenScores = new Set();
+  for (const s of allScores) {
+    if (!seenScores.has(s) && scoreCounts[s] <= 2) {
+      seenScores.add(s);
+      uniqueScores.push(s);
     }
   }
 
-  // 按分數排序
-  results.sort((a, b) => b.score - a.score);
-  results.forEach((d, i) => d.rank = i + 1);
+  // 按出現順序配對：第 N 個公會名 = 第 N 名，配第 N 個分數
+  const count = Math.min(names.length, uniqueScores.length);
+  for (let i = 0; i < count; i++) {
+    results.push({ rank: i + 1, name: names[i], score: uniqueScores[i] });
+  }
 
   return results;
 }
