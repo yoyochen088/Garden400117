@@ -18,20 +18,22 @@
 
     /* ===== HERO ===== */
     .hero {
-      text-align:center; padding:48px 20px 36px;
+      padding:36px 20px 28px;
       background:linear-gradient(180deg,#fff8ed,#ffefd4);
       border-bottom:3px solid #f0c866;
       position:relative;
+      display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap;
     }
+    .hero-content { text-align:center; }
     .hero-link {
-      position:absolute; top:20px; right:20px;
       display:inline-flex; align-items:center; gap:6px;
       padding:10px 22px; border-radius:24px;
       background:linear-gradient(135deg,#e96a1e,#f4a46a); color:#fff;
       text-decoration:none; font-weight:700; font-size:0.9rem;
       box-shadow:0 4px 16px rgba(233,106,30,.3); transition:transform .15s;
+      position:absolute; right:20px; top:50%; transform:translateY(-50%);
     }
-    .hero-link:hover { transform:translateY(-2px); }
+    .hero-link:hover { transform:translateY(calc(-50% - 2px)); }
     .hero h1 {
       font-size:2.2rem; font-weight:900; color:#a35d00;
       margin-bottom:6px;
@@ -117,17 +119,13 @@
     /* TOP 5 */
     .top5-podium { display:flex; justify-content:center; align-items:flex-end; gap:16px; margin-bottom:12px; padding:12px 0; }
     .podium-item { text-align:center; }
-    .podium-frame {
-      margin:0 auto 6px; position:relative; display:flex; align-items:center; justify-content:center;
+    .podium-avatar {
+      border-radius:50%; background:#fff3e0; display:flex; align-items:center; justify-content:center;
+      margin:0 auto 6px; border:3px solid #f0c866;
     }
-    .podium-frame img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; }
-    .podium-frame .podium-medal { position:relative; z-index:1; }
-    .podium-1 .podium-frame { width:88px; height:88px; }
-    .podium-1 .podium-medal { font-size:3rem; }
-    .podium-2 .podium-frame { width:68px; height:68px; }
-    .podium-2 .podium-medal { font-size:2.2rem; }
-    .podium-3 .podium-frame { width:58px; height:58px; }
-    .podium-3 .podium-medal { font-size:1.8rem; }
+    .podium-1 .podium-avatar { width:80px; height:80px; font-size:3rem; border-color:#ffd700; box-shadow:0 6px 20px rgba(255,215,0,.35); }
+    .podium-2 .podium-avatar { width:62px; height:62px; font-size:2.2rem; border-color:#c0c0c0; box-shadow:0 4px 14px rgba(192,192,192,.3); }
+    .podium-3 .podium-avatar { width:54px; height:54px; font-size:1.8rem; border-color:#cd7f32; box-shadow:0 4px 12px rgba(205,127,50,.25); }
     .podium-1 .podium-name { font-size:1rem; font-weight:900; }
     .podium-2 .podium-name { font-size:0.85rem; font-weight:700; }
     .podium-3 .podium-name { font-size:0.8rem; font-weight:700; }
@@ -139,6 +137,12 @@
     .rest-item { display:flex; align-items:center; padding:6px 4px; font-size:0.92rem; gap:8px; }
     .rest-rank { font-weight:700; color:#a08050; width:20px; flex-shrink:0; }
     .rest-name { flex:1; font-weight:700; color:#4a3520; }
+    .rest-role { font-size:0.7rem; padding:2px 7px; border-radius:8px; font-weight:600; margin-left:6px; }
+    .rr-會長 { background:linear-gradient(135deg,#ff4e8a,#ff8c42); color:#fff; }
+    .rr-副會長 { background:linear-gradient(135deg,#ff8c00,#ffb347); color:#fff; }
+    .rr-理事 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
+    .rr-菁英 { background:linear-gradient(135deg,#4a90d9,#74b9ff); color:#fff; }
+    .rr-成員 { background:#e8f5e9; color:#2e7d32; }
     .rest-title { font-size:0.75rem; padding:3px 10px; border-radius:10px; font-weight:700; white-space:nowrap; flex-shrink:0; }
     .rt-王者花匠 { background:linear-gradient(135deg,#e96a1e,#ff4e8a); color:#fff; }
     .rt-大師花匠 { background:linear-gradient(135deg,#9b59b6,#c39bd3); color:#fff; }
@@ -200,10 +204,11 @@
 
 <!-- HERO -->
 <section class="hero">
+  <div class="hero-content">
+    <h1>本期公會競賽戰報</h1>
+    <div class="period-badge" id="periodBadge">載入中...</div>
+  </div>
   <a href="contest-history-v2.html" class="hero-link">📋 歷史戰績</a>
-  <h1>本期公會競賽戰報</h1>
-  <div class="period-badge" id="periodBadge">載入中...</div>
-  <div class="date-line" id="dateLine"></div>
 </section>
 
 <!-- KPI -->
@@ -405,15 +410,11 @@ async function init() {
     const top5 = latestData.slice(0,5);
     const medals = ['🥇','🥈','🥉'];
     const podiumCls = ['podium-1','podium-2','podium-3'];
-    const frameImgs = ['assets/contest/frame-gold.png','assets/contest/frame-silver.png','assets/contest/frame-bronze.png'];
     // 顯示順序：2,1,3（銀、金、銅）
     const podiumOrder = [1,0,2].filter(i=>top5[i]).map(i=>({d:top5[i],rank:i}));
     document.getElementById('top5Podium').innerHTML = podiumOrder.map(({d,rank}) => {
       return `<div class="podium-item ${podiumCls[rank]}">
-        <div class="podium-frame">
-          <img src="${frameImgs[rank]}" alt="">
-          <span class="podium-medal">${medals[rank]}</span>
-        </div>
+        <div class="podium-avatar">${medals[rank]}</div>
         <div class="podium-name">${d.nickname}</div>
         <div class="podium-score">${d.score.toLocaleString()}</div>
       </div>`;
@@ -422,8 +423,9 @@ async function init() {
     document.getElementById('top5Rest').innerHTML = top5.map((d,i) => {
       const titleCls = d.title ? `rt-${d.title}` : '';
       const titleBadge = d.title ? `<span class="rest-title ${titleCls}">${d.title}</span>` : '';
+      const roleBadge = d.role ? `<span class="rest-role rr-${d.role}">${d.role}</span>` : '';
       const scoreCls = i < 3 ? 'rest-score-top' : 'rest-score';
-      return `<div class="rest-item"><span class="rest-rank">${i+1}</span><span class="rest-name">${d.nickname}</span>${titleBadge}<span class="${scoreCls}">${d.score.toLocaleString()}</span></div>`;
+      return `<div class="rest-item"><span class="rest-rank">${i+1}</span><span class="rest-name">${d.nickname}${roleBadge}</span>${titleBadge}<span class="${scoreCls}">${d.score.toLocaleString()}</span></div>`;
     }).join('');
 
     // 稱號分布
