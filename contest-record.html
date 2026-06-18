@@ -52,27 +52,30 @@
     /* 手機：辨識結果改卡片式 */
     @media(max-width:600px) {
       .result-table thead { display:none; }
-      .result-table, .result-table tbody, .result-table tr, .result-table td {
-        display:block; width:100%;
-      }
+      .result-table tbody { display:block; }
       .result-table tr {
+        display:grid; grid-template-columns:auto 1fr auto; gap:4px 8px; align-items:center;
         border:1px solid var(--border); border-radius:10px; margin-bottom:10px;
         padding:12px; background:#fff;
-        display:grid; grid-template-columns:30px 1fr auto; gap:4px 8px; align-items:center;
       }
       .result-table tr:hover { background:var(--orange-light); }
-      .result-table td { border:none; padding:2px 0; }
-      /* Row 1: # / 稱號 / X */
+      .result-table td { border:none; padding:2px 0; display:block; }
+      /* Row 1: # / 職稱 / X */
       .result-table td:nth-child(1) { grid-row:1; grid-column:1; font-weight:700; font-size:1rem; }
-      .result-table td:nth-child(6) { grid-row:1; grid-column:2; font-size:0.78rem; color:var(--text-muted); }
-      .result-table td:nth-child(7) { grid-row:1; grid-column:3; }
-      /* Row 2: 伺服器 / 暱稱 / 職稱 */
+      .result-table td:nth-child(4) { grid-row:1; grid-column:2; }
+      .result-table td:nth-child(7) { grid-row:1; grid-column:3; justify-self:end; }
+      /* Row 2: 伺服器 / 名稱 */
       .result-table td:nth-child(2) { grid-row:2; grid-column:1; }
-      .result-table td:nth-child(3) { grid-row:2; grid-column:2; }
-      .result-table td:nth-child(4) { grid-row:2; grid-column:3; }
-      /* Row 3: 分數 */
-      .result-table td:nth-child(5) { grid-row:3; grid-column:1 / -1; font-weight:700; color:var(--orange); }
-      .title-divider td { display:block !important; width:100% !important; grid-column:1/-1; }
+      .result-table td:nth-child(3) { grid-row:2; grid-column:2 / -1; }
+      /* Row 3: 稱號 / 分數 */
+      .result-table td:nth-child(6) { grid-row:3; grid-column:1; font-size:0.78rem; color:var(--text-muted); }
+      .result-table td:nth-child(5) { grid-row:3; grid-column:2; font-weight:700; color:var(--orange); }
+      /* 花匠分隔列 */
+      .result-table tr.title-divider {
+        display:block; padding:8px 12px; border:none; margin-bottom:6px;
+        background:var(--orange-light); border-radius:8px;
+      }
+      .title-divider td { display:block !important; width:100% !important; font-size:0.85rem; }
     }
 
     .title-divider { background:var(--orange-light); font-weight:700; color:var(--orange-dark); font-size:0.85rem; }
