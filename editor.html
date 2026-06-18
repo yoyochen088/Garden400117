@@ -92,6 +92,41 @@
     }
 
     /* nav-dropdown 由 header.js 統一注入 */
+
+    /* ── 競賽紀錄相關樣式 ── */
+    .card-title { font-size:0.9rem; font-weight:700; color:var(--pink-dark); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .drop-zone {
+      border:2.5px dashed var(--pink-mid); border-radius:var(--radius);
+      background:var(--pink-light); padding:40px 20px;
+      text-align:center; cursor:pointer; transition:all .2s; margin-bottom:16px;
+    }
+    .drop-zone.drag-over { border-color:var(--pink); background:#fde8d4; }
+    .drop-zone .dz-icon { font-size:2.4rem; margin-bottom:10px; }
+    .drop-zone .dz-text { font-size:0.95rem; font-weight:700; color:var(--pink-dark); margin-bottom:4px; }
+    .drop-zone .dz-sub { font-size:0.8rem; color:#9e6b7e; }
+    .progress-wrap { margin:12px 0; display:none; }
+    .progress-bar { background:#f0e0d0; border-radius:8px; height:10px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,#c2510b,#e96a1e); border-radius:8px; transition:width .3s; width:0%; }
+    .progress-text { font-size:0.82rem; color:#9e6b7e; text-align:center; margin-top:6px; }
+    .result-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    .result-table thead tr { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; }
+    .result-table th { padding:10px 12px; text-align:left; font-weight:600; }
+    .result-table td { padding:8px 12px; border-bottom:1px solid var(--border); }
+    .result-table tbody tr:hover { background:var(--pink-light); }
+    .result-table input { padding:5px 8px; border:1.5px solid var(--pink-mid); border-radius:6px; font-size:0.88rem; background:var(--bg); color:#3d1a2e; outline:none; width:100%; }
+    .result-table input:focus { border-color:var(--pink); }
+    .title-divider { background:var(--pink-light); font-weight:700; color:var(--pink-dark); font-size:0.85rem; }
+    .title-divider td { padding:8px 12px !important; }
+    .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .period-input { display:flex; gap:10px; align-items:center; margin-bottom:14px; }
+    .period-input label { font-size:0.85rem; font-weight:600; color:var(--pink-dark); white-space:nowrap; }
+    .period-input input { padding:8px 12px; border:1.5px solid var(--pink-mid); border-radius:8px; font-size:0.9rem; background:var(--bg); color:#3d1a2e; outline:none; width:140px; }
+    .btn-primary { background:linear-gradient(135deg,#c2510b,#e96a1e); color:#fff; box-shadow:0 3px 12px rgba(233,106,30,.3); }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(233,106,30,.4); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .empty-state { text-align:center; padding:40px; color:#9e6b7e; font-size:0.9rem; }
+    #summaryResult input { padding:7px 10px; border:1.5px solid var(--pink-mid); border-radius:7px; font-size:0.88rem; background:var(--bg); color:#3d1a2e; outline:none; }
+    #summaryResult input:focus { border-color:var(--pink); }
   </style>
 </head>
 <body>
@@ -103,6 +138,7 @@
   <button class="tab active" onclick="switchTab('tm',this)">&#128101;<br>成員管理</button>
   <button class="tab" onclick="switchTab('tf',this)">&#127800;<br>花卉資料</button>
   <button class="tab" onclick="switchTab('tc',this)">&#127873;<br>兌換碼</button>
+  <button class="tab" onclick="switchTab('tr',this)">&#128248;<br>競賽紀錄</button>
 </div>
 <div id="tm" class="panel active">
   <div id="mlist"><div class="loading">載入中...</div></div>
@@ -158,11 +194,115 @@
   <div id="clist"><div class="loading">載入中...</div></div>
   <button class="btn-add" onclick="addCoupon()">＋ 新增兌換碼</button>
 </div>
+<div id="tr" class="panel">
+  <!-- 設定 -->
+  <div class="card">
+    <div class="card-title">📅 期數設定</div>
+    <div class="period-input">
+      <label>競賽期數：</label>
+      <input type="date" id="periodInput" />
+    </div>
+  </div>
+
+  <!-- 總結截圖 -->
+  <div class="card">
+    <div class="card-title">📊 公會總結</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="drop-zone" id="summaryDropZone" onclick="document.getElementById('summary-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
+        <div class="dz-icon" style="font-size:1.6rem;">📊</div>
+        <div class="dz-text" style="font-size:0.85rem;">上傳總結截圖</div>
+      </div>
+      <input type="file" id="summary-file" accept="image/*" style="display:none;" onchange="handleSummaryFile(this.files[0])" />
+      <div id="summaryResult" style="flex:2;min-width:200px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><label class="lbl">成員數</label><input type="number" id="sumMembers" placeholder="" style="width:100%;" /></div>
+          <div><label class="lbl">總分</label><input type="number" id="sumTotal" placeholder="" style="width:100%;" /></div>
+          <div><label class="lbl">名次</label><input type="text" id="sumRank" placeholder="" style="width:100%;" /></div>
+          <div><label class="lbl">評級</label><input type="text" id="sumGrade" placeholder="" style="width:100%;" /></div>
+        </div>
+      </div>
+    </div>
+    <div id="summaryStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
+  </div>
+
+  <!-- 對手排名截圖 -->
+  <div class="card">
+    <div class="card-title">⚔️ 對手排名</div>
+    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+      <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
+        <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
+        <div class="dz-text" style="font-size:0.85rem;">上傳對手排名截圖（可多張）</div>
+        <div class="dz-sub">排名畫面，辨識公會名稱與分數，多張會合併</div>
+      </div>
+      <input type="file" id="opponent-file" accept="image/*" multiple style="display:none;" onchange="handleOpponentFiles(this.files)" />
+      <div id="opponentResult" style="flex:2;min-width:260px;">
+        <table class="result-table" id="opponentTable" style="display:none;">
+          <thead><tr><th>#</th><th>公會名稱</th><th>分數</th><th></th></tr></thead>
+          <tbody id="opponentBody"></tbody>
+        </table>
+        <div class="btn-row" id="opponentBtnRow" style="display:none;">
+          <button class="btn btn-primary" style="padding:8px 16px;font-size:.85rem;" onclick="addOpponentRow()">＋ 手動新增</button>
+          <button class="btn" style="background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;padding:8px 16px;font-size:.85rem;" onclick="saveOpponents()">💾 儲存對手排名</button>
+        </div>
+      </div>
+    </div>
+    <div id="opponentStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
+  </div>
+
+  <!-- 上傳 -->
+  <div class="card">
+    <div class="card-title">📷 上傳成員截圖</div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('file-input').click()">
+      <div class="dz-icon">📂</div>
+      <div class="dz-text">點擊或拖曳截圖到這裡</div>
+      <div class="dz-sub">支援 JPG、PNG，可多張（多頁截圖）</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)" />
+    <div id="previewList" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">準備辨識中...</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" style="background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;" id="ocrBtn" onclick="startOCR()" disabled>🔍 開始辨識</button>
+      <button class="btn btn-sec" onclick="clearAll()">🗑️ 清除</button>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="card-title">📋 辨識結果（可修正）</div>
+
+    <!-- 缺少成員提示 -->
+    <div id="missingAlert" style="display:none;background:#fff3e0;border:1px solid #ffcc80;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:0.85rem;color:#e65100;">
+      <strong>⚠️ 以下成員未辨識到：</strong>
+      <div id="missingList" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="result-table">
+        <thead><tr><th>#</th><th>伺服器</th><th>暱稱</th><th>職稱</th><th>分數</th><th>稱號</th><th></th></tr></thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sec" onclick="addManualRow()">＋ 手動新增</button>
+      <button class="btn" style="background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;" id="saveBtn" onclick="saveToSheet()">💾 儲存到 Sheet</button>
+    </div>
+    <div class="progress-wrap" id="saveProgressWrap" style="display:none;">
+      <div class="progress-bar"><div class="progress-fill" id="saveProgressFill"></div></div>
+      <div class="progress-text" id="saveProgressText"></div>
+    </div>
+  </div>
+</div>
 <div class="bbar">
   <button class="btn" style="background:#4a90d9;color:#fff;" id="smBtn" onclick="saveM()">&#128190; 儲存成員</button>
   <button class="btn" style="background:#34a853;color:#fff;display:none;" id="sfBtn" onclick="saveFlowers()">&#128190; 儲存花卉</button>
   <button class="btn" style="background:#e96a1e;color:#fff;display:none;" id="scBtn" onclick="saveCoupons()">&#128190; 儲存兌換碼</button>
 </div>
+<script src="contest-record.js"></script>
 <script>
 
 const QL=['仙','華','珍','普','凡'],SL=[14,21,23,25,28,30];
@@ -601,9 +741,27 @@ async function saveCoupons() {
   document.getElementById('sfBtn').style.display='none';
   document.getElementById('smBtn').style.display='inline-flex';
   document.getElementById('scBtn').style.display='none';
+
+  // 初始化競賽紀錄功能
+  initContestRecord();
 })();
 </script>
+
+<!-- 示意圖 Lightbox -->
+<div class="help-lightbox" id="helpLightbox" onclick="closeHelp()" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;">
+  <button onclick="closeHelp()" style="position:absolute;top:16px;right:20px;color:#fff;font-size:2rem;cursor:pointer;background:none;border:none;line-height:1;">✕</button>
+  <img id="helpImg" src="" alt="示意圖" style="max-width:90%;max-height:90vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.4);" />
 </div>
+<script>
+function showHelp(imgSrc) {
+  document.getElementById('helpImg').src = imgSrc;
+  document.getElementById('helpLightbox').style.display = 'flex';
+}
+function closeHelp() {
+  document.getElementById('helpLightbox').style.display = 'none';
+}
+</script>
+
 <script src="header.js"></script>
 </body>
 </html>
