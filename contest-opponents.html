@@ -243,6 +243,11 @@ async function init() {
     renderRivalList();
     renderHotTags();
     populateTrendSelect();
+
+    // 預設選擇常見對手第一名
+    const counts = getOppCounts();
+    const topOpp = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+    if (topOpp) selectOpp(topOpp[0]);
   } catch(e) {
     document.getElementById('topList').innerHTML = '<div class="loading">&#x26A0;&#xFE0F; '+e.message+'</div>';
   }
