@@ -3,261 +3,561 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>對手分析 - 璀璨</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <title>公會對戰情報中心 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F338;</text></svg>" />
   <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
-    :root { --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a; --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#fff; --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0; --shadow:0 2px 12px rgba(233,106,30,.10); --radius:14px; }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
-    main { max-width:900px; margin:0 auto; padding:24px 16px; }
-    h1 { text-align:center; color:var(--orange-dark); font-size:1.3rem; margin-bottom:4px; }
-    .subtitle { text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:24px; }
-    .card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; margin-bottom:16px; }
-    .card-title { font-size:0.95rem; font-weight:700; color:var(--orange-dark); margin-bottom:14px; }
+    :root{--orange:#e96a1e;--orange-light:#fef0e7;--orange-mid:#f4a46a;--orange-dark:#c2510b;--bg:#fff8f5;--card-bg:#fff;--text:#3d1a2e;--text-muted:#9e6b7e;--border:#f8d5b0;--shadow:0 2px 12px rgba(233,106,30,.10);--radius:14px;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-    /* 搜尋 */
-    .search-bar { display:flex; gap:10px; margin-bottom:20px; }
-    .search-bar input { flex:1; padding:10px 14px; border:1.5px solid var(--orange-mid); border-radius:10px; font-size:0.95rem; outline:none; background:#fff; }
-    .search-bar input:focus { border-color:var(--orange); }
+    /* Hero */
+    .hero{position:relative;width:100%;min-height:300px;background:linear-gradient(135deg,#fff8f5 0%,#fef0e7 50%,#fde8d4 100%);overflow:hidden;border-bottom:1px solid var(--border);}
+    .hero::before{content:'';position:absolute;inset:0;background:url('images/hero-battle.png') center 40%/cover no-repeat;opacity:0.25;}
+    .hero-content{position:relative;max-width:1400px;margin:0 auto;padding:48px 40px;display:flex;align-items:center;}
+    .hero-text{max-width:700px;}
+    .hero-badge{font-size:0.72rem;font-weight:700;color:var(--orange);background:rgba(233,106,30,0.1);display:inline-block;padding:4px 12px;border-radius:20px;margin-bottom:12px;letter-spacing:0.5px;}
+    .hero h1{font-size:2.2rem;font-weight:900;color:var(--text);margin-bottom:8px;}
+    .hero-sub{font-size:0.95rem;color:var(--text-muted);margin-bottom:24px;}
+    .kpi-row{display:flex;gap:14px;flex-wrap:wrap;}
+    .kpi-box{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px 20px;min-width:130px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:2px;}
+    .kpi-icon{font-size:1.2rem;}
+    .kpi-val{font-size:1.3rem;font-weight:900;color:var(--text);}
+    .kpi-label{font-size:0.72rem;color:var(--text-muted);}
 
-    /* 統計卡片 */
-    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
-    .stat-card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:14px; text-align:center; }
-    .stat-value { font-size:1.4rem; font-weight:900; color:var(--orange); }
-    .stat-label { font-size:0.75rem; color:var(--text-muted); margin-top:4px; }
+    /* Main Grid */
+    .main-grid{max-width:1400px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:280px 1fr 300px;gap:20px;}
 
-    /* 對戰紀錄 */
-    .record-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
-    .record-item:last-child { border-bottom:none; }
-    .record-period { font-size:0.82rem; color:var(--text-muted); width:90px; flex-shrink:0; }
-    .record-rank { display:flex; align-items:center; gap:6px; flex:1; }
-    .rank-badge { padding:3px 10px; border-radius:8px; font-size:0.82rem; font-weight:700; }
-    .rank-win { background:#e8f5e9; color:#2e7d32; }
-    .rank-lose { background:#fce4ec; color:#c62828; }
-    .rank-tie { background:#f5f5f5; color:#888; }
-    .record-score { font-weight:700; color:var(--text); font-size:0.9rem; }
+    /* Cards */
+    .card{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px;margin-bottom:16px;}
+    .card-title{font-size:0.92rem;font-weight:700;color:var(--orange-dark);margin-bottom:14px;}
 
-    /* 常見對手 */
-    .freq-list { display:flex; flex-direction:column; gap:8px; }
-    .freq-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--orange-light); border-radius:10px; cursor:pointer; transition:background .15s; }
-    .freq-item:hover { background:#fde8d4; }
-    .freq-name { flex:1; font-weight:700; color:var(--text); }
-    .freq-count { font-size:0.85rem; color:var(--orange-dark); font-weight:600; }
-    .freq-winrate { font-size:0.85rem; font-weight:700; }
-    .wr-good { color:#2e7d32; }
-    .wr-bad { color:#c62828; }
-    .wr-neutral { color:#888; }
+    /* Search */
+    .search-row{display:flex;gap:8px;margin-bottom:12px;}
+    .search-row input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;transition:border .2s;}
+    .search-row input:focus{border-color:var(--orange);}
+    .btn-search{width:40px;height:40px;border:none;background:var(--orange);color:#fff;border-radius:10px;font-size:1.1rem;cursor:pointer;transition:transform .15s;}
+    .btn-search:hover{transform:scale(1.05);}
+    .hot-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+    .hot-label{font-size:0.75rem;color:var(--text-muted);}
+    .hot-tag{font-size:0.75rem;padding:4px 10px;background:var(--orange-light);color:var(--orange-dark);border-radius:12px;cursor:pointer;transition:background .15s;font-weight:600;}
+    .hot-tag:hover{background:#fde0c4;}
 
-    /* 期數列表 */
-    .period-select { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-    .period-select label { font-size:0.9rem; font-weight:600; color:var(--orange-dark); }
-    .period-select select { padding:8px 14px; border:1.5px solid var(--orange-mid); border-radius:10px; font-size:0.9rem; background:#fff; outline:none; }
-    .opp-rank-list { }
-    .opp-rank-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
-    .opp-rank-item:last-child { border-bottom:none; }
-    .opp-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; background:var(--orange-light); color:var(--orange-dark); flex-shrink:0; }
-    .opp-num.self { background:var(--orange); color:#fff; }
-    .opp-name { flex:1; font-weight:600; }
-    .opp-name.self { color:var(--orange); font-weight:800; }
-    .opp-score { font-weight:700; color:var(--text); }
+    /* TOP list */
+    .top-list{display:flex;flex-direction:column;gap:8px;}
+    .top-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .15s;}
+    .top-item:hover{background:var(--orange-light);}
+    .top-medal{font-size:1.1rem;width:28px;text-align:center;}
+    .top-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--orange-light);color:var(--orange-dark);font-size:0.75rem;font-weight:700;}
+    .top-name{flex:1;font-weight:600;font-size:0.88rem;}
+    .top-count{font-size:0.8rem;color:var(--text-muted);font-weight:600;}
 
-    .loading { text-align:center; padding:40px; color:var(--text-muted); }
-    .empty { text-align:center; padding:30px; color:var(--text-muted); font-size:0.9rem; }
+    /* Rivals */
+    .rival-list{display:flex;flex-direction:column;gap:12px;}
+    .rival-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--orange-light);cursor:pointer;transition:background .15s;}
+    .rival-item:hover{background:#fde0c4;}
+    .rival-avatar{font-size:1.5rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;border:2px solid var(--border);}
+    .rival-info{flex:1;}
+    .rival-name{font-weight:700;font-size:0.9rem;}
+    .rival-meta{font-size:0.78rem;color:var(--text-muted);margin-top:2px;}
 
-    @media(max-width:600px) {
-      .stats-row { grid-template-columns:repeat(2,1fr); }
+    /* Battle Card */
+    .battle-header{margin-bottom:16px;}
+    .battle-name-row{display:flex;align-items:center;gap:14px;}
+    .battle-opp-avatar{width:50px;height:50px;border-radius:50%;background:var(--orange-light);display:flex;align-items:center;justify-content:center;font-size:1.6rem;border:2px solid var(--border);}
+    .battle-opp-name{font-size:1.3rem;font-weight:900;color:var(--text);}
+    .battle-opp-badge{font-size:0.78rem;color:var(--orange);font-weight:600;background:var(--orange-light);display:inline-block;padding:2px 10px;border-radius:10px;margin-top:4px;}
+    .bs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+    .bs-item{text-align:center;padding:14px 8px;background:var(--orange-light);border-radius:10px;}
+    .bs-val{font-size:1.4rem;font-weight:900;}
+    .bs-label{font-size:0.72rem;color:var(--text-muted);margin-top:4px;}
+    .be-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .be-item{padding:12px;background:#fafafa;border-radius:10px;border:1px solid var(--border);}
+    .be-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;}
+    .be-val{font-size:1rem;font-weight:700;color:var(--text);}
+
+    /* History Table */
+    .history-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:14px;}
+    .history-table thead tr{background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;}
+    .history-table th{padding:10px 8px;text-align:center;font-weight:600;white-space:nowrap;}
+    .history-table td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:center;}
+    .history-table tbody tr:hover{background:var(--orange-light);}
+    .badge-win{background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:8px;font-weight:700;font-size:0.78rem;}
+    .badge-lose{background:#fce4ec;color:#c62828;padding:3px 10px;border-radius:8px;font-weight:700;font-size:0.78rem;}
+    .badge-tie{background:#f5f5f5;color:#888;padding:3px 10px;border-radius:8px;font-weight:700;font-size:0.78rem;}
+
+    /* Pagination */
+    .pagination{display:flex;justify-content:center;align-items:center;gap:4px;}
+    .pg-btn{border:1px solid var(--border);background:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:0.82rem;transition:background .15s;}
+    .pg-btn:hover{background:var(--orange-light);}
+    .pg-active{background:var(--orange);color:#fff;padding:6px 12px;border-radius:8px;font-weight:700;font-size:0.82rem;}
+    .pg-dots{padding:6px 8px;color:var(--text-muted);}
+
+    /* Chart */
+    .chart-wrap{position:relative;height:200px;margin-top:10px;}
+    .chart-wrap-donut{position:relative;height:180px;margin-top:10px;}
+    .chart-header{display:flex;justify-content:flex-end;margin-bottom:4px;}
+    .chart-header select{padding:5px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;outline:none;}
+
+    /* Donut legend */
+    .donut-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center;}
+    .legend-item{font-size:0.75rem;display:flex;align-items:center;gap:4px;color:var(--text-muted);}
+    .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+    /* Tips */
+    .tip-box{padding:14px;background:linear-gradient(135deg,#fef0e7,#fff8f5);border-radius:10px;border:1px solid var(--border);}
+    .tip-text{font-size:0.88rem;line-height:1.6;color:var(--text);}
+
+    .loading{text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;}
+
+    /* Responsive */
+    @media(max-width:1100px){.main-grid{grid-template-columns:1fr;}}
+    @media(max-width:768px){
+      .hero-content{padding:32px 20px;}
+      .hero h1{font-size:1.6rem;}
+      .kpi-row{gap:8px;}
+      .kpi-box{min-width:100px;padding:10px 14px;}
+      .kpi-val{font-size:1rem;}
+      .bs-grid{grid-template-columns:repeat(2,1fr);}
+      .be-grid{grid-template-columns:1fr;}
+      .history-table{font-size:0.75rem;}
+      .history-table th,.history-table td{padding:7px 4px;}
     }
-  </style>
+    @media(max-width:480px){
+      .kpi-row{flex-direction:row;flex-wrap:wrap;}
+      .kpi-box{flex:1 1 45%;}
+    }
+</style>
 </head>
 <body>
 <div id="site-header"></div>
-<main>
-  <h1>⚔️ 對手分析</h1>
-  <p class="subtitle">搜尋對手、查看對戰紀錄與勝率</p>
-
-  <!-- 搜尋 -->
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="輸入對手公會名稱..." oninput="searchOpponent()" />
-  </div>
-
-  <!-- 搜尋結果：對戰紀錄卡 -->
-  <div class="card" id="battleCard" style="display:none;">
-    <div class="card-title" id="battleTitle">⚔️ 對戰紀錄</div>
-    <div class="stats-row" id="battleStats"></div>
-    <div id="battleRecords"></div>
-  </div>
-
-  <!-- 常見對手 TOP -->
-  <div class="card">
-    <div class="card-title">🏆 常見對手 TOP 10</div>
-    <div class="freq-list" id="freqList"><div class="loading">載入中...</div></div>
-  </div>
-
-  <!-- 每期對手列表 -->
-  <div class="card">
-    <div class="card-title">📋 每期對手排名</div>
-    <div class="period-select">
-      <label>期數：</label>
-      <select id="oppPeriodPicker" onchange="renderPeriodList()"><option value="">載入中...</option></select>
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <p class="hero-badge">Guild Battle Intelligence</p>
+      <h1>公會對戰情報中心</h1>
+      <p class="hero-sub">分析對手戰績，掌握勝利關鍵！</p>
+      <div class="kpi-row" id="kpiRow">
+        <div class="kpi-box"><div class="kpi-icon">&#x1F4C5;</div><div class="kpi-val" id="kpiPeriods">-</div><div class="kpi-label">總期數</div></div>
+        <div class="kpi-box"><div class="kpi-icon">&#x2694;&#xFE0F;</div><div class="kpi-val" id="kpiOpponents">-</div><div class="kpi-label">對手總數</div></div>
+        <div class="kpi-box"><div class="kpi-icon">&#x1F3C6;</div><div class="kpi-val" id="kpiWinRate">-</div><div class="kpi-label">總勝率</div></div>
+        <div class="kpi-box"><div class="kpi-icon">&#x1F525;</div><div class="kpi-val" id="kpiRivals">-</div><div class="kpi-label">宿敵公會數</div></div>
+      </div>
     </div>
-    <div class="opp-rank-list" id="oppRankList"></div>
   </div>
+</div>
+
+<!-- 三欄主體 -->
+<main class="main-grid">
+  <!-- 左欄 -->
+  <aside class="col-left">
+    <div class="card">
+      <div class="card-title">&#x1F50D; 搜尋對手公會</div>
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="輸入公會名稱..." />
+        <button class="btn-search" onclick="doSearch()">&#x1F50D;</button>
+      </div>
+      <div class="hot-tags" id="hotTags"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#x1F3C5; 常見對手 TOP 5</div>
+      <div id="topList" class="top-list"><div class="loading">載入中...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#x1F525; 宿敵公會</div>
+      <div id="rivalList" class="rival-list"><div class="loading">載入中...</div></div>
+    </div>
+  </aside>
+
+  <!-- 中欄 -->
+  <section class="col-center">
+    <div class="card" id="battleCard" style="display:none;">
+      <div class="card-title" id="battleTitle">&#x2694;&#xFE0F; 對戰情報卡</div>
+      <div class="battle-header" id="battleHeader"></div>
+      <div class="battle-stats" id="battleStats"></div>
+      <div class="battle-extra" id="battleExtra"></div>
+    </div>
+    <div class="card" id="historyCard" style="display:none;">
+      <div class="card-title">&#x1F4DC; 歷史交手紀錄</div>
+      <table class="history-table">
+        <thead><tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>分數對比</th><th>名次差</th><th>備註</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+      <div class="pagination" id="pagination"></div>
+    </div>
+    <div class="card" id="emptyCenter" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+      <div style="font-size:2.5rem;margin-bottom:12px;">&#x2694;&#xFE0F;</div>
+      <p>選擇或搜尋一個對手公會<br/>查看對戰情報</p>
+    </div>
+  </section>
+
+  <!-- 右欄 -->
+  <aside class="col-right">
+    <div class="card">
+      <div class="card-title">&#x1F4C8; 歷史分數趨勢</div>
+      <div class="chart-header">
+        <select id="trendSelect" onchange="renderTrendChart()"></select>
+      </div>
+      <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#x1F369; 對手名次分布</div>
+      <div class="chart-wrap-donut"><canvas id="chartDonut"></canvas></div>
+      <div id="donutLegend" class="donut-legend"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#x1F4A1; 對戰小提示</div>
+      <div id="tipBox" class="tip-box"><span class="loading">選擇對手後顯示</span></div>
+    </div>
+  </aside>
 </main>
 
+<script src="header.js"></script>
 <script>
-let oppData = []; // 所有對手資料
-let summaryData = []; // 公會總結（用來取得自己的名次和分數）
+// ═══════════════════════════════════════════════
+//  Data
+// ═══════════════════════════════════════════════
+let oppData = [], summaryData = [];
+let currentOpp = null, historyPage = 0;
+const PAGE_SIZE = 5;
 
 async function init() {
   try {
-    // 讀取對手資料
-    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:E?key=${API_KEY}`);
-    if (!res.ok) throw new Error('讀取失敗');
-    const data = await res.json();
-    const rows = (data.values || []).slice(1);
-    oppData = rows.map(r => ({ period:r[0]||'', rank:Number(r[1])||0, name:r[2]||'', score:Number(r[3])||0 }));
+    const [oppRes, sumRes] = await Promise.all([
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:E?key=${API_KEY}`),
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`)
+    ]);
+    if (!oppRes.ok) throw new Error('讀取對手資料失敗');
+    const oppJson = await oppRes.json();
+    oppData = (oppJson.values||[]).slice(1).map(r=>({period:r[0]||'',rank:Number(r[1])||0,name:r[2]||'',score:Number(r[3])||0}));
 
-    // 讀取公會總結（取自己每期的名次和分數）
-    try {
-      const sRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`);
-      if (sRes.ok) {
-        const sData = await sRes.json();
-        summaryData = (sData.values||[]).slice(1).map(r => ({ period:r[0]||'', total:Number(r[2])||0, rank:r[3]||'' }));
-      }
-    } catch(e) {}
-
-    if (!oppData.length) {
-      document.getElementById('freqList').innerHTML = '<div class="empty">尚無對手資料</div>';
-      return;
+    if (sumRes.ok) {
+      const sumJson = await sumRes.json();
+      summaryData = (sumJson.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:Number(r[2])||0,rank:r[3]||''}));
     }
 
-    renderFreqList();
-    renderPeriodPicker();
+    renderKPI();
+    renderTopList();
+    renderRivalList();
+    renderHotTags();
+    populateTrendSelect();
   } catch(e) {
-    document.getElementById('freqList').innerHTML = '<div class="empty">⚠️ ' + e.message + '</div>';
+    document.getElementById('topList').innerHTML = '<div class="loading">&#x26A0;&#xFE0F; '+e.message+'</div>';
   }
 }
 
-// ── 常見對手排行 ──
-function renderFreqList() {
-  const nameCount = {};
-  oppData.forEach(d => {
-    if (d.name === '璀璨') return; // 排除自己
-    nameCount[d.name] = (nameCount[d.name] || 0) + 1;
+// ═══ KPI ═══
+function renderKPI() {
+  const periods = [...new Set(oppData.map(d=>d.period))];
+  const opponents = [...new Set(oppData.filter(d=>d.name!=='璀璨').map(d=>d.name))];
+  const wr = calcOverallWinRate();
+  const rivals = getRivals();
+  document.getElementById('kpiPeriods').textContent = periods.length + ' 期';
+  document.getElementById('kpiOpponents').textContent = opponents.length + ' 個';
+  document.getElementById('kpiWinRate').textContent = wr + '%';
+  document.getElementById('kpiRivals').textContent = rivals.length + ' 個';
+}
+
+function calcOverallWinRate() {
+  const periods = [...new Set(oppData.map(d=>d.period))];
+  let wins=0, total=0;
+  periods.forEach(p=>{
+    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
+    if (!my) return;
+    const opps = oppData.filter(d=>d.period===p && d.name!=='璀璨');
+    opps.forEach(o=>{total++; if(my.rank < o.rank) wins++;});
   });
+  return total ? Math.round(wins/total*100) : 0;
+}
 
-  const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+function getRivals() {
+  const counts = getOppCounts();
+  return Object.entries(counts).filter(([,c])=>c>=5).sort((a,b)=>b[1]-a[1]).slice(0,12);
+}
 
-  document.getElementById('freqList').innerHTML = sorted.map(([name, count]) => {
-    const wr = calcWinRate(name);
-    const wrClass = wr.rate > 50 ? 'wr-good' : wr.rate < 50 ? 'wr-bad' : 'wr-neutral';
-    return `<div class="freq-item" onclick="showBattle('${name.replace(/'/g,"\\'")}')">
-      <span class="freq-name">${name}</span>
-      <span class="freq-count">遇到 ${count} 次</span>
-      <span class="freq-winrate ${wrClass}">${wr.rate}% 勝率</span>
+function getOppCounts() {
+  const c = {};
+  oppData.filter(d=>d.name!=='璀璨').forEach(d=>{c[d.name]=(c[d.name]||0)+1;});
+  return c;
+}
+
+// ═══ 常見對手 TOP 5 ═══
+function renderTopList() {
+  const counts = getOppCounts();
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('topList').innerHTML = sorted.map(([name,count],i)=>{
+    const medal = i<3 ? ['&#x1F947;','&#x1F948;','&#x1F949;'][i] : `<span class="top-num">${i+1}</span>`;
+    return `<div class="top-item" onclick="selectOpp('${esc(name)}')">
+      <span class="top-medal">${medal}</span>
+      <span class="top-name">${name}</span>
+      <span class="top-count">${count}次</span>
     </div>`;
   }).join('');
 }
 
-// ── 計算對某公會的勝率 ──
-function calcWinRate(oppName) {
-  const periods = [...new Set(oppData.filter(d => d.name === oppName).map(d => d.period))];
-  let wins = 0, total = 0;
-
-  for (const p of periods) {
-    const myEntry = oppData.find(d => d.period === p && d.name === '璀璨');
-    const oppEntry = oppData.find(d => d.period === p && d.name === oppName);
-    if (myEntry && oppEntry) {
-      total++;
-      if (myEntry.rank < oppEntry.rank) wins++;
-    }
-  }
-
-  return { wins, total, rate: total > 0 ? Math.round(wins / total * 100) : 0 };
-}
-
-// ── 搜尋對手 ──
-function searchOpponent() {
-  const q = document.getElementById('searchInput').value.trim();
-  if (!q) { document.getElementById('battleCard').style.display = 'none'; return; }
-
-  const matches = oppData.filter(d => d.name.includes(q) && d.name !== '璀璨');
-  if (!matches.length) { document.getElementById('battleCard').style.display = 'none'; return; }
-
-  // 取第一個符合的公會名
-  const name = matches[0].name;
-  showBattle(name);
-}
-
-// ── 顯示對戰紀錄卡 ──
-function showBattle(name) {
-  document.getElementById('searchInput').value = name;
-  const card = document.getElementById('battleCard');
-  card.style.display = '';
-
-  document.getElementById('battleTitle').textContent = `⚔️ vs ${name}`;
-
-  // 統計
-  const wr = calcWinRate(name);
-  const allScores = oppData.filter(d => d.name === name).map(d => d.score);
-  const avgScore = allScores.length ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0;
-  const encounters = [...new Set(oppData.filter(d => d.name === name).map(d => d.period))].length;
-
-  document.getElementById('battleStats').innerHTML = `
-    <div class="stat-card"><div class="stat-value">${encounters}</div><div class="stat-label">交手次數</div></div>
-    <div class="stat-card"><div class="stat-value">${wr.wins}/${wr.total}</div><div class="stat-label">勝場</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:${wr.rate>=50?'#2e7d32':'#c62828'}">${wr.rate}%</div><div class="stat-label">勝率</div></div>
-    <div class="stat-card"><div class="stat-value">${avgScore.toLocaleString()}</div><div class="stat-label">對手均分</div></div>
-  `;
-
-  // 逐期紀錄
-  const periods = [...new Set(oppData.filter(d => d.name === name).map(d => d.period))].sort().reverse();
-  document.getElementById('battleRecords').innerHTML = periods.map(p => {
-    const myEntry = oppData.find(d => d.period === p && d.name === '璀璨');
-    const oppEntry = oppData.find(d => d.period === p && d.name === name);
-    if (!myEntry || !oppEntry) return '';
-
-    const won = myEntry.rank < oppEntry.rank;
-    const tied = myEntry.rank === oppEntry.rank;
-    const badgeClass = won ? 'rank-win' : tied ? 'rank-tie' : 'rank-lose';
-    const badgeText = won ? '勝' : tied ? '平' : '負';
-
-    return `<div class="record-item">
-      <div class="record-period">${p}</div>
-      <div class="record-rank">
-        <span class="rank-badge ${badgeClass}">${badgeText}</span>
-        <span style="font-size:0.82rem;color:var(--text-muted);">我方 #${myEntry.rank} (${myEntry.score.toLocaleString()}) vs #${oppEntry.rank} (${oppEntry.score.toLocaleString()})</span>
+// ═══ 宿敵公會 ═══
+function renderRivalList() {
+  const counts = getOppCounts();
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  document.getElementById('rivalList').innerHTML = sorted.map(([name,count])=>{
+    const wr = calcWinRate(name);
+    return `<div class="rival-item" onclick="selectOpp('${esc(name)}')">
+      <div class="rival-avatar">&#x2694;&#xFE0F;</div>
+      <div class="rival-info">
+        <div class="rival-name">${name}</div>
+        <div class="rival-meta">交手 ${count}次 &#x30FB; 勝率 ${wr.rate}%</div>
       </div>
     </div>`;
-  }).join('') || '<div class="empty">無詳細紀錄</div>';
+  }).join('') || '<div class="loading">尚無宿敵</div>';
 }
 
-// ── 每期對手列表 ──
-function renderPeriodPicker() {
-  const periods = [...new Set(oppData.map(d => d.period))].sort().reverse();
-  const sel = document.getElementById('oppPeriodPicker');
-  sel.innerHTML = periods.map(p => `<option value="${p}">${p}</option>`).join('');
-  renderPeriodList();
+// ═══ 熱門標籤 ═══
+function renderHotTags() {
+  const counts = getOppCounts();
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  document.getElementById('hotTags').innerHTML = '<span class="hot-label">熱門：</span>' +
+    top.map(([name])=>`<span class="hot-tag" onclick="selectOpp('${esc(name)}')">${name}</span>`).join('');
 }
 
-function renderPeriodList() {
-  const period = document.getElementById('oppPeriodPicker').value;
-  if (!period) return;
+// ═══ 勝率計算 ═══
+function calcWinRate(oppName) {
+  const periods = [...new Set(oppData.filter(d=>d.name===oppName).map(d=>d.period))];
+  let wins=0,losses=0,total=0;
+  periods.forEach(p=>{
+    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
+    const opp = oppData.find(d=>d.period===p && d.name===oppName);
+    if(my && opp){total++; if(my.rank<opp.rank) wins++; else if(my.rank>opp.rank) losses++;}
+  });
+  return {wins, losses, total, rate: total?Math.round(wins/total*100):0};
+}
 
-  const data = oppData.filter(d => d.period === period).sort((a, b) => a.rank - b.rank);
-  document.getElementById('oppRankList').innerHTML = data.map(d => {
-    const isSelf = d.name === '璀璨';
-    return `<div class="opp-rank-item">
-      <div class="opp-num ${isSelf?'self':''}">${d.rank}</div>
-      <div class="opp-name ${isSelf?'self':''}">${d.name}</div>
-      <div class="opp-score">${d.score.toLocaleString()}</div>
+// ═══ 搜尋 ═══
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  const match = oppData.find(d=>d.name.includes(q) && d.name!=='璀璨');
+  if (match) selectOpp(match.name);
+}
+
+// ═══ 選擇對手 ═══
+function selectOpp(name) {
+  currentOpp = name;
+  historyPage = 0;
+  document.getElementById('searchInput').value = name;
+  document.getElementById('emptyCenter').style.display = 'none';
+  renderBattleCard(name);
+  renderHistoryTable(name);
+  renderTrendChart();
+  renderDonutChart(name);
+  renderTip(name);
+}
+
+// ═══ 對戰情報卡 ═══
+function renderBattleCard(name) {
+  const card = document.getElementById('battleCard');
+  card.style.display = '';
+  document.getElementById('battleTitle').innerHTML = `&#x2694;&#xFE0F; 對戰情報卡`;
+
+  const wr = calcWinRate(name);
+  const encounters = wr.total;
+  const oppScores = oppData.filter(d=>d.name===name).map(d=>d.score);
+  const myPeriodsWithOpp = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))];
+
+  // 平均名次差
+  let rankDiffs=[], scoreDiffs=[], bestMyRank=null, bestOppRank=null, lastPeriod='';
+  myPeriodsWithOpp.sort().forEach(p=>{
+    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
+    const opp = oppData.find(d=>d.period===p && d.name===name);
+    if(my && opp){
+      rankDiffs.push(opp.rank - my.rank);
+      scoreDiffs.push(my.score - opp.score);
+      if(bestMyRank===null || my.rank<bestMyRank) bestMyRank=my.rank;
+      if(bestOppRank===null || opp.rank<bestOppRank) bestOppRank=opp.rank;
+      lastPeriod = p;
+    }
+  });
+  const avgRankDiff = rankDiffs.length ? (rankDiffs.reduce((a,b)=>a+b,0)/rankDiffs.length).toFixed(1) : '-';
+  const avgScoreDiff = scoreDiffs.length ? Math.round(scoreDiffs.reduce((a,b)=>a+b,0)/scoreDiffs.length).toLocaleString() : '-';
+
+  document.getElementById('battleHeader').innerHTML = `
+    <div class="battle-name-row">
+      <div class="battle-opp-avatar">&#x2694;&#xFE0F;</div>
+      <div>
+        <div class="battle-opp-name">${name}</div>
+        <div class="battle-opp-badge">${encounters} 場對戰</div>
+      </div>
     </div>`;
-  }).join('') || '<div class="empty">該期無資料</div>';
+
+  document.getElementById('battleStats').innerHTML = `
+    <div class="bs-grid">
+      <div class="bs-item"><div class="bs-val">${encounters}</div><div class="bs-label">交手次數</div></div>
+      <div class="bs-item"><div class="bs-val" style="color:#2e7d32;">${wr.wins}</div><div class="bs-label">勝場</div></div>
+      <div class="bs-item"><div class="bs-val" style="color:#c62828;">${wr.losses}</div><div class="bs-label">敗場</div></div>
+      <div class="bs-item"><div class="bs-val" style="color:var(--orange);">${wr.rate}%</div><div class="bs-label">勝率</div></div>
+    </div>`;
+
+  document.getElementById('battleExtra').innerHTML = `
+    <div class="be-grid">
+      <div class="be-item"><div class="be-label">平均名次差</div><div class="be-val">${Number(avgRankDiff)>0?'+':''}${avgRankDiff}名</div></div>
+      <div class="be-item"><div class="be-label">平均分數差</div><div class="be-val">${Number(avgScoreDiff)>0?'+':''}${avgScoreDiff}分</div></div>
+      <div class="be-item"><div class="be-label">最高名次對比</div><div class="be-val">${bestMyRank||'-'}名 vs ${bestOppRank||'-'}名</div></div>
+      <div class="be-item"><div class="be-label">最近交手</div><div class="be-val">第 ${lastPeriod.replace(/[^0-9]/g,'')||lastPeriod} 期</div></div>
+    </div>`;
 }
+
+// ═══ 歷史交手紀錄（分頁） ═══
+function renderHistoryTable(name) {
+  const card = document.getElementById('historyCard');
+  card.style.display = '';
+  const periods = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))].sort().reverse();
+  const totalPages = Math.ceil(periods.length / PAGE_SIZE);
+  const page = periods.slice(historyPage*PAGE_SIZE, (historyPage+1)*PAGE_SIZE);
+
+  document.getElementById('historyBody').innerHTML = page.map(p=>{
+    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
+    const opp = oppData.find(d=>d.period===p && d.name===name);
+    if(!my||!opp) return '';
+    const won = my.rank<opp.rank, tied = my.rank===opp.rank;
+    const result = won ? '<span class="badge-win">勝利</span>' : tied ? '<span class="badge-tie">平手</span>' : '<span class="badge-lose">失敗</span>';
+    const rankDiff = opp.rank - my.rank;
+    return `<tr>
+      <td>${p}</td><td>${my.rank}</td><td>${opp.rank}</td><td>${result}</td>
+      <td>${my.score.toLocaleString()} vs ${opp.score.toLocaleString()}</td>
+      <td>${rankDiff>0?'+':''}${rankDiff}</td><td>—</td>
+    </tr>`;
+  }).join('');
+
+  // 分頁
+  if(totalPages>1){
+    let pHtml = '<button class="pg-btn" onclick="pgPrev()">&lt;</button>';
+    for(let i=0;i<totalPages;i++){
+      if(i===historyPage) pHtml+=`<span class="pg-active">${i+1}</span>`;
+      else if(i<3||i===totalPages-1||Math.abs(i-historyPage)<=1) pHtml+=`<button class="pg-btn" onclick="pgGo(${i})">${i+1}</button>`;
+      else if(i===3&&historyPage>4) pHtml+='<span class="pg-dots">...</span>';
+    }
+    pHtml += '<button class="pg-btn" onclick="pgNext()">&gt;</button>';
+    document.getElementById('pagination').innerHTML = pHtml;
+  } else {
+    document.getElementById('pagination').innerHTML = '';
+  }
+}
+function pgPrev(){if(historyPage>0){historyPage--;renderHistoryTable(currentOpp);}}
+function pgNext(){const periods=[...new Set(oppData.filter(d=>d.name===currentOpp).map(d=>d.period))];if((historyPage+1)*PAGE_SIZE<periods.length){historyPage++;renderHistoryTable(currentOpp);}}
+function pgGo(i){historyPage=i;renderHistoryTable(currentOpp);}
+
+// ═══ 趨勢折線圖 ═══
+let trendChart = null;
+function populateTrendSelect(){
+  const counts = getOppCounts();
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const sel = document.getElementById('trendSelect');
+  sel.innerHTML = sorted.map(([name])=>`<option value="${name}">${name}</option>`).join('');
+}
+function renderTrendChart(){
+  const name = currentOpp || document.getElementById('trendSelect').value;
+  if(!name) return;
+  document.getElementById('trendSelect').value = name;
+
+  const periods = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))].sort();
+  const myScores = periods.map(p=>{const d=oppData.find(x=>x.period===p&&x.name==='璀璨');return d?d.score:null;});
+  const oppScores = periods.map(p=>{const d=oppData.find(x=>x.period===p&&x.name===name);return d?d.score:null;});
+  const labels = periods.map(p=>p.replace(/[^0-9]/g,'')||p);
+
+  if(trendChart) trendChart.destroy();
+  trendChart = new Chart(document.getElementById('chartTrend'),{
+    type:'line',
+    data:{labels, datasets:[
+      {label:'璀璨',data:myScores,borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.1)',fill:false,tension:0.3,pointRadius:4,pointBackgroundColor:'#e96a1e'},
+      {label:name,data:oppScores,borderColor:'#6b7280',backgroundColor:'rgba(107,114,128,0.1)',fill:false,tension:0.3,pointRadius:4,pointBackgroundColor:'#6b7280',borderDash:[5,3]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+      scales:{y:{beginAtZero:false,ticks:{callback:v=>v.toLocaleString()}},x:{grid:{display:false}}}
+    }
+  });
+  // annotation for latest
+  if(myScores.length){
+    const last = myScores[myScores.length-1];
+    const lastOpp = oppScores[oppScores.length-1];
+    const anno = document.querySelector('.trend-annotation');
+    // handled via tooltip
+  }
+}
+
+// ═══ 甜甜圈（名次分布） ═══
+let donutChart = null;
+function renderDonutChart(name){
+  const ranks = oppData.filter(d=>d.name===name).map(d=>d.rank);
+  const buckets = {'1-3名':0,'4-10名':0,'11-20名':0,'21名以上':0};
+  ranks.forEach(r=>{if(r<=3)buckets['1-3名']++;else if(r<=10)buckets['4-10名']++;else if(r<=20)buckets['11-20名']++;else buckets['21名以上']++;});
+  const total = ranks.length;
+  const colors = ['#e96a1e','#f4a46a','#fbd38d','#e2e8f0'];
+
+  if(donutChart) donutChart.destroy();
+  donutChart = new Chart(document.getElementById('chartDonut'),{
+    type:'doughnut',
+    data:{labels:Object.keys(buckets),datasets:[{data:Object.values(buckets),backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'60%'}
+  });
+
+  document.getElementById('donutLegend').innerHTML = Object.entries(buckets).map(([label,val],i)=>{
+    const pct = total?Math.round(val/total*100):0;
+    return `<div class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${label} <b>${pct}%</b> (${val}期)</div>`;
+  }).join('');
+}
+
+// ═══ 對戰小提示 ═══
+function renderTip(name){
+  const periods = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))].sort();
+  const encounters = periods.length;
+  let tip = '';
+
+  if(encounters === 0){
+    tip = '&#x2753; 尚未正式交手';
+  } else if(encounters === 1){
+    tip = '&#x1F195; 首次交手，尚無趨勢可分析';
+  } else if(encounters === 2){
+    tip = '&#x1F4CA; 資料尚少，持續觀察中';
+  } else {
+    // 交手 >= 3
+    const last3 = periods.slice(-3);
+    const oppScoresRecent = last3.map(p=>{const d=oppData.find(x=>x.period===p&&x.name===name);return d?d.score:0;});
+    const myRanksRecent = last3.map(p=>{
+      const my=oppData.find(x=>x.period===p&&x.name==='璀璨');
+      const opp=oppData.find(x=>x.period===p&&x.name===name);
+      return my&&opp?{myR:my.rank,oppR:opp.rank}:null;
+    }).filter(Boolean);
+
+    // 對手近期分數上升
+    const isRising = oppScoresRecent.length>=3 && oppScoresRecent[2]>oppScoresRecent[1] && oppScoresRecent[1]>oppScoresRecent[0];
+    // 自己連續贏
+    const allWins = myRanksRecent.every(x=>x.myR<x.oppR);
+    // 對手分數穩定高於自己
+    const oppHigher = last3.every(p=>{
+      const my=oppData.find(x=>x.period===p&&x.name==='璀璨');
+      const opp=oppData.find(x=>x.period===p&&x.name===name);
+      return my&&opp&&opp.score>my.score;
+    });
+
+    if(isRising){
+      tip = `&#x26A0;&#xFE0F; ${name}近期分數上升中，需注意！`;
+    } else if(allWins){
+      tip = `&#x2705; 連續 ${myRanksRecent.length} 期保持領先`;
+    } else if(oppHigher){
+      tip = `&#x1F4AA; ${name}實力穩定偏高，需全力以赴`;
+    } else {
+      tip = `&#x1F4CA; 雙方勢均力敵，持續保持競爭力`;
+    }
+  }
+  document.getElementById('tipBox').innerHTML = `<div class="tip-text">${tip}</div>`;
+}
+
+function esc(s){return s.replace(/'/g,"\\'");}
+
+document.getElementById('searchInput').addEventListener('keydown',function(e){if(e.key==='Enter')doSearch();});
 
 init();
 </script>
-<script src="header.js"></script>
 </body>
 </html>
