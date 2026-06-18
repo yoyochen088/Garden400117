@@ -93,7 +93,7 @@
     .diff-same { color:#888; }
 
     /* 亮點 — 色塊風格 */
-    .highlight-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .highlight-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
     .highlight-card {
       background:#fff; border-radius:18px; padding:22px;
       box-shadow:0 4px 20px rgba(180,120,40,.06); border:1px solid #f5deb3;
@@ -277,6 +277,11 @@
           <div class="hl-name" id="potentialName">-</div>
           <div class="hl-score" id="potentialScore">資料累積中</div>
         </div>
+        <div class="hl-item" style="background:#e3f2fd;border:1.5px solid #90caf9;">
+          <div class="hl-top"><span class="hl-icon">💎</span><span class="hl-label">穩定輸出</span></div>
+          <div class="hl-name" id="stableName">-</div>
+          <div class="hl-score" id="stableScore" style="color:#1565c0;">資料累積中</div>
+        </div>
       </div>
     </div>
   </div>
@@ -413,7 +418,26 @@ async function init() {
       }
     }
 
-    // TOP 5 - Podium (前三) + Rest (4-5)
+    // 穩定輸出：連續最近3期都參賽且每期 ≥ 1000，取平均最高
+    if (periods.length >= 3) {
+      const last3 = periods.slice(-3);
+      const sp3 = {};
+      last3.forEach(p => { sp3[p] = {}; });
+      allRecords.filter(r => last3.includes(r.period)).forEach(r => { sp3[r.period][r.nickname] = r.score; });
+
+      let stableBest = null, stableAvg = 0;
+      [...new Set(allRecords.map(r => r.nickname))].forEach(n => {
+        const scores = last3.map(p => sp3[p]?.[n]).filter(s => s !== undefined);
+        if (scores.length === 3 && scores.every(s => s >= 1000)) {
+          const avg = Math.round(scores.reduce((a, b) => a + b, 0) / 3);
+          if (avg > stableAvg) { stableAvg = avg; stableBest = n; }
+        }
+      });
+      if (stableBest) {
+        document.getElementById('stableName').textContent = stableBest;
+        document.getElementById('stableScore').textContent = '連3期均分 ' + stableAvg + ' 分';
+      }
+    }    // TOP 5 - Podium (前三) + Rest (4-5)
     const top5 = latestData.slice(0,5);
     const medals = ['🥇','🥈','🥉'];
     const podiumCls = ['podium-1','podium-2','podium-3'];
