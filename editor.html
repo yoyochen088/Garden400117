@@ -117,6 +117,28 @@
     .result-table input:focus { border-color:var(--pink); }
     .title-divider { background:var(--pink-light); font-weight:700; color:var(--pink-dark); font-size:0.85rem; }
     .title-divider td { padding:8px 12px !important; }
+
+    /* 手機：辨識結果改卡片式 */
+    @media(max-width:600px) {
+      .result-table thead { display:none; }
+      .result-table, .result-table tbody, .result-table tr, .result-table td {
+        display:block; width:100%;
+      }
+      .result-table tr {
+        border:1px solid var(--border); border-radius:10px; margin-bottom:10px;
+        padding:10px; background:#fff; position:relative;
+      }
+      .result-table tr:hover { background:var(--pink-light); }
+      .result-table td { border:none; padding:4px 0; display:inline-block; }
+      .result-table td:nth-child(1) { font-weight:700; width:30px; }
+      .result-table td:nth-child(2) { width:60px; }
+      .result-table td:nth-child(3) { width:calc(100% - 100px); }
+      .result-table td:nth-child(4) { width:80px; }
+      .result-table td:nth-child(5) { width:70px; }
+      .result-table td:nth-child(6) { font-size:0.75rem; color:#9e6b7e; }
+      .result-table td:nth-child(7) { position:absolute; top:10px; right:10px; }
+      .title-divider td { display:block !important; width:100% !important; }
+    }
     .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .period-input { display:flex; gap:10px; align-items:center; margin-bottom:14px; }
     .period-input label { font-size:0.85rem; font-weight:600; color:var(--pink-dark); white-space:nowrap; }
@@ -225,30 +247,6 @@
     <div id="summaryStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
   </div>
 
-  <!-- 對手排名截圖 -->
-  <div class="card">
-    <div class="card-title">⚔️ 對手排名</div>
-    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
-      <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
-        <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
-        <div class="dz-text" style="font-size:0.85rem;">上傳對手排名截圖（可多張）</div>
-        <div class="dz-sub">排名畫面，辨識公會名稱與分數，多張會合併</div>
-      </div>
-      <input type="file" id="opponent-file" accept="image/*" multiple style="display:none;" onchange="handleOpponentFiles(this.files)" />
-      <div id="opponentResult" style="flex:2;min-width:260px;">
-        <table class="result-table" id="opponentTable" style="display:none;">
-          <thead><tr><th>#</th><th>公會名稱</th><th>分數</th><th></th></tr></thead>
-          <tbody id="opponentBody"></tbody>
-        </table>
-        <div class="btn-row" id="opponentBtnRow" style="display:none;">
-          <button class="btn btn-primary" style="padding:8px 16px;font-size:.85rem;" onclick="addOpponentRow()">＋ 手動新增</button>
-          <button class="btn" style="background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;padding:8px 16px;font-size:.85rem;" onclick="saveOpponents()">💾 儲存對手排名</button>
-        </div>
-      </div>
-    </div>
-    <div id="opponentStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
-  </div>
-
   <!-- 上傳 -->
   <div class="card">
     <div class="card-title">📷 上傳成員截圖</div>
@@ -295,6 +293,30 @@
       <div class="progress-bar"><div class="progress-fill" id="saveProgressFill"></div></div>
       <div class="progress-text" id="saveProgressText"></div>
     </div>
+  </div>
+
+  <!-- 對手排名截圖 -->
+  <div class="card">
+    <div class="card-title">⚔️ 對手排名</div>
+    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+      <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
+        <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
+        <div class="dz-text" style="font-size:0.85rem;">上傳對手排名截圖（可多張）</div>
+        <div class="dz-sub">排名畫面，辨識公會名稱與分數，多張會合併</div>
+      </div>
+      <input type="file" id="opponent-file" accept="image/*" multiple style="display:none;" onchange="handleOpponentFiles(this.files)" />
+      <div id="opponentResult" style="flex:2;min-width:260px;">
+        <table class="result-table" id="opponentTable" style="display:none;">
+          <thead><tr><th>#</th><th>公會名稱</th><th>分數</th><th></th></tr></thead>
+          <tbody id="opponentBody"></tbody>
+        </table>
+        <div class="btn-row" id="opponentBtnRow" style="display:none;">
+          <button class="btn btn-primary" style="padding:8px 16px;font-size:.85rem;" onclick="addOpponentRow()">＋ 手動新增</button>
+          <button class="btn" style="background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;padding:8px 16px;font-size:.85rem;" onclick="saveOpponents()">💾 儲存對手排名</button>
+        </div>
+      </div>
+    </div>
+    <div id="opponentStatus" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
   </div>
 </div>
 <div class="bbar">
