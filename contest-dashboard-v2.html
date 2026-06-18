@@ -195,6 +195,13 @@
       .highlight-grid { grid-template-columns:1fr; }
       .bottom-grid { grid-template-columns:1fr; }
     }
+    @media(max-width:600px) {
+      .rest-item { flex-wrap:wrap; gap:6px 8px; }
+      .rest-name { width:100%; order:-1; display:flex; align-items:center; gap:6px; }
+      .rest-rank { order:-2; }
+      .rest-title { margin-left:0; }
+      .rest-score, .rest-score-top { margin-left:auto; }
+    }
     @media(max-width:480px) {
       .kpi-row { grid-template-columns:1fr 1fr; gap:10px; }
       .kpi-value { font-size:1.4rem; }
