@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>對手分析 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <script src="config.js"></script>
+  <style>
+    :root { --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a; --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#fff; --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0; --shadow:0 2px 12px rgba(233,106,30,.10); --radius:14px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI','Microsoft JhengHei',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:40px; }
+    main { max-width:900px; margin:0 auto; padding:24px 16px; }
+    h1 { text-align:center; color:var(--orange-dark); font-size:1.3rem; margin-bottom:4px; }
+    .subtitle { text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:24px; }
+    .card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:20px; margin-bottom:16px; }
+    .card-title { font-size:0.95rem; font-weight:700; color:var(--orange-dark); margin-bottom:14px; }
+
+    /* 搜尋 */
+    .search-bar { display:flex; gap:10px; margin-bottom:20px; }
+    .search-bar input { flex:1; padding:10px 14px; border:1.5px solid var(--orange-mid); border-radius:10px; font-size:0.95rem; outline:none; background:#fff; }
+    .search-bar input:focus { border-color:var(--orange); }
+
+    /* 統計卡片 */
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .stat-card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); padding:14px; text-align:center; }
+    .stat-value { font-size:1.4rem; font-weight:900; color:var(--orange); }
+    .stat-label { font-size:0.75rem; color:var(--text-muted); margin-top:4px; }
+
+    /* 對戰紀錄 */
+    .record-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+    .record-item:last-child { border-bottom:none; }
+    .record-period { font-size:0.82rem; color:var(--text-muted); width:90px; flex-shrink:0; }
+    .record-rank { display:flex; align-items:center; gap:6px; flex:1; }
+    .rank-badge { padding:3px 10px; border-radius:8px; font-size:0.82rem; font-weight:700; }
+    .rank-win { background:#e8f5e9; color:#2e7d32; }
+    .rank-lose { background:#fce4ec; color:#c62828; }
+    .rank-tie { background:#f5f5f5; color:#888; }
+    .record-score { font-weight:700; color:var(--text); font-size:0.9rem; }
+
+    /* 常見對手 */
+    .freq-list { display:flex; flex-direction:column; gap:8px; }
+    .freq-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--orange-light); border-radius:10px; cursor:pointer; transition:background .15s; }
+    .freq-item:hover { background:#fde8d4; }
+    .freq-name { flex:1; font-weight:700; color:var(--text); }
+    .freq-count { font-size:0.85rem; color:var(--orange-dark); font-weight:600; }
+    .freq-winrate { font-size:0.85rem; font-weight:700; }
+    .wr-good { color:#2e7d32; }
+    .wr-bad { color:#c62828; }
+    .wr-neutral { color:#888; }
+
+    /* 期數列表 */
+    .period-select { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .period-select label { font-size:0.9rem; font-weight:600; color:var(--orange-dark); }
+    .period-select select { padding:8px 14px; border:1.5px solid var(--orange-mid); border-radius:10px; font-size:0.9rem; background:#fff; outline:none; }
+    .opp-rank-list { }
+    .opp-rank-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+    .opp-rank-item:last-child { border-bottom:none; }
+    .opp-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; background:var(--orange-light); color:var(--orange-dark); flex-shrink:0; }
+    .opp-num.self { background:var(--orange); color:#fff; }
+    .opp-name { flex:1; font-weight:600; }
+    .opp-name.self { color:var(--orange); font-weight:800; }
+    .opp-score { font-weight:700; color:var(--text); }
+
+    .loading { text-align:center; padding:40px; color:var(--text-muted); }
+    .empty { text-align:center; padding:30px; color:var(--text-muted); font-size:0.9rem; }
+
+    @media(max-width:600px) {
+      .stats-row { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+<main>
+  <h1>⚔️ 對手分析</h1>
+  <p class="subtitle">搜尋對手、查看對戰紀錄與勝率</p>
+
+  <!-- 搜尋 -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="輸入對手公會名稱..." oninput="searchOpponent()" />
+  </div>
+
+  <!-- 搜尋結果：對戰紀錄卡 -->
+  <div class="card" id="battleCard" style="display:none;">
+    <div class="card-title" id="battleTitle">⚔️ 對戰紀錄</div>
+    <div class="stats-row" id="battleStats"></div>
+    <div id="battleRecords"></div>
+  </div>
+
+  <!-- 常見對手 TOP -->
+  <div class="card">
+    <div class="card-title">🏆 常見對手 TOP 10</div>
+    <div class="freq-list" id="freqList"><div class="loading">載入中...</div></div>
+  </div>
+
+  <!-- 每期對手列表 -->
+  <div class="card">
+    <div class="card-title">📋 每期對手排名</div>
+    <div class="period-select">
+      <label>期數：</label>
+      <select id="oppPeriodPicker" onchange="renderPeriodList()"><option value="">載入中...</option></select>
+    </div>
+    <div class="opp-rank-list" id="oppRankList"></div>
+  </div>
+</main>
+
+<script>
+let oppData = []; // 所有對手資料
+let summaryData = []; // 公會總結（用來取得自己的名次和分數）
+
+async function init() {
+  try {
+    // 讀取對手資料
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:E?key=${API_KEY}`);
+    if (!res.ok) throw new Error('讀取失敗');
+    const data = await res.json();
+    const rows = (data.values || []).slice(1);
+    oppData = rows.map(r => ({ period:r[0]||'', rank:Number(r[1])||0, name:r[2]||'', score:Number(r[3])||0 }));
+
+    // 讀取公會總結（取自己每期的名次和分數）
+    try {
+      const sRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`);
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        summaryData = (sData.values||[]).slice(1).map(r => ({ period:r[0]||'', total:Number(r[2])||0, rank:r[3]||'' }));
+      }
+    } catch(e) {}
+
+    if (!oppData.length) {
+      document.getElementById('freqList').innerHTML = '<div class="empty">尚無對手資料</div>';
+      return;
+    }
+
+    renderFreqList();
+    renderPeriodPicker();
+  } catch(e) {
+    document.getElementById('freqList').innerHTML = '<div class="empty">⚠️ ' + e.message + '</div>';
+  }
+}
+
+// ── 常見對手排行 ──
+function renderFreqList() {
+  const nameCount = {};
+  oppData.forEach(d => {
+    if (d.name === '璀璨') return; // 排除自己
+    nameCount[d.name] = (nameCount[d.name] || 0) + 1;
+  });
+
+  const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+  document.getElementById('freqList').innerHTML = sorted.map(([name, count]) => {
+    const wr = calcWinRate(name);
+    const wrClass = wr.rate > 50 ? 'wr-good' : wr.rate < 50 ? 'wr-bad' : 'wr-neutral';
+    return `<div class="freq-item" onclick="showBattle('${name.replace(/'/g,"\\'")}')">
+      <span class="freq-name">${name}</span>
+      <span class="freq-count">遇到 ${count} 次</span>
+      <span class="freq-winrate ${wrClass}">${wr.rate}% 勝率</span>
+    </div>`;
+  }).join('');
+}
+
+// ── 計算對某公會的勝率 ──
+function calcWinRate(oppName) {
+  const periods = [...new Set(oppData.filter(d => d.name === oppName).map(d => d.period))];
+  let wins = 0, total = 0;
+
+  for (const p of periods) {
+    const myEntry = oppData.find(d => d.period === p && d.name === '璀璨');
+    const oppEntry = oppData.find(d => d.period === p && d.name === oppName);
+    if (myEntry && oppEntry) {
+      total++;
+      if (myEntry.rank < oppEntry.rank) wins++;
+    }
+  }
+
+  return { wins, total, rate: total > 0 ? Math.round(wins / total * 100) : 0 };
+}
+
+// ── 搜尋對手 ──
+function searchOpponent() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) { document.getElementById('battleCard').style.display = 'none'; return; }
+
+  const matches = oppData.filter(d => d.name.includes(q) && d.name !== '璀璨');
+  if (!matches.length) { document.getElementById('battleCard').style.display = 'none'; return; }
+
+  // 取第一個符合的公會名
+  const name = matches[0].name;
+  showBattle(name);
+}
+
+// ── 顯示對戰紀錄卡 ──
+function showBattle(name) {
+  document.getElementById('searchInput').value = name;
+  const card = document.getElementById('battleCard');
+  card.style.display = '';
+
+  document.getElementById('battleTitle').textContent = `⚔️ vs ${name}`;
+
+  // 統計
+  const wr = calcWinRate(name);
+  const allScores = oppData.filter(d => d.name === name).map(d => d.score);
+  const avgScore = allScores.length ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0;
+  const encounters = [...new Set(oppData.filter(d => d.name === name).map(d => d.period))].length;
+
+  document.getElementById('battleStats').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${encounters}</div><div class="stat-label">交手次數</div></div>
+    <div class="stat-card"><div class="stat-value">${wr.wins}/${wr.total}</div><div class="stat-label">勝場</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:${wr.rate>=50?'#2e7d32':'#c62828'}">${wr.rate}%</div><div class="stat-label">勝率</div></div>
+    <div class="stat-card"><div class="stat-value">${avgScore.toLocaleString()}</div><div class="stat-label">對手均分</div></div>
+  `;
+
+  // 逐期紀錄
+  const periods = [...new Set(oppData.filter(d => d.name === name).map(d => d.period))].sort().reverse();
+  document.getElementById('battleRecords').innerHTML = periods.map(p => {
+    const myEntry = oppData.find(d => d.period === p && d.name === '璀璨');
+    const oppEntry = oppData.find(d => d.period === p && d.name === name);
+    if (!myEntry || !oppEntry) return '';
+
+    const won = myEntry.rank < oppEntry.rank;
+    const tied = myEntry.rank === oppEntry.rank;
+    const badgeClass = won ? 'rank-win' : tied ? 'rank-tie' : 'rank-lose';
+    const badgeText = won ? '勝' : tied ? '平' : '負';
+
+    return `<div class="record-item">
+      <div class="record-period">${p}</div>
+      <div class="record-rank">
+        <span class="rank-badge ${badgeClass}">${badgeText}</span>
+        <span style="font-size:0.82rem;color:var(--text-muted);">我方 #${myEntry.rank} (${myEntry.score.toLocaleString()}) vs #${oppEntry.rank} (${oppEntry.score.toLocaleString()})</span>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">無詳細紀錄</div>';
+}
+
+// ── 每期對手列表 ──
+function renderPeriodPicker() {
+  const periods = [...new Set(oppData.map(d => d.period))].sort().reverse();
+  const sel = document.getElementById('oppPeriodPicker');
+  sel.innerHTML = periods.map(p => `<option value="${p}">${p}</option>`).join('');
+  renderPeriodList();
+}
+
+function renderPeriodList() {
+  const period = document.getElementById('oppPeriodPicker').value;
+  if (!period) return;
+
+  const data = oppData.filter(d => d.period === period).sort((a, b) => a.rank - b.rank);
+  document.getElementById('oppRankList').innerHTML = data.map(d => {
+    const isSelf = d.name === '璀璨';
+    return `<div class="opp-rank-item">
+      <div class="opp-num ${isSelf?'self':''}">${d.rank}</div>
+      <div class="opp-name ${isSelf?'self':''}">${d.name}</div>
+      <div class="opp-score">${d.score.toLocaleString()}</div>
+    </div>`;
+  }).join('') || '<div class="empty">該期無資料</div>';
+}
+
+init();
+</script>
+<script src="header.js"></script>
+</body>
+</html>
