@@ -56,8 +56,9 @@
     .val-same{color:#888;}
 
     /* Achievement */
+    .highlight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
     .achievement-list{display:flex;flex-direction:column;gap:10px;}
-    .ach-item{padding:12px 14px;border-radius:12px;}
+    .ach-item{padding:14px 16px;border-radius:14px;}
     .ach-mvp{background:#fff3e0;border:1.5px solid #f4a46a;}
     .ach-progress{background:#e8f5e9;border:1.5px solid #a5d6a7;}
     .ach-potential{background:#f3e5f5;border:1.5px solid #ce93d8;}
@@ -128,7 +129,7 @@
     .title-count{font-weight:700;color:#4a3520;}
 
     /* Responsive */
-    @media(max-width:900px){.grid-3col,.grid-2col{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:900px){.grid-3col,.grid-2col{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}.highlight-grid{grid-template-columns:1fr;}}
     @media(max-width:480px){.kpi-row{grid-template-columns:1fr 1fr;}.kpi-value{font-size:1.3rem;}.hero h1{font-size:1.5rem;}.hero-inner{padding:36px 20px;}}
   </style>
 </head>
@@ -161,10 +162,10 @@
   </div>
 </section>
 
-<!-- Row 1: 總分趨勢 + 與上期比較 + 本期成就 -->
+<!-- Row 1: 總分趨勢 + 與上期比較 -->
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="grid-3col">
+    <div class="grid-2col">
       <div class="card">
         <div class="card-title">&#x1F4C8; 公會總分趨勢</div>
         <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
@@ -174,13 +175,19 @@
         <div class="card-title">&#x1F4CA; 與上期比較</div>
         <div id="compareSection" class="compare-list"><div class="loading">資料累積中</div></div>
       </div>
-      <div class="card">
-        <div class="card-title">&#x2B50; 本期成就</div>
-        <div class="achievement-list">
-          <div class="ach-item ach-mvp"><div class="ach-label">&#x1F451; 最高個人分數</div><div class="ach-name" id="mvpName">-</div><div class="ach-score" id="mvpScore">-</div></div>
-          <div class="ach-item ach-progress"><div class="ach-label">&#x1F680; 進步王</div><div class="ach-name" id="progressName">-</div><div class="ach-score" id="progressScore">資料累積中</div></div>
-          <div class="ach-item ach-potential"><div class="ach-label">&#x1F331; 潛力成員</div><div class="ach-name" id="potentialName">-</div><div class="ach-score" id="potentialScore">資料累積中</div></div>
-        </div>
+    </div>
+  </div>
+</section>
+
+<!-- Row 1.5: 本期亮點（獨立一行三格） -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">&#x2B50; 本期亮點</div>
+      <div class="highlight-grid">
+        <div class="ach-item ach-mvp"><div class="ach-label">&#x1F451; 本期 MVP</div><div class="ach-name" id="mvpName">-</div><div class="ach-score" id="mvpScore">-</div></div>
+        <div class="ach-item ach-progress"><div class="ach-label">&#x1F680; 進步王</div><div class="ach-name" id="progressName">-</div><div class="ach-score" id="progressScore">資料累積中</div></div>
+        <div class="ach-item ach-potential"><div class="ach-label">&#x1F331; 潛力成員</div><div class="ach-name" id="potentialName">-</div><div class="ach-score" id="potentialScore">資料累積中</div></div>
       </div>
     </div>
   </div>
@@ -205,7 +212,25 @@
   </div>
 </section>
 
-<!-- Row 3: TOP5 左 + 右（公會傳奇紀錄 + 本期對手分數名次） -->
+<!-- Row 3.5: 穩定輸出榜 + 稱號分布 -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="grid-2col">
+      <div class="card" id="stableCard" style="display:none;">
+        <div class="card-title">&#x1F48E; 穩定輸出榜</div>
+        <p style="font-size:0.78rem;color:#a08050;margin-bottom:12px;">連續 3 期參賽且每期 &#x2265; 1000 分</p>
+        <div id="stableList" class="stable-chips"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
+        <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
+        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Row 4: TOP5 左 + 右（公會傳奇紀錄 + 稱號分布） -->
 <section class="section" style="padding-top:0;">
   <div class="container">
     <div class="grid-2col">
@@ -226,29 +251,11 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
-          <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
-          <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Row 4: 穩定輸出榜 + 稱號分布 -->
-<section class="section" style="padding-top:0;">
-  <div class="container">
-    <div class="grid-2col">
-      <div class="card" id="stableCard" style="display:none;">
-        <div class="card-title">&#x1F48E; 穩定輸出榜</div>
-        <p style="font-size:0.78rem;color:#a08050;margin-bottom:12px;">連續 3 期參賽且每期 &#x2265; 1000 分</p>
-        <div id="stableList" class="stable-chips"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">&#x1F396; 稱號分布</div>
-        <div class="title-section">
-          <div class="title-chart-wrap"><canvas id="chartDonut"></canvas><div class="title-center"><strong id="donutTotal">-</strong>人</div></div>
-          <div class="title-list" id="titleList"></div>
+          <div class="card-title">&#x1F396; 稱號分布</div>
+          <div class="title-section">
+            <div class="title-chart-wrap"><canvas id="chartDonut"></canvas><div class="title-center"><strong id="donutTotal">-</strong>人</div></div>
+            <div class="title-list" id="titleList"></div>
+          </div>
         </div>
       </div>
     </div>
