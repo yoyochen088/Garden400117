@@ -40,6 +40,10 @@
 
     /* Chart */
     .chart-wrap{position:relative;height:180px;}
+    .chart-overlay{position:absolute;right:16px;bottom:16px;text-align:right;}
+    .chart-overlay .co-label{font-size:0.72rem;color:#a08050;}
+    .chart-overlay .co-value{font-size:1.4rem;font-weight:900;color:#4a3520;}
+    .chart-overlay .co-diff{font-size:0.82rem;font-weight:700;}
 
     /* Compare */
     .compare-list{display:flex;flex-direction:column;gap:10px;}
@@ -164,6 +168,7 @@
       <div class="card">
         <div class="card-title">&#x1F4C8; 公會總分趨勢</div>
         <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
+        <div class="chart-overlay" id="chartOverlay"></div>
       </div>
       <div class="card">
         <div class="card-title">&#x1F4CA; 與上期比較</div>
@@ -181,7 +186,7 @@
   </div>
 </section>
 
-<!-- Row 2: 排名走勢 + 公會歷史紀錄 -->
+<!-- Row 2: 排名走勢 + 近期公會總分排名 -->
 <section class="section" style="padding-top:0;">
   <div class="container">
     <div class="grid-2col">
@@ -190,14 +195,7 @@
         <div class="chart-wrap" style="height:150px;"><canvas id="chartRank"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">&#x1F3F0; 公會歷史紀錄</div>
-        <div class="history-grid">
-          <div class="hist-item"><div class="hist-label">歷史最高分</div><div class="hist-value" id="hsHighest">-</div></div>
-          <div class="hist-item"><div class="hist-label">最佳排名</div><div class="hist-value" id="hsBestRank">-</div></div>
-          <div class="hist-item"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg">-</div></div>
-          <div class="hist-item"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods">-</div></div>
-        </div>
-        <div class="card-title" style="margin-top:16px;">&#x1F4C5; 近期公會總分排名</div>
+        <div class="card-title">&#x1F4C5; 近期公會總分排名</div>
         <table class="mini-table">
           <thead><tr><th>期數</th><th>總分</th><th>排名</th><th>較上期變動</th></tr></thead>
           <tbody id="historyTable"></tbody>
@@ -207,7 +205,7 @@
   </div>
 </section>
 
-<!-- Row 3: TOP5 左 + 對戰對手 TOP5 右 -->
+<!-- Row 3: TOP5 左 + 右（公會傳奇紀錄 + 本期對手分數名次） -->
 <section class="section" style="padding-top:0;">
   <div class="container">
     <div class="grid-2col">
@@ -217,10 +215,21 @@
         <div id="top5Rest" class="top5-rest"></div>
         <div style="text-align:center;margin-top:14px;"><a href="contest-history-v3.html" id="rankMoreLink" class="btn-link" style="font-size:0.82rem;">查看完整排行榜 &#x2192;</a></div>
       </div>
-      <div class="card">
-        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
-        <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
-        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-title">&#x1F3F0; 公會傳奇紀錄</div>
+          <div class="history-grid">
+            <div class="hist-item"><div class="hist-label">歷史最高分</div><div class="hist-value" id="hsHighest">-</div></div>
+            <div class="hist-item"><div class="hist-label">最佳排名</div><div class="hist-value" id="hsBestRank">-</div></div>
+            <div class="hist-item"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg">-</div></div>
+            <div class="hist-item"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods">-</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
+          <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
+          <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
+        </div>
       </div>
     </div>
   </div>
@@ -401,6 +410,11 @@ async function init(){
     if(summaries.length>=2){
       const cd=periods.slice(-6).map(p=>{const s=summaries.find(x=>x.period===p);return{period:p,total:s?Number(s.total):0};}).filter(d=>d.total>0);
       if(cd.length>=2){new Chart(document.getElementById('chartTotal'),{type:'line',data:{labels:cd.map(d=>d.period.slice(5)),datasets:[{data:cd.map(d=>d.total),borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.06)',fill:true,tension:0.35,pointRadius:5,pointBackgroundColor:'#e96a1e',pointBorderColor:'#fff',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>(v/1000)+'K'},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}});}
+      // 趨勢圖上壓本期總分+較上期
+      const lastTotal=cd[cd.length-1].total;
+      const prevTotal=cd.length>=2?cd[cd.length-2].total:0;
+      const tdiff=lastTotal-prevTotal;
+      document.getElementById('chartOverlay').innerHTML=`<div class="co-label">本期總分</div><div class="co-value">${lastTotal.toLocaleString()}</div><div class="co-diff ${tdiff>=0?'val-up':'val-down'}">${tdiff>=0?'較上期 +':'較上期 '}${tdiff.toLocaleString()} ${tdiff>=0?'&#x2191;':'&#x2193;'}</div>`;
     }
 
     // 排名走勢圖
