@@ -142,7 +142,6 @@
     <div class="hero-text">
       <h1>本期公會競賽戰報</h1>
       <p class="hero-period" id="heroPeriod">載入中...</p>
-      <p class="hero-sub">分析對手戰績，掌握勝利關鍵！</p>
     </div>
   </div>
 </section>
@@ -245,18 +244,18 @@
 <!-- Row 4: 公會傳奇紀錄（左）+ 本期對戰對手TOP5（右） -->
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="grid-2col">
-      <div class="card">
+    <div class="grid-2col" style="align-items:stretch;">
+      <div class="card" style="display:flex;flex-direction:column;">
         <div class="card-title">&#x1F3F0; 公會傳奇紀錄</div>
-        <div class="history-grid">
-          <div class="hist-item"><div class="hist-label">歷史最高分</div><div class="hist-value" id="hsHighest">-</div></div>
-          <div class="hist-item"><div class="hist-label">最佳排名</div><div class="hist-value" id="hsBestRank">-</div></div>
-          <div class="hist-item"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg">-</div></div>
-          <div class="hist-item"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods">-</div></div>
+        <div class="history-grid" style="gap:14px;flex:1;">
+          <div class="hist-item" style="padding:20px 12px;"><div class="hist-label">歷史最高分</div><div class="hist-value" id="hsHighest" style="font-size:1.5rem;">-</div></div>
+          <div class="hist-item" style="padding:20px 12px;"><div class="hist-label">最佳排名</div><div class="hist-value" id="hsBestRank" style="font-size:1.5rem;">-</div></div>
+          <div class="hist-item" style="padding:20px 12px;"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg" style="font-size:1.5rem;">-</div></div>
+          <div class="hist-item" style="padding:20px 12px;"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods" style="font-size:1.5rem;">-</div></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
+        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手</div>
         <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
         <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
       </div>
