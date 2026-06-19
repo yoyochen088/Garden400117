@@ -14,14 +14,15 @@
     .loading{text-align:center;padding:50px;color:#a08050;}
 
     /* Hero */
-    .hero{position:relative;min-height:300px;background:linear-gradient(135deg,#fff8f5 0%,#fef0e7 50%,#fde8d4 100%);overflow:hidden;border-bottom:1px solid #f8d5b0;text-align:center;}
-    .hero::before{content:'';position:absolute;inset:0;background:url('images/hero-report.png') center 40%/cover no-repeat;opacity:0.2;}
-    .hero-inner{position:relative;padding:48px 20px 32px;}
+    .hero{position:relative;min-height:320px;background:linear-gradient(135deg,#fff8f5 0%,#fef0e7 50%,#fde8d4 100%);overflow:hidden;border-bottom:1px solid #f8d5b0;}
+    .hero::before{content:'';position:absolute;inset:0;background:url('images/hero-result.png') center 40%/cover no-repeat;opacity:0.2;}
+    .hero-inner{position:relative;max-width:1100px;margin:0 auto;padding:48px 40px 32px;display:flex;justify-content:flex-end;}
+    .hero-card{background:rgba(255,255,255,0.75);backdrop-filter:blur(6px);border-radius:24px;padding:36px 44px;max-width:480px;text-align:center;}
     .hero h1{font-size:2rem;font-weight:900;color:#a35d00;margin-bottom:10px;}
     .hero-summary{font-size:0.95rem;color:#5b3b1d;line-height:1.8;}
     .hero-highlight{font-size:1.3rem;font-weight:900;color:#e96a1e;}
     .hero-grade{display:inline-block;margin-top:14px;background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;font-weight:900;font-size:0.95rem;padding:8px 24px;border-radius:20px;box-shadow:0 3px 12px rgba(233,106,30,.3);}
-    .period-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px;}
+    .period-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;}
     .period-bar label{font-size:0.88rem;font-weight:700;color:#8b5a00;}
     .period-bar select{padding:8px 14px;border:2px solid #f0c866;border-radius:12px;font-size:0.88rem;background:#fff;color:#4a3520;outline:none;cursor:pointer;}
 
@@ -93,7 +94,7 @@
     .back-to-top{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#e96a1e,#f4a46a);color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(233,106,30,.3);cursor:pointer;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;text-decoration:none;}
     .back-to-top.show{opacity:1;pointer-events:auto;}
 
-    @media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}.rank-table{font-size:0.8rem;}.rank-table th,.rank-table td{padding:9px 8px;}.contrib-bar{display:none;}.title-chips{overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;}}
+    @media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}.rank-table{font-size:0.8rem;}.rank-table th,.rank-table td{padding:9px 8px;}.contrib-bar{display:none;}.title-chips{overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;}.hero-card{padding:24px 20px;max-width:100%;}}
     @media(max-width:480px){.kpi-row{grid-template-columns:1fr 1fr;}.kpi-value{font-size:1.2rem;}.hero h1{font-size:1.5rem;}}
   </style>
 </head>
@@ -103,11 +104,13 @@
 <!-- Hero -->
 <section class="hero">
   <div class="hero-inner">
-    <h1>&#x1F3C6; 競賽結果</h1>
-    <div class="hero-summary" id="heroSummary">載入中...</div>
-    <div class="period-bar">
-      <label>期數：</label>
-      <select id="periodPicker" onchange="loadPeriod()"><option value="">載入中...</option></select>
+    <div class="hero-card">
+      <h1>&#x1F3C6; 競賽結果</h1>
+      <div class="hero-summary" id="heroSummary">載入中...</div>
+      <div class="period-bar">
+        <label>期數：</label>
+        <select id="periodPicker" onchange="loadPeriod()"><option value="">載入中...</option></select>
+      </div>
     </div>
   </div>
 </section>
@@ -141,7 +144,6 @@
         <tbody id="rankBody"></tbody>
       </table>
       <div class="show-more-wrap" id="showMoreWrap" style="display:none;">
-        <button class="btn-more" onclick="showAll()">查看更多成員 &#x25BC;</button>
       </div>
     </div>
   </div>
@@ -239,7 +241,7 @@ function loadPeriod(){
   // 排名列表
   document.getElementById('rankSection').style.display='';
   const maxScore=data[0]?data[0].score:1;
-  const displayData=showAllMembers?data:data.slice(0,10);
+  const displayData=data;
 
   renderRankList(displayData,data,maxScore,prevRankMap,total);
 
