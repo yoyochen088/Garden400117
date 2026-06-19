@@ -197,9 +197,12 @@
 <section class="section" style="padding-top:0;">
   <div class="container">
     <div class="grid-2col">
-      <div class="card">
+        <div class="card">
         <div class="card-title">&#x1F4C9; 排名走勢</div>
-        <div class="chart-wrap" style="height:150px;"><canvas id="chartRank"></canvas></div>
+        <div class="chart-wrap" style="height:150px;">
+          <canvas id="chartRank"></canvas>
+          <div class="chart-overlay" id="chartRankOverlay"></div>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">&#x1F4C5; 近期公會總分排名</div>
@@ -220,7 +223,7 @@
         <div class="card-title">&#x1F3C5; 本期排行榜 TOP 5</div>
         <div id="top5Podium" class="top5-podium"></div>
         <div id="top5Rest" class="top5-rest"></div>
-        <div style="text-align:center;margin-top:14px;"><a href="contest-history-v3.html" id="rankMoreLink" class="btn-link" style="font-size:0.82rem;">查看完整排行榜 &#x2192;</a></div>
+        <div style="text-align:center;margin-top:14px;"><a href="contest-history-v3.html" id="rankMoreLink" class="btn-link" style="font-size:0.82rem;">查看完整排行榜</a></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;">
         <div class="card" id="stableCard" style="display:none;">
@@ -256,7 +259,7 @@
       <div class="card">
         <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 3</div>
         <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
-        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
+        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析</a></div>
       </div>
     </div>
   </div>
@@ -428,6 +431,9 @@ async function init(){
     if(summaries.length>=2){
       const rd=periods.slice(-6).map(p=>{const s=summaries.find(x=>x.period===p);return{period:p,rank:s?extractRankNum(s.rank):null};}).filter(d=>d.rank!==null);
       if(rd.length>=2){new Chart(document.getElementById('chartRank'),{type:'line',data:{labels:rd.map(d=>d.period.slice(5)),datasets:[{data:rd.map(d=>d.rank),borderColor:'#4a90d9',backgroundColor:'rgba(74,144,217,0.06)',fill:true,tension:0.35,pointRadius:5,pointBackgroundColor:'#4a90d9',pointBorderColor:'#fff',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{reverse:true,min:0,ticks:{stepSize:1,callback:v=>v===0?'':'#'+v},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}});}
+      // 排名圖上壓本期名次
+      const lastRank=rd[rd.length-1].rank;
+      document.getElementById('chartRankOverlay').innerHTML=`<div class="co-label">本期排名</div><div class="co-value" style="color:#4a90d9;">#${lastRank}</div>`;
     }
 
   }catch(e){document.getElementById('loadingState').textContent='⚠️ '+e.message;}
