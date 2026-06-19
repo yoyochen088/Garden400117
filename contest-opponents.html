@@ -182,7 +182,7 @@
     <div class="card" id="historyCard" style="display:none;">
       <div class="card-title">&#x1F4DC; 歷史交手紀錄</div>
       <table class="history-table">
-        <thead><tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>分數對比</th><th>名次差</th><th>備註</th></tr></thead>
+        <thead><tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>我方分數</th><th>對方分數</th><th>名次差</th></tr></thead>
         <tbody id="historyBody"></tbody>
       </table>
       <div class="pagination" id="pagination"></div>
@@ -368,6 +368,7 @@ function renderBattleCard(name) {
   const wr = calcWinRate(name);
   const encounters = wr.total;
   const oppScores = oppData.filter(d=>d.name===name).map(d=>d.score);
+  const myScoresArr = oppData.filter(d=>d.name==='璀璨' && [...new Set(oppData.filter(x=>x.name===name).map(x=>x.period))].includes(d.period)).map(d=>d.score);
   const myPeriodsWithOpp = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))];
 
   // 平均名次差
@@ -409,6 +410,8 @@ function renderBattleCard(name) {
       <div class="be-item"><div class="be-label">平均分數差</div><div class="be-val">${Number(avgScoreDiff)>0?'+':''}${avgScoreDiff}分</div></div>
       <div class="be-item"><div class="be-label">最高名次對比</div><div class="be-val">${bestMyRank||'-'}名 vs ${bestOppRank||'-'}名</div></div>
       <div class="be-item"><div class="be-label">最近交手</div><div class="be-val">第 ${lastPeriod.replace(/[^0-9]/g,'')||lastPeriod} 期</div></div>
+      <div class="be-item"><div class="be-label">對手歷史最高分</div><div class="be-val" style="color:var(--orange);">${oppScores.length ? Math.max(...oppScores).toLocaleString() : '-'}分</div></div>
+      <div class="be-item"><div class="be-label">我方歷史最高分</div><div class="be-val" style="color:var(--orange);">${myScoresArr.length ? Math.max(...myScoresArr).toLocaleString() : '-'}分</div></div>
     </div>`;
 }
 
@@ -429,8 +432,9 @@ function renderHistoryTable(name) {
     const rankDiff = opp.rank - my.rank;
     return `<tr>
       <td>${p}</td><td>${my.rank}</td><td>${opp.rank}</td><td>${result}</td>
-      <td>${my.score.toLocaleString()} vs ${opp.score.toLocaleString()}</td>
-      <td>${rankDiff>0?'+':''}${rankDiff}</td><td>—</td>
+      <td style="font-weight:700;color:var(--orange);">${my.score.toLocaleString()}</td>
+      <td style="font-weight:700;">${opp.score.toLocaleString()}</td>
+      <td>${rankDiff>0?'+':''}${rankDiff}</td>
     </tr>`;
   }).join('');
 
