@@ -40,10 +40,10 @@
 
     /* Chart */
     .chart-wrap{position:relative;height:180px;}
-    .chart-overlay{position:absolute;right:16px;bottom:16px;text-align:right;}
+    .chart-overlay{position:absolute;right:20px;bottom:30px;background:rgba(255,255,255,0.9);border-radius:12px;padding:10px 16px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1px solid #f5deb3;}
     .chart-overlay .co-label{font-size:0.72rem;color:#a08050;}
-    .chart-overlay .co-value{font-size:1.4rem;font-weight:900;color:#4a3520;}
-    .chart-overlay .co-diff{font-size:0.82rem;font-weight:700;}
+    .chart-overlay .co-value{font-size:1.5rem;font-weight:900;color:#4a3520;}
+    .chart-overlay .co-diff{font-size:0.82rem;font-weight:700;margin-top:2px;}
 
     /* Compare */
     .compare-list{display:flex;flex-direction:column;gap:10px;}
@@ -168,8 +168,10 @@
     <div class="grid-2col">
       <div class="card">
         <div class="card-title">&#x1F4C8; 公會總分趨勢</div>
-        <div class="chart-wrap"><canvas id="chartTotal"></canvas></div>
-        <div class="chart-overlay" id="chartOverlay"></div>
+        <div class="chart-wrap">
+          <canvas id="chartTotal"></canvas>
+          <div class="chart-overlay" id="chartOverlay"></div>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">&#x1F4CA; 與上期比較</div>
@@ -212,25 +214,7 @@
   </div>
 </section>
 
-<!-- Row 3.5: 穩定輸出榜 + 稱號分布 -->
-<section class="section" style="padding-top:0;">
-  <div class="container">
-    <div class="grid-2col">
-      <div class="card" id="stableCard" style="display:none;">
-        <div class="card-title">&#x1F48E; 穩定輸出榜</div>
-        <p style="font-size:0.78rem;color:#a08050;margin-bottom:12px;">連續 3 期參賽且每期 &#x2265; 1000 分</p>
-        <div id="stableList" class="stable-chips"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
-        <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
-        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Row 4: TOP5 左 + 右（公會傳奇紀錄 + 稱號分布） -->
+<!-- Row 3: 本期排行榜TOP5（左大）+ 穩定輸出榜 + 稱號分布（右上下） -->
 <section class="section" style="padding-top:0;">
   <div class="container">
     <div class="grid-2col">
@@ -241,14 +225,10 @@
         <div style="text-align:center;margin-top:14px;"><a href="contest-history-v3.html" id="rankMoreLink" class="btn-link" style="font-size:0.82rem;">查看完整排行榜 &#x2192;</a></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;">
-        <div class="card">
-          <div class="card-title">&#x1F3F0; 公會傳奇紀錄</div>
-          <div class="history-grid">
-            <div class="hist-item"><div class="hist-label">歷史最高分</div><div class="hist-value" id="hsHighest">-</div></div>
-            <div class="hist-item"><div class="hist-label">最佳排名</div><div class="hist-value" id="hsBestRank">-</div></div>
-            <div class="hist-item"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg">-</div></div>
-            <div class="hist-item"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods">-</div></div>
-          </div>
+        <div class="card" id="stableCard" style="display:none;">
+          <div class="card-title">&#x1F48E; 穩定輸出榜</div>
+          <p style="font-size:0.78rem;color:#a08050;margin-bottom:12px;">連續 3 期參賽且每期 &#x2265; 1000 分</p>
+          <div id="stableList" class="stable-chips"></div>
         </div>
         <div class="card">
           <div class="card-title">&#x1F396; 稱號分布</div>
@@ -257,6 +237,28 @@
             <div class="title-list" id="titleList"></div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Row 4: 公會傳奇紀錄（左）+ 本期對戰對手TOP5（右） -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="grid-2col">
+      <div class="card">
+        <div class="card-title">&#x1F3F0; 公會傳奇紀錄</div>
+        <div class="history-grid">
+          <div class="hist-item"><div class="hist-label">歷史最高分</div><div class="hist-value" id="hsHighest">-</div></div>
+          <div class="hist-item"><div class="hist-label">最佳排名</div><div class="hist-value" id="hsBestRank">-</div></div>
+          <div class="hist-item"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg">-</div></div>
+          <div class="hist-item"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods">-</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
+        <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
+        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析 &#x2192;</a></div>
       </div>
     </div>
   </div>
