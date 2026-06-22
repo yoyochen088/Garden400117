@@ -294,7 +294,7 @@ async function init(){
     if(!allRecords.length){document.getElementById('loadingState').textContent='尚無資料';return;}
     document.getElementById('loadingState').style.display='none';
 
-    const periods=[...new Set(allRecords.map(r=>r.period))].sort();
+    const periods=[...new Set(allRecords.map(r=>r.period))].sort((a,b)=>new Date(a)-new Date(b));
     const latestPeriod=periods[periods.length-1];
     const latestData=allRecords.filter(r=>r.period===latestPeriod).sort((a,b)=>b.score-a.score);
     const latestSummary=summaries.find(s=>s.period===latestPeriod);
@@ -335,7 +335,7 @@ async function init(){
       document.getElementById('compareSection').innerHTML=`
         <div class="cmp-item"><span class="cmp-icon">&#x1F4CA;</span><span class="cmp-label">總分差距</span><span class="cmp-val ${tDiff>=0?'val-up':'val-down'}">${tDiff>=0?'+':''}${tDiff.toLocaleString()} ${tDiff>=0?'&#x2191;':'&#x2193;'}</span></div>
         <div class="cmp-item"><span class="cmp-icon">&#x1F396;&#xFE0F;</span><span class="cmp-label">排名變動</span><span class="cmp-val ${rDiff>0?'val-up':rDiff<0?'val-down':'val-same'}">${rDiff>0?'+'+rDiff+' &#x2191;':rDiff===0?'持平':rDiff!==null?rDiff+' &#x2193;':'—'}</span></div>
-        <div class="cmp-item"><span class="cmp-icon">&#x1F4C8;</span><span class="cmp-label">對手差距</span><span class="cmp-val ${aDiff>=0?'val-up':'val-down'}">${aDiff>=0?'+':''}${aDiff} ${aDiff>=0?'&#x2191;':'&#x2193;'}</span></div>`;
+        <div class="cmp-item"><span class="cmp-icon">&#x1F4C8;</span><span class="cmp-label">均分增減</span><span class="cmp-val ${aDiff>=0?'val-up':'val-down'}">${aDiff>=0?'+':''}${aDiff} ${aDiff>=0?'&#x2191;':'&#x2193;'}</span></div>`;
     }
 
     // 潛力成員
@@ -351,15 +351,16 @@ async function init(){
       if(best){document.getElementById('potentialName').textContent=best;document.getElementById('potentialScore').textContent='連3期成長 +'+bestG+' 分';}
     }
 
-    // 穩定輸出榜
-    if(periods.length>=3){
-      const last3=periods.slice(-3);const sp3={};
-      last3.forEach(p=>{sp3[p]={};});
-      allRecords.filter(r=>last3.includes(r.period)).forEach(r=>{sp3[r.period][r.nickname]=r.score;});
+    // 穩定輸出榜（取最近最多5期，有幾期算幾期）
+    if(periods.length>=2){
+      const lastN=periods.slice(-Math.min(5,periods.length));const sp3={};
+      lastN.forEach(p=>{sp3[p]={};});
+      allRecords.filter(r=>lastN.includes(r.period)).forEach(r=>{sp3[r.period][r.nickname]=r.score;});
       const stableMembers=[];
+      const reqPeriods=lastN.length;
       [...new Set(allRecords.map(r=>r.nickname))].forEach(n=>{
-        const scores=last3.map(p=>sp3[p]?.[n]).filter(s=>s!==undefined);
-        if(scores.length===3&&scores.every(s=>s>=1000)){const a=Math.round(scores.reduce((x,y)=>x+y,0)/3);stableMembers.push({name:n,avg:a});}
+        const scores=lastN.map(p=>sp3[p]?.[n]).filter(s=>s!==undefined);
+        if(scores.length===reqPeriods&&scores.every(s=>s>=1000)){const a=Math.round(scores.reduce((x,y)=>x+y,0)/reqPeriods);stableMembers.push({name:n,avg:a});}
       });
       if(stableMembers.length){
         stableMembers.sort((a,b)=>b.avg-a.avg);
@@ -408,7 +409,7 @@ async function init(){
     }
 
     // 近期公會總分排名表格
-    const recentSummaries=summaries.slice().sort((a,b)=>b.period.localeCompare(a.period)).slice(0,5);
+    const recentSummaries=summaries.slice().sort((a,b)=>new Date(b.period)-new Date(a.period)).slice(0,5);
     document.getElementById('historyTable').innerHTML=recentSummaries.map((s,i)=>{
       const next=recentSummaries[i+1];
       let diff='—';
