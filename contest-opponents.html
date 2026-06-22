@@ -136,10 +136,10 @@
       .history-table td::before{content:attr(data-label);font-size:0.7rem;color:var(--text-muted);font-weight:600;white-space:nowrap;}
       /* 期數獨佔一行 */
       .history-table td:nth-child(1){grid-column:1/-1;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px;font-weight:700;}
-      /* 結果移到底部分數差上面 */
-      .history-table td:nth-child(4){grid-column:1/-1;order:10;}
+      /* 結果移到分隔線下方、分數差上面 */
+      .history-table td:nth-child(4){grid-column:1/-1;order:10;padding-top:6px;border-top:1px solid var(--border);margin-top:4px;}
       /* 分數差獨佔底部一行 */
-      .history-table td:nth-child(7){grid-column:1/-1;padding-top:6px;border-top:1px solid var(--border);margin-top:4px;font-size:1rem;order:11;}
+      .history-table td:nth-child(7){grid-column:1/-1;font-size:1rem;order:11;}
     }
     @media(max-width:480px){
       .kpi-row{flex-direction:row;flex-wrap:wrap;}
