@@ -125,15 +125,15 @@
     .stable-chip small{font-weight:500;color:#5b3b1d;}
 
     /* Title donut */
-    .title-section{display:flex;align-items:center;gap:16px;}
-    .title-chart-wrap{width:120px;height:120px;flex-shrink:0;position:relative;}
-    .title-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:0.72rem;color:#a08050;}
-    .title-center strong{display:block;font-size:1rem;color:#4a3520;}
-    .title-list{flex:1;display:flex;flex-direction:column;gap:4px;}
-    .title-row{display:flex;align-items:center;gap:8px;font-size:0.8rem;}
-    .title-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .title-section{display:flex;align-items:center;gap:20px;justify-content:center;}
+    .title-chart-wrap{width:160px;height:160px;flex-shrink:0;position:relative;}
+    .title-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;font-size:0.8rem;color:#a08050;}
+    .title-center strong{display:block;font-size:1.2rem;color:#4a3520;}
+    .title-list{flex:1;display:flex;flex-direction:column;gap:6px;}
+    .title-row{display:flex;align-items:center;gap:10px;font-size:0.88rem;}
+    .title-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
     .title-name{flex:1;color:#5b3b1d;}
-    .title-count{font-weight:700;color:#4a3520;}
+    .title-count{font-weight:700;color:#4a3520;font-size:0.88rem;}
 
     /* Responsive */
     @media(max-width:900px){.grid-3col,.grid-2col{grid-template-columns:1fr;}.kpi-row{grid-template-columns:repeat(2,1fr);}.highlight-grid{grid-template-columns:1fr;}.card{overflow-x:auto;}.mini-table{min-width:0;}.mini-table th:nth-child(4),.mini-table td:nth-child(4){display:none;}}
@@ -215,12 +215,12 @@
   </div>
 </section>
 
-<!-- Row 3: 本期排行榜TOP5（左大）+ 穩定輸出榜 + 稱號分布（右上下） -->
+<!-- Row 3: 本期排行榜TOP10（左大）+ 穩定輸出榜 + 稱號分布（右上下） -->
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="grid-2col">
+    <div class="grid-2col" style="align-items:stretch;">
       <div class="card">
-        <div class="card-title">&#x1F3C5; 本期排行榜 TOP 5</div>
+        <div class="card-title">&#x1F3C5; 本期排行榜 TOP 10</div>
         <div id="top5Podium" class="top5-podium"></div>
         <div id="top5Rest" class="top5-rest"></div>
         <div style="text-align:center;margin-top:14px;"><a href="contest-history.html" id="rankMoreLink" class="btn-link" style="font-size:0.82rem;">查看完整排行榜</a></div>
@@ -228,12 +228,11 @@
       <div style="display:flex;flex-direction:column;gap:16px;">
         <div class="card" id="stableCard" style="display:none;">
           <div class="card-title">&#x1F48E; 穩定輸出榜</div>
-        
           <div id="stableList" class="stable-chips"></div>
         </div>
-        <div class="card">
-          <div class="card-title">&#x1F396; 稱號分布</div>
-          <div class="title-section">
+        <div class="card" style="flex:1;display:flex;flex-direction:column;">
+          <div class="card-title">&#x1F3C5; 稱號分布</div>
+          <div class="title-section" style="flex:1;align-items:center;">
             <div class="title-chart-wrap"><canvas id="chartDonut"></canvas><div class="title-center"><strong id="donutTotal">-</strong>人</div></div>
             <div class="title-list" id="titleList"></div>
           </div>
@@ -369,15 +368,15 @@ async function init(){
       }
     }
 
-    // TOP 5
-    const top5=latestData.slice(0,5);
+    // TOP 10
+    const top10=latestData.slice(0,10);
     const medals=['&#x1F947;','&#x1F948;','&#x1F949;'];
-    const podiumOrder=[1,0,2].filter(i=>top5[i]).map(i=>({d:top5[i],rank:i}));
+    const podiumOrder=[1,0,2].filter(i=>top10[i]).map(i=>({d:top10[i],rank:i}));
     document.getElementById('top5Podium').innerHTML=podiumOrder.map(({d,rank})=>`<div class="podium-item podium-${rank+1}"><div class="podium-avatar">${medals[rank]}</div><div class="podium-name">${d.nickname}</div><div class="podium-score">${d.score.toLocaleString()}</div></div>`).join('');
-    document.getElementById('top5Rest').innerHTML=top5.map((d,i)=>{
+    document.getElementById('top5Rest').innerHTML=top10.slice(3).map((d,i)=>{
       const titleCls=d.title?`rt-${d.title}`:'';
       const titleBadge=d.title?`<span class="rest-title ${titleCls}">${d.title}</span>`:'';
-      return `<div class="rest-item"><span class="rest-rank">${i+1}</span><span class="rest-name">${d.nickname}</span>${titleBadge}<span class="rest-score">${d.score.toLocaleString()}</span></div>`;
+      return `<div class="rest-item"><span class="rest-rank">${i+4}</span><span class="rest-name">${d.nickname}</span>${titleBadge}<span class="rest-score">${d.score.toLocaleString()}</span></div>`;
     }).join('');
 
     // 對戰對手 TOP 5（本期）
