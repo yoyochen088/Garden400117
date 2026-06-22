@@ -10,7 +10,7 @@
   <style>
     :root{--orange:#e96a1e;--orange-light:#fef0e7;--orange-mid:#f4a46a;--orange-dark:#c2510b;--bg:#fff8f5;--card-bg:#fff;--text:#3d1a2e;--text-muted:#9e6b7e;--border:#f8d5b0;--shadow:0 2px 12px rgba(233,106,30,.10);--radius:14px;}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
     /* Hero */
     .hero{position:relative;width:100%;min-height:300px;background:linear-gradient(135deg,#fff8f5 0%,#fef0e7 50%,#fde8d4 100%);overflow:hidden;border-bottom:1px solid var(--border);}
@@ -121,8 +121,15 @@
       .kpi-val{font-size:1rem;}
       .bs-grid{grid-template-columns:repeat(2,1fr);}
       .be-grid{grid-template-columns:1fr;}
-      .history-table{font-size:0.75rem;}
-      .history-table th,.history-table td{padding:7px 4px;}
+      .card{overflow:hidden;}
+      .top-item,.rival-item,.opp-item{overflow:hidden;}
+      .hot-tags{overflow-x:auto;flex-wrap:nowrap;}
+      /* 歷史交手紀錄改卡片式 */
+      .history-table thead{display:none;}
+      .history-table tbody tr{display:block;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff;}
+      .history-table tbody tr:hover{background:var(--orange-light);}
+      .history-table td{display:block;border:none;padding:3px 0;text-align:left !important;font-size:0.85rem;}
+      .history-table td::before{content:attr(data-label);font-size:0.72rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:2px;}
     }
     @media(max-width:480px){
       .kpi-row{flex-direction:row;flex-wrap:wrap;}
@@ -443,10 +450,10 @@ function renderHistoryTable(name) {
     const result = won ? '<span class="badge-win">勝</span>' : tied ? '<span class="badge-tie">平</span>' : '<span class="badge-lose">敗</span>';
     const scoreDiff = my.score - opp.score;
     return `<tr>
-      <td>${p}</td><td>${my.rank===1?'👑 1':my.rank}</td><td>${opp.rank===1?'👑 1':opp.rank}</td><td>${result}</td>
-      <td style="font-weight:700;color:var(--orange);">${my.score.toLocaleString()}</td>
-      <td style="font-weight:700;">${opp.score.toLocaleString()}</td>
-      <td style="font-weight:700;color:${scoreDiff>=0?'#2e7d32':'#c62828'};">${scoreDiff>=0?'+':''}${scoreDiff.toLocaleString()}</td>
+      <td data-label="期數">${p}</td><td data-label="我方名次">${my.rank===1?'👑 1':my.rank}</td><td data-label="對方名次">${opp.rank===1?'👑 1':opp.rank}</td><td data-label="結果">${result}</td>
+      <td data-label="我方分數" style="font-weight:700;color:var(--orange);">${my.score.toLocaleString()}</td>
+      <td data-label="對方分數" style="font-weight:700;">${opp.score.toLocaleString()}</td>
+      <td data-label="分數差" style="font-weight:700;color:${scoreDiff>=0?'#2e7d32':'#c62828'};">${scoreDiff>=0?'+':''}${scoreDiff.toLocaleString()}</td>
     </tr>`;
   }).join('');
 
@@ -510,10 +517,10 @@ function renderTrendChart(){
 let donutChart = null;
 function renderDonutChart(name){
   const ranks = oppData.filter(d=>d.name===name).map(d=>d.rank);
-  const buckets = {'1-3名':0,'4-10名':0,'11-20名':0,'21名以上':0};
-  ranks.forEach(r=>{if(r<=3)buckets['1-3名']++;else if(r<=10)buckets['4-10名']++;else if(r<=20)buckets['11-20名']++;else buckets['21名以上']++;});
+  const buckets = {'第1名':0,'第2名':0,'第3名':0,'第4名':0,'第5名':0,'第6名':0};
+  ranks.forEach(r=>{if(r>=1&&r<=6) buckets['第'+r+'名']++;});
   const total = ranks.length;
-  const colors = ['#e96a1e','#f4a46a','#fbd38d','#e2e8f0'];
+  const colors = ['#e96a1e','#f4a46a','#fbd38d','#a5d6a7','#90caf9','#e2e8f0'];
 
   if(donutChart) donutChart.destroy();
   donutChart = new Chart(document.getElementById('chartDonut'),{
@@ -522,9 +529,10 @@ function renderDonutChart(name){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'60%'}
   });
 
-  document.getElementById('donutLegend').innerHTML = Object.entries(buckets).map(([label,val],i)=>{
+  document.getElementById('donutLegend').innerHTML = Object.entries(buckets).filter(([,val])=>val>0).map(([label,val],i)=>{
     const pct = total?Math.round(val/total*100):0;
-    return `<div class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span>${label} <b>${pct}%</b> (${val}期)</div>`;
+    const colorIdx = parseInt(label.match(/\d/)[0])-1;
+    return `<div class="legend-item"><span class="legend-dot" style="background:${colors[colorIdx]}"></span>${label} <b>${pct}%</b> (${val}期)</div>`;
   }).join('');
 }
 
