@@ -76,12 +76,16 @@ async function handleSummaryFile(file) {
     // 解析總結資訊
     const membersMatch = text.match(/在\s*(\d+)\s*名/);
     const totalMatch = text.match(/總獲得\s*([\d,]+)\s*積分/) || text.match(/([\d,]{4,})\s*積分/);
-    const rankMatch = text.match(/位列\s*(.+?名)/) || text.match(/(甲級|乙級|丙級).{0,4}(第.名)/);
-    const gradeMatch = text.match(/(甲級|乙級|丙級)\s*公會/);
+    const rankMatch = text.match(/位列\s*(.+?名)/) || text.match(/成功獲得\s*(.+?名)/) || text.match(/(甲級|乙級|丙級).{0,6}(第.{1,2}名)/) || text.match(/(甲級|乙級|丙級)\s*(第.名)/);
+    const gradeMatch = text.match(/(甲級|乙級|丙級)\s*公會/) || text.match(/(甲級|乙級|丙級)/);
 
     if (membersMatch) document.getElementById('sumMembers').value = membersMatch[1];
     if (totalMatch) document.getElementById('sumTotal').value = totalMatch[1].replace(/,/g, '');
-    if (rankMatch) document.getElementById('sumRank').value = rankMatch[1] || (rankMatch[1] + rankMatch[2]);
+    if (rankMatch) {
+      // rankMatch[1] 可能是 "甲級第一名" 或分組 match
+      const rankVal = rankMatch[2] ? rankMatch[1] + rankMatch[2] : rankMatch[1];
+      document.getElementById('sumRank').value = rankVal;
+    }
     if (gradeMatch) document.getElementById('sumGrade').value = gradeMatch[1] + '公會';
 
     status.style.color = '#2e7d32';
