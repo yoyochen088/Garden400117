@@ -120,16 +120,24 @@
       .kpi-box{min-width:100px;padding:10px 14px;}
       .kpi-val{font-size:1rem;}
       .bs-grid{grid-template-columns:repeat(2,1fr);}
-      .be-grid{grid-template-columns:1fr;}
+      .be-grid{grid-template-columns:repeat(2,1fr);}
       .card{overflow:hidden;}
       .top-item,.rival-item,.opp-item{overflow:hidden;}
-      .hot-tags{overflow-x:auto;flex-wrap:nowrap;}
+      .hot-tags{overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;}
+      .hot-tag{white-space:nowrap;}
+      .hot-label{white-space:nowrap;}
       /* 歷史交手紀錄改卡片式 */
       .history-table thead{display:none;}
-      .history-table tbody tr{display:block;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff;}
+      .history-table tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff;}
       .history-table tbody tr:hover{background:var(--orange-light);}
-      .history-table td{display:block;border:none;padding:3px 0;text-align:left !important;font-size:0.85rem;}
-      .history-table td::before{content:attr(data-label);font-size:0.72rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:2px;}
+      .history-table td{display:flex;align-items:center;gap:6px;border:none;padding:4px 0;text-align:left !important;font-size:0.88rem;}
+      .history-table td::before{content:attr(data-label);font-size:0.7rem;color:var(--text-muted);font-weight:600;white-space:nowrap;}
+      /* 期數獨佔一行 */
+      .history-table td:nth-child(1){grid-column:1/-1;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px;font-weight:700;}
+      /* 結果放右上 */
+      .history-table td:nth-child(4){justify-self:end;}
+      /* 分數差獨佔底部一行 */
+      .history-table td:nth-child(7){grid-column:1/-1;padding-top:6px;border-top:1px solid var(--border);margin-top:4px;font-size:1rem;}
     }
     @media(max-width:480px){
       .kpi-row{flex-direction:row;flex-wrap:wrap;}
