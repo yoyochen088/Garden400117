@@ -79,7 +79,7 @@
     .rd-same{color:#888;}
 
     /* Section divider */
-    .section-divider{padding:10px 24px;background:#fffbf5;font-size:0.85rem;font-weight:800;color:#a35d00;border-bottom:1px solid #f9edd8;}
+    .section-divider{padding:10px 24px;background:linear-gradient(90deg,#fff3e0,#ffefd4);font-size:0.9rem;font-weight:800;color:#a35d00;border-bottom:2px solid #f0c866;border-top:2px solid #f0c866;}
 
     /* Show more button */
     .show-more-wrap{text-align:center;padding:20px;}
@@ -95,7 +95,12 @@
     .back-to-top{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#e96a1e,#f4a46a);color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(233,106,30,.3);cursor:pointer;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;text-decoration:none;}
     .back-to-top.show{opacity:1;pointer-events:auto;}
 
-    @media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}.rank-table{font-size:0.8rem;}.rank-table th,.rank-table td{padding:9px 8px;}.contrib-bar{display:none;}.title-chips{overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;}.hero-card{padding:24px 20px;max-width:100%;}}
+    @media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}.rank-table{font-size:0.8rem;}.rank-table th,.rank-table td{padding:9px 8px;}.contrib-bar{display:none;}.title-chips{overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;}.hero-card{padding:24px 20px;max-width:100%;}
+      .rank-table th:nth-child(3),.rank-table td:nth-child(3),
+      .rank-table th:nth-child(5),.rank-table td:nth-child(5),
+      .rank-table th:nth-child(6),.rank-table td:nth-child(6){display:none;}
+      .role-badge{display:none;}
+    }
     @media(max-width:480px){.kpi-row{grid-template-columns:1fr 1fr;}.kpi-value{font-size:1.2rem;}.hero h1{font-size:1.5rem;}}
   </style>
 </head>
@@ -273,7 +278,7 @@ function renderRankList(displayData,allPeriodData,maxScore,prevRankMap,total){
 
     // section divider
     let divider='';
-    if(d.title&&d.title!==lastTitle){lastTitle=d.title;divider=`<tr><td colspan="6" class="section-divider" id="title-${d.title}">&#x1F396; ${d.title}</td></tr>`;}
+    if(d.title&&d.title!==lastTitle){lastTitle=d.title;divider=`<tr><td colspan="6" class="section-divider" id="title-${d.title}">&#x1F3C5; ${d.title}</td></tr>`;}
 
     return divider+`<tr>
       <td><span class="rank-num ${rnCls}">${i+1}</span></td>
