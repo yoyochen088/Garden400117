@@ -87,14 +87,15 @@
     .mini-table tbody tr:hover{background:#fffbf5;}
 
     /* TOP5 */
-    .top5-podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:12px;padding:10px 0;}
-    .podium-item{text-align:center;}
+    .top5-podium{display:flex;justify-content:space-evenly;align-items:flex-end;margin-bottom:12px;padding:16px 0;background:linear-gradient(180deg,#fffbf5,#fff);border-radius:12px;}
+    .podium-item{text-align:center;flex:1;}
     .podium-avatar{border-radius:50%;background:#fff3e0;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;border:3px solid #f0c866;}
     .podium-1 .podium-avatar{width:76px;height:76px;font-size:2.8rem;border-color:#ffd700;box-shadow:0 6px 20px rgba(255,215,0,.35);}
     .podium-2 .podium-avatar{width:60px;height:60px;font-size:2rem;border-color:#c0c0c0;}
     .podium-3 .podium-avatar{width:52px;height:52px;font-size:1.6rem;border-color:#cd7f32;}
     .podium-name{font-size:0.85rem;font-weight:700;color:#4a3520;margin-top:4px;}
-    .podium-score{font-size:0.85rem;font-weight:900;color:#e96a1e;}
+    .podium-title{font-size:0.7rem;padding:2px 8px;border-radius:8px;font-weight:700;display:inline-block;margin-top:3px;}
+    .podium-score{font-size:0.85rem;font-weight:900;color:#e96a1e;margin-top:2px;}
     .top5-rest{border-top:1px solid #f5deb3;padding-top:8px;}
     .rest-item{display:flex;align-items:center;padding:7px 4px;font-size:0.88rem;gap:10px;}
     .rest-rank{font-weight:700;color:#a08050;width:20px;}
@@ -372,7 +373,11 @@ async function init(){
     const top10=latestData.slice(0,10);
     const medals=['&#x1F947;','&#x1F948;','&#x1F949;'];
     const podiumOrder=[1,0,2].filter(i=>top10[i]).map(i=>({d:top10[i],rank:i}));
-    document.getElementById('top5Podium').innerHTML=podiumOrder.map(({d,rank})=>`<div class="podium-item podium-${rank+1}"><div class="podium-avatar">${medals[rank]}</div><div class="podium-name">${d.nickname}</div><div class="podium-score">${d.score.toLocaleString()}</div></div>`).join('');
+    document.getElementById('top5Podium').innerHTML=podiumOrder.map(({d,rank})=>{
+      const titleCls=d.title?`rt-${d.title}`:'';
+      const titleBadge=d.title?`<div class="podium-title ${titleCls}">${d.title}</div>`:'';
+      return `<div class="podium-item podium-${rank+1}"><div class="podium-avatar">${medals[rank]}</div><div class="podium-name">${d.nickname}</div>${titleBadge}<div class="podium-score">${d.score.toLocaleString()}</div></div>`;
+    }).join('');
     document.getElementById('top5Rest').innerHTML=top10.slice(3).map((d,i)=>{
       const titleCls=d.title?`rt-${d.title}`:'';
       const titleBadge=d.title?`<span class="rest-title ${titleCls}">${d.title}</span>`:'';
