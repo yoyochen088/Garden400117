@@ -80,9 +80,9 @@ async function handleSummaryFile(file) {
     const rankMatch = text.match(/位列\s*(.+?名)/) 
       || text.match(/成功獲得\s*(.+?名)/) 
       || text.match(/獲得\s*(.+?名)/)
-      || text.match(/(甲級|乙級|丙級)\s*(第[一二三四五六七八九十\d]+名)/)
+      || text.match(/(甲級|乙級|丙級|甲組|乙組|丙組)\s*(第[一二三四五六七八九十\d]+名)/)
       || text.match(/(第[一二三四五六七八九十\d]+名)/);
-    const gradeMatch = text.match(/(甲級|乙級|丙級)\s*公會/) || text.match(/(甲級|乙級|丙級)/);
+    const gradeMatch = text.match(/(甲級|乙級|丙級|甲組|乙組|丙組)\s*公會/) || text.match(/(甲級|乙級|丙級|甲組|乙組|丙組)/);
 
     if (membersMatch) document.getElementById('sumMembers').value = membersMatch[1];
     if (totalMatch) document.getElementById('sumTotal').value = totalMatch[1].replace(/,/g, '');
@@ -97,7 +97,10 @@ async function handleSummaryFile(file) {
       }
       document.getElementById('sumRank').value = rankVal;
     }
-    if (gradeMatch) document.getElementById('sumGrade').value = gradeMatch[1] + '公會';
+    if (gradeMatch) {
+      const g = gradeMatch[1].replace('組','級');
+      document.getElementById('sumGrade').value = g + '公會';
+    }
 
     status.style.color = '#2e7d32';
     status.textContent = '✅ 辨識完成，請確認數據';
