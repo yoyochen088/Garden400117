@@ -182,7 +182,7 @@
     <div class="card" id="historyCard" style="display:none;">
       <div class="card-title">&#x1F4DC; 歷史交手紀錄</div>
       <table class="history-table">
-        <thead><tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>我方分數</th><th>對方分數</th><th>名次差</th></tr></thead>
+        <thead><tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>我方分數</th><th>對方分數</th><th>分數差</th></tr></thead>
         <tbody id="historyBody"></tbody>
       </table>
       <div class="pagination" id="pagination"></div>
@@ -343,7 +343,19 @@ function doSearch() {
   const q = document.getElementById('searchInput').value.trim();
   if (!q) return;
   const match = oppData.find(d=>d.name.includes(q) && d.name!=='璀璨');
-  if (match) selectOpp(match.name);
+  if (match) {
+    selectOpp(match.name);
+  } else {
+    // 找不到該對手，清空中欄顯示提示
+    currentOpp = null;
+    document.getElementById('battleCard').style.display = 'none';
+    document.getElementById('historyCard').style.display = 'none';
+    document.getElementById('emptyCenter').style.display = '';
+    document.getElementById('emptyCenter').innerHTML = `
+      <div style="font-size:2.5rem;margin-bottom:12px;">&#x2753;</div>
+      <p>找不到「${q}」的對戰紀錄<br/>此對手尚未有對戰資料</p>`;
+    document.getElementById('tipBox').innerHTML = '<div class="tip-text">&#x2753; 尚未正式交手</div>';
+  }
 }
 
 // ═══ 選擇對手 ═══
@@ -428,13 +440,13 @@ function renderHistoryTable(name) {
     const opp = oppData.find(d=>d.period===p && d.name===name);
     if(!my||!opp) return '';
     const won = my.rank<opp.rank, tied = my.rank===opp.rank;
-    const result = won ? '<span class="badge-win">勝利</span>' : tied ? '<span class="badge-tie">平手</span>' : '<span class="badge-lose">失敗</span>';
-    const rankDiff = opp.rank - my.rank;
+    const result = won ? '<span class="badge-win">勝</span>' : tied ? '<span class="badge-tie">平</span>' : '<span class="badge-lose">敗</span>';
+    const scoreDiff = my.score - opp.score;
     return `<tr>
-      <td>${p}</td><td>${my.rank}</td><td>${opp.rank}</td><td>${result}</td>
+      <td>${p}</td><td>${my.rank===1?'👑 1':my.rank}</td><td>${opp.rank===1?'👑 1':opp.rank}</td><td>${result}</td>
       <td style="font-weight:700;color:var(--orange);">${my.score.toLocaleString()}</td>
       <td style="font-weight:700;">${opp.score.toLocaleString()}</td>
-      <td>${rankDiff>0?'+':''}${rankDiff}</td>
+      <td style="font-weight:700;color:${scoreDiff>=0?'#2e7d32':'#c62828'};">${scoreDiff>=0?'+':''}${scoreDiff.toLocaleString()}</td>
     </tr>`;
   }).join('');
 

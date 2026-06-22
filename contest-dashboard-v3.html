@@ -228,7 +228,7 @@
       <div style="display:flex;flex-direction:column;gap:16px;">
         <div class="card" id="stableCard" style="display:none;">
           <div class="card-title">&#x1F48E; 穩定輸出榜</div>
-          <p style="font-size:0.78rem;color:#a08050;margin-bottom:12px;">連續 3 期參賽且每期 &#x2265; 1000 分</p>
+        
           <div id="stableList" class="stable-chips"></div>
         </div>
         <div class="card">
@@ -365,7 +365,7 @@ async function init(){
       if(stableMembers.length){
         stableMembers.sort((a,b)=>b.avg-a.avg);
         document.getElementById('stableCard').style.display='';
-        document.getElementById('stableList').innerHTML=stableMembers.map(m=>`<span class="stable-chip">${m.name} <small>均${m.avg}</small></span>`).join('');
+        document.getElementById('stableList').innerHTML=stableMembers.map(m=>`<span class="stable-chip">${m.name} <small>均分 ${m.avg}</small></span>`).join('');
       }
     }
 
@@ -381,9 +381,15 @@ async function init(){
     }).join('');
 
     // 對戰對手 TOP 5（本期）
-    const latestOpp=oppData.filter(d=>d.period===latestPeriod&&d.name!=='璀璨').sort((a,b)=>a.rank-b.rank).slice(0,3);
-    if(latestOpp.length){
-      document.getElementById('oppTop5').innerHTML=latestOpp.map((d,i)=>{
+    // 對戰對手 TOP 3（本期，去重）
+    const latestOppAll=oppData.filter(d=>d.period===latestPeriod&&d.name!=='璀璨');
+    const seenOpp=new Set();
+    const latestOpp=[];
+    for(const d of latestOppAll){if(!seenOpp.has(d.name)){seenOpp.add(d.name);latestOpp.push(d);}}
+    latestOpp.sort((a,b)=>a.rank-b.rank);
+    const oppTop3=latestOpp.slice(0,3);
+    if(oppTop3.length){
+      document.getElementById('oppTop5').innerHTML=oppTop3.map((d,i)=>{
         const numCls=i<3?'opp-num-'+(i+1):'opp-num-def';
         return `<div class="opp-item"><span class="opp-rank ${numCls}">${d.rank}</span><span class="opp-name">${d.name}</span><span class="opp-score">${d.score.toLocaleString()}</span></div>`;
       }).join('');
