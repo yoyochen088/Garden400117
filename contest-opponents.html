@@ -30,7 +30,7 @@
     .main-grid{max-width:1400px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:280px 1fr 300px;gap:20px;overflow-x:hidden;}
 
     /* Cards */
-    .card{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px;margin-bottom:16px;overflow:hidden;word-break:break-word;}
+    .card{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px;margin-bottom:16px;overflow:hidden;word-break:break-word;min-width:0;}
     .card-title{font-size:0.92rem;font-weight:700;color:var(--orange-dark);margin-bottom:14px;}
 
     /* Search */
@@ -95,8 +95,9 @@
     .pg-dots{padding:6px 8px;color:var(--text-muted);}
 
     /* Chart */
-    .chart-wrap{position:relative;height:200px;margin-top:10px;max-width:100%;}
-    .chart-wrap-donut{position:relative;height:180px;margin-top:10px;max-width:100%;}
+    .chart-wrap{position:relative;height:200px;margin-top:10px;max-width:100%;overflow:hidden;}
+    .chart-wrap-donut{position:relative;height:180px;margin-top:10px;max-width:100%;overflow:hidden;}
+    .chart-wrap canvas,.chart-wrap-donut canvas{max-width:100% !important;}
     .chart-header{display:flex;justify-content:flex-end;margin-bottom:4px;}
     .chart-header select{padding:5px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;outline:none;}
 
