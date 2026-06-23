@@ -106,7 +106,7 @@
     .member-hist-table td{padding:8px 12px;border-bottom:1px solid #f9edd8;text-align:center;}
     .member-hist-table tbody tr:hover{background:#fffbf5;}
     .rank-table td.clickable-name{cursor:pointer;color:#a35d00;transition:color .15s;}
-    .rank-table td.clickable-name:hover{color:#e96a1e;text-decoration:underline;}
+    .rank-table td.clickable-name:hover{color:#e96a1e;}
 
     /* Back link */
     .back-wrap{text-align:center;padding:32px 0 48px;}
@@ -324,10 +324,14 @@ function scrollToTitle(title){const el=document.getElementById('title-'+title);i
 let mcChart=null;
 let currentMemberOpen=null;
 function showMemberCard(nickname){
-  // 如果點的是同一個人，關閉卡片
+  // 如果點的是同一個人，關閉卡片（帶動畫）
   if(currentMemberOpen===nickname){
     const old=document.getElementById('inlineMemberCard');
-    if(old)old.remove();
+    if(old){
+      const inner=document.getElementById('mcCardInner');
+      if(inner)inner.classList.remove('open');
+      setTimeout(()=>{old.remove();},400);
+    }
     currentMemberOpen=null;
     return;
   }
