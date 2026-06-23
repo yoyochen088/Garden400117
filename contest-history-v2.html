@@ -116,7 +116,7 @@
     .back-to-top{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#e96a1e,#f4a46a);color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(233,106,30,.3);cursor:pointer;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;text-decoration:none;}
     .back-to-top.show{opacity:1;pointer-events:auto;}
 
-    @media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}.rank-table{font-size:0.8rem;}.rank-table th,.rank-table td{padding:9px 8px;}.contrib-bar{display:none;}.title-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;overflow:visible;}.title-chip{white-space:nowrap;font-size:0.75rem;padding:6px 10px;text-align:center;}.hero-card{padding:24px 20px;max-width:100%;}
+    @media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}.rank-table{font-size:0.8rem;}.rank-table th,.rank-table td{padding:9px 8px;}.contrib-bar{display:none;}.title-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;overflow:visible;}.title-chip{white-space:nowrap;font-size:0.75rem;padding:6px 10px;text-align:center;}.hero-card{padding:24px 20px;max-width:100%;}.member-kpi-row{grid-template-columns:repeat(2,1fr);}
       .rank-table th:nth-child(3),.rank-table td:nth-child(3),
       .rank-table th:nth-child(5),.rank-table td:nth-child(5),
       .rank-table th:nth-child(6),.rank-table td:nth-child(6){display:none;}
@@ -188,7 +188,7 @@
         <div class="member-kpi"><div class="mk-label">參賽期數</div><div class="mk-value" id="mcPeriods">-</div></div>
         <div class="member-kpi"><div class="mk-label">歷史最高</div><div class="mk-value" id="mcHighest">-</div></div>
         <div class="member-kpi"><div class="mk-label">平均分數</div><div class="mk-value" id="mcAvg">-</div></div>
-        <div class="member-kpi"><div class="mk-label">最新稱號</div><div class="mk-value" id="mcTitle">-</div></div>
+        <div class="member-kpi"><div class="mk-label">最高稱號</div><div class="mk-value" id="mcTitle">-</div></div>
       </div>
       <div class="member-chart-wrap"><canvas id="mcChart"></canvas></div>
       <div class="member-table-wrap">
@@ -358,7 +358,7 @@ function showMemberCard(nickname){
   const scores=memberData.map(d=>d.score);
   const highest=Math.max(...scores);
   const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
-  const latestTitle=memberData[memberData.length-1].title||'無稱號';
+  const latestTitle=highest>=1400?'王者花匠':highest>=1300?'大師花匠':highest>=1000?'黃金花匠':highest>=700?'白銀花匠':highest>=500?'青銅花匠':'無稱號';
 
   document.getElementById('mcPeriods').textContent=memberData.length+'期';
   document.getElementById('mcHighest').textContent=highest.toLocaleString();
