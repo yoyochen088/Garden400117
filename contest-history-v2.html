@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>競賽戰績 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F338;</text></svg>" />
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:#fffaf3;color:#4a3520;min-height:100vh;}
+    .container{max-width:1100px;margin:0 auto;padding:0 16px;}
+    .section{padding:20px 0;}
+    .loading{text-align:center;padding:50px;color:#a08050;}
+
+    /* Hero */
+    .hero{position:relative;min-height:320px;background:linear-gradient(135deg,#fff8f5 0%,#fef0e7 50%,#fde8d4 100%);overflow:hidden;border-bottom:1px solid #f8d5b0;}
+    .hero::before{content:'';position:absolute;inset:0;background:url('images/hero-result.png') center 40%/cover no-repeat;opacity:0.2;}
+    .hero-inner{position:relative;max-width:1100px;margin:0 auto;padding:48px 40px 32px;display:flex;justify-content:flex-end;}
+    .hero-card{background:rgba(255,255,255,0.75);backdrop-filter:blur(6px);border-radius:24px;padding:36px 44px;max-width:480px;text-align:center;}
+    .hero h1{font-size:2rem;font-weight:900;color:#a35d00;margin-bottom:10px;}
+    .hero-summary{font-size:0.95rem;color:#5b3b1d;line-height:1.8;}
+    .hero-highlight{font-size:1.3rem;font-weight:900;color:#e96a1e;}
+    .hero-grade{display:inline-block;margin-top:14px;background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;font-weight:900;font-size:0.95rem;padding:8px 24px;border-radius:20px;box-shadow:0 3px 12px rgba(233,106,30,.3);}
+    .period-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;}
+    .period-bar label{font-size:0.88rem;font-weight:700;color:#8b5a00;}
+    .period-bar select{padding:8px 14px;border:2px solid #f0c866;border-radius:12px;font-size:0.88rem;background:#fff;color:#4a3520;outline:none;cursor:pointer;}
+
+    /* KPI */
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    .kpi-card{background:#fff;border-radius:16px;padding:18px 12px;text-align:center;box-shadow:0 4px 20px rgba(180,120,40,.08);border:1.5px solid #f5deb3;}
+    .kpi-icon{font-size:1.4rem;margin-bottom:4px;}
+    .kpi-label{font-size:0.75rem;color:#a08050;font-weight:600;margin-bottom:4px;}
+    .kpi-value{font-size:1.6rem;font-weight:900;color:#4a3520;}
+
+    /* Title chips */
+    .title-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px;}
+    .title-chip{padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:700;cursor:pointer;transition:transform .15s;}
+    .title-chip:hover{transform:translateY(-2px);}
+    .tc-王者花匠{background:linear-gradient(135deg,#e96a1e,#ff4e8a);color:#fff;}
+    .tc-大師花匠{background:linear-gradient(135deg,#9b59b6,#c39bd3);color:#fff;}
+    .tc-黃金花匠{background:linear-gradient(135deg,#f4c430,#ffd700);color:#5a4000;}
+    .tc-白銀花匠{background:linear-gradient(135deg,#9e9e9e,#d4d4d4);color:#fff;}
+    .tc-青銅花匠{background:linear-gradient(135deg,#cd7f32,#e8a96a);color:#fff;}
+    .tc-無稱號{background:#f0f0f0;color:#888;}
+
+    /* Ranking */
+    .rank-box{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(180,120,40,.06);border:1px solid #f5deb3;}
+    .rank-header{background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;padding:16px 24px;font-size:1rem;font-weight:800;}
+    .rank-table{width:100%;border-collapse:collapse;font-size:0.88rem;}
+    .rank-table th{padding:12px 14px;text-align:left;font-weight:600;background:#fffbf5;border-bottom:2px solid #f5deb3;color:#8b5a00;}
+    .rank-table td{padding:11px 14px;border-bottom:1px solid #f9edd8;}
+    .rank-table tbody tr:hover{background:#fffbf5;}
+    .rank-num{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:800;}
+    .rn-1{background:linear-gradient(135deg,#f4c430,#ffd700);color:#5a4000;}
+    .rn-2{background:linear-gradient(135deg,#bdbdbd,#e0e0e0);color:#555;}
+    .rn-3{background:linear-gradient(135deg,#cd7f32,#e8a96a);color:#fff;}
+    .rn-default{background:#fff3e0;color:#a35d00;}
+    .role-badge{font-size:0.7rem;padding:2px 7px;border-radius:8px;font-weight:600;margin-left:6px;}
+    .rb-會長{background:linear-gradient(135deg,#ff4e8a,#ff8c42);color:#fff;}
+    .rb-副會長{background:linear-gradient(135deg,#ff8c00,#ffb347);color:#fff;}
+    .rb-理事{background:linear-gradient(135deg,#9b59b6,#c39bd3);color:#fff;}
+    .rb-菁英{background:linear-gradient(135deg,#4a90d9,#74b9ff);color:#fff;}
+    .rb-成員{background:#e8f5e9;color:#2e7d32;}
+    .rb-分會成員{background:#e3f2fd;color:#1565c0;}
+    .title-badge{font-size:0.72rem;padding:3px 10px;border-radius:10px;font-weight:700;white-space:nowrap;}
+    .tb-王者花匠{background:linear-gradient(135deg,#e96a1e,#ff4e8a);color:#fff;}
+    .tb-大師花匠{background:linear-gradient(135deg,#9b59b6,#c39bd3);color:#fff;}
+    .tb-黃金花匠{background:linear-gradient(135deg,#f4c430,#ffd700);color:#5a4000;}
+    .tb-白銀花匠{background:linear-gradient(135deg,#9e9e9e,#d4d4d4);color:#fff;}
+    .tb-青銅花匠{background:linear-gradient(135deg,#cd7f32,#e8a96a);color:#fff;}
+    .tb-無稱號{background:#f0f0f0;color:#888;}
+    .score-col{font-weight:900;color:#e96a1e;font-size:1rem;}
+    .contrib-bar{width:80px;height:8px;background:#f0e8e0;border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px;}
+    .contrib-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#e96a1e,#f4a46a);}
+    .rank-diff{font-weight:700;font-size:0.82rem;}
+    .rd-up{color:#2e7d32;}
+    .rd-down{color:#c62828;}
+    .rd-same{color:#888;}
+
+    /* Section divider */
+    .section-divider{padding:10px 24px;background:linear-gradient(90deg,#fff3e0,#ffefd4);font-size:0.9rem;font-weight:800;color:#a35d00;border-bottom:2px solid #f0c866;border-top:2px solid #f0c866;}
+
+    /* Show more button */
+    .show-more-wrap{text-align:center;padding:20px;}
+    .btn-more{padding:10px 28px;border-radius:20px;font-size:0.88rem;font-weight:700;background:#fff;border:2px solid #f0c866;color:#8b5a00;cursor:pointer;transition:all .15s;}
+    .btn-more:hover{background:#fff8ed;transform:translateY(-2px);}
+
+    /* Member Card */
+    .member-card{background:#fff;border-radius:18px;padding:24px;box-shadow:0 4px 20px rgba(180,120,40,.06);border:2px solid #f0c866;}
+    .member-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .member-card-name{font-size:1.4rem;font-weight:900;color:#a35d00;}
+    .member-card-close{background:none;border:none;font-size:1.4rem;color:#a08050;cursor:pointer;padding:4px 8px;border-radius:8px;transition:background .15s;}
+    .member-card-close:hover{background:#fff3e0;}
+    .member-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+    .member-kpi{text-align:center;padding:14px 8px;background:#fffbf5;border-radius:12px;border:1px solid #f5deb3;}
+    .mk-label{font-size:0.72rem;color:#a08050;font-weight:600;}
+    .mk-value{font-size:1.2rem;font-weight:900;color:#4a3520;margin-top:4px;}
+    .member-chart-wrap{height:180px;margin-bottom:18px;position:relative;}
+    .member-table-wrap{max-height:300px;overflow-y:auto;}
+    .member-hist-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+    .member-hist-table thead tr{background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;position:sticky;top:0;}
+    .member-hist-table th{padding:10px 12px;text-align:center;font-weight:600;}
+    .member-hist-table td{padding:8px 12px;border-bottom:1px solid #f9edd8;text-align:center;}
+    .member-hist-table tbody tr:hover{background:#fffbf5;}
+    .rank-table td.clickable-name{cursor:pointer;color:#a35d00;transition:color .15s;}
+    .rank-table td.clickable-name:hover{color:#e96a1e;text-decoration:underline;}
+
+    /* Back link */
+    .back-wrap{text-align:center;padding:32px 0 48px;}
+    .btn-link{padding:10px 22px;border-radius:20px;font-size:0.88rem;font-weight:700;background:linear-gradient(135deg,#e96a1e,#f4a46a);color:#fff;text-decoration:none;box-shadow:0 3px 12px rgba(233,106,30,.25);transition:transform .15s;display:inline-block;}
+    .btn-link:hover{transform:translateY(-2px);}
+
+    /* Back to top */
+    .back-to-top{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#e96a1e,#f4a46a);color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(233,106,30,.3);cursor:pointer;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;text-decoration:none;}
+    .back-to-top.show{opacity:1;pointer-events:auto;}
+
+    @media(max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr);}.rank-table{font-size:0.8rem;}.rank-table th,.rank-table td{padding:9px 8px;}.contrib-bar{display:none;}.title-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;overflow:visible;}.title-chip{white-space:nowrap;font-size:0.75rem;padding:6px 10px;text-align:center;}.hero-card{padding:24px 20px;max-width:100%;}
+      .rank-table th:nth-child(3),.rank-table td:nth-child(3),
+      .rank-table th:nth-child(5),.rank-table td:nth-child(5),
+      .rank-table th:nth-child(6),.rank-table td:nth-child(6){display:none;}
+      .role-badge{display:none;}
+    }
+    @media(max-width:480px){.kpi-row{grid-template-columns:1fr 1fr;}.kpi-value{font-size:1.2rem;}.hero h1{font-size:1.5rem;}}
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-card">
+      <h1>&#x1F3C6; 競賽結果</h1>
+      <div class="hero-summary" id="heroSummary">載入中...</div>
+      <div class="period-bar">
+        <label>期數：</label>
+        <select id="periodPicker" onchange="loadPeriod()"><option value="">載入中...</option></select>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KPI -->
+<section class="section" id="kpiSection" style="display:none;">
+  <div class="container">
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-icon">&#x1F3C6;</div><div class="kpi-label">公會總分</div><div class="kpi-value" id="statTotal">-</div></div>
+      <div class="kpi-card"><div class="kpi-icon">&#x1F465;</div><div class="kpi-label">參賽人數</div><div class="kpi-value" id="statCount">-</div></div>
+      <div class="kpi-card"><div class="kpi-icon">&#x1F4CA;</div><div class="kpi-label">平均分數</div><div class="kpi-value" id="statAvg">-</div></div>
+      <div class="kpi-card"><div class="kpi-icon">&#x2694;&#xFE0F;</div><div class="kpi-label">有效參賽率</div><div class="kpi-value" id="statRate">-</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 稱號標籤 -->
+<section class="section" id="titleSection" style="display:none;padding-top:0;padding-bottom:8px;">
+  <div class="container">
+    <div class="title-chips" id="titleDist"></div>
+  </div>
+</section>
+
+<!-- 排名列表 -->
+<section class="section" id="rankSection" style="display:none;padding-top:0;">
+  <div class="container">
+    <div class="rank-box">
+      <div class="rank-header">&#x1F4CB; 成員排名</div>
+      <table class="rank-table">
+        <thead><tr><th>排名</th><th>暱稱</th><th>花匠稱號</th><th>個人積分</th><th>貢獻度</th><th>較上期</th></tr></thead>
+        <tbody id="rankBody"></tbody>
+      </table>
+      <div class="show-more-wrap" id="showMoreWrap" style="display:none;">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 個人戰績卡 -->
+<section class="section" id="memberSection" style="display:none;padding-top:0;">
+  <div class="container">
+    <div class="member-card">
+      <div class="member-card-header">
+        <div class="member-card-name" id="mcName">-</div>
+        <button class="member-card-close" onclick="closeMemberCard()">&#x2715;</button>
+      </div>
+      <div class="member-kpi-row">
+        <div class="member-kpi"><div class="mk-label">參賽期數</div><div class="mk-value" id="mcPeriods">-</div></div>
+        <div class="member-kpi"><div class="mk-label">歷史最高</div><div class="mk-value" id="mcHighest">-</div></div>
+        <div class="member-kpi"><div class="mk-label">平均分數</div><div class="mk-value" id="mcAvg">-</div></div>
+        <div class="member-kpi"><div class="mk-label">最新稱號</div><div class="mk-value" id="mcTitle">-</div></div>
+      </div>
+      <div class="member-chart-wrap"><canvas id="mcChart"></canvas></div>
+      <div class="member-table-wrap">
+        <table class="member-hist-table">
+          <thead><tr><th>期數</th><th>分數</th><th>排名</th><th>稱號</th></tr></thead>
+          <tbody id="mcTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="loading" id="loadingState">載入中...</div>
+
+<div class="back-wrap">
+  <a href="contest-dashboard.html" class="btn-link">返回本期公會競賽戰報</a>
+</div>
+
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">&#x2191;</a>
+
+<script>
+let allData=[],periods=[],summaryData=[],membersData=[];
+let showAllMembers=false;
+
+async function init(){
+  try{
+    const [cRes,sRes,mRes]=await Promise.all([
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`),
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`),
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:D?key=${API_KEY}`)
+    ]);
+    const cData=await cRes.json();
+    if(!cRes.ok)throw new Error('讀取失敗');
+    const rows=(cData.values||[]);
+    if(rows.length<=1){document.getElementById('loadingState').textContent='尚無資料';return;}
+    allData=rows.slice(1).map(r=>({period:r[0]||'',server:r[1]||'',nickname:r[2]||'',role:r[3]||'',score:Number(r[4])||0,title:r[5]||''}));
+
+    if(sRes.ok){const d=await sRes.json();summaryData=(d.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:r[2]||'',rank:r[3]||'',grade:r[4]||''}));}
+    if(mRes.ok){const d=await mRes.json();const mRows=(d.values||[]).slice(1);membersData=mRows.filter(r=>r[3]!=='true');}// active members only
+
+    periods=[...new Set(allData.map(d=>d.period))].sort().reverse();
+    const sel=document.getElementById('periodPicker');
+    sel.innerHTML=periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+    document.getElementById('loadingState').style.display='none';
+
+    const urlParams=new URLSearchParams(location.search);
+    const urlPeriod=urlParams.get('period');
+    if(urlPeriod&&periods.includes(urlPeriod))sel.value=urlPeriod;
+
+    loadPeriod();
+  }catch(e){document.getElementById('loadingState').textContent='⚠️ '+e.message;}
+}
+
+function loadPeriod(){
+  const period=document.getElementById('periodPicker').value;
+  if(!period)return;
+  showAllMembers=false;
+
+  const url=new URL(location.href);url.searchParams.set('period',period);history.replaceState(null,'',url);
+
+  const data=allData.filter(d=>d.period===period).sort((a,b)=>b.score-a.score);
+  if(!data.length){document.getElementById('heroSummary').textContent='該期無資料';return;}
+
+  const summary=summaryData.find(s=>s.period===period);
+  const total=data.reduce((s,d)=>s+d.score,0);
+  const count=data.length;
+  const avg=Math.round(total/count);
+  const totalMembers=membersData.length||count;
+  const rate=Math.round(count/totalMembers*100);
+
+  // Hero summary
+  const rankText=summary?summary.rank:'-';
+  const gradeText=summary?summary.grade:'';
+  document.getElementById('heroSummary').innerHTML=`
+    在 <span class="hero-highlight">${count}</span> 名公會成員的共同努力下<br/>
+    獲得總分 <span class="hero-highlight">${total.toLocaleString()}</span> 積分<br/>
+    位列 <span class="hero-highlight">${rankText}</span>
+    ${gradeText?`<br/><span class="hero-grade">${gradeText}</span>`:''}`;
+
+  // KPI
+  document.getElementById('kpiSection').style.display='';
+  document.getElementById('statTotal').textContent=total.toLocaleString();
+  document.getElementById('statCount').textContent=count+' 人';
+  document.getElementById('statAvg').textContent=avg.toLocaleString();
+  document.getElementById('statRate').textContent=rate+'%';
+
+  // 稱號
+  const TITLES=['王者花匠','大師花匠','黃金花匠','白銀花匠','青銅花匠','無稱號'];
+  const tc={};TITLES.forEach(t=>tc[t]=0);data.forEach(d=>{if(tc[d.title]!==undefined)tc[d.title]++;});
+  document.getElementById('titleSection').style.display='';
+  document.getElementById('titleDist').innerHTML=TITLES.filter(t=>tc[t]>0).map(t=>`<span class="title-chip tc-${t}" onclick="scrollToTitle('${t}')">${t} ${tc[t]}人</span>`).join('');
+
+  // 較上期排名變化
+  const prevPeriodIdx=periods.indexOf(period)+1;
+  const prevPeriod=prevPeriodIdx<periods.length?periods[prevPeriodIdx]:null;
+  let prevRankMap={};
+  if(prevPeriod){
+    const prevData=allData.filter(d=>d.period===prevPeriod).sort((a,b)=>b.score-a.score);
+    prevData.forEach((d,i)=>{prevRankMap[d.nickname]=i+1;});
+  }
+
+  // 排名列表
+  document.getElementById('rankSection').style.display='';
+  const maxScore=data[0]?data[0].score:1;
+  const displayData=data;
+
+  renderRankList(displayData,data,maxScore,prevRankMap,total);
+
+  if(data.length>10&&!showAllMembers){
+    document.getElementById('showMoreWrap').style.display='';
+  }else{
+    document.getElementById('showMoreWrap').style.display='none';
+  }
+}
+
+function renderRankList(displayData,allPeriodData,maxScore,prevRankMap,total){
+  let lastTitle='';
+  document.getElementById('rankBody').innerHTML=displayData.map((d,idx)=>{
+    const i=allPeriodData.indexOf(d);
+    const rnCls=i===0?'rn-1':i===1?'rn-2':i===2?'rn-3':'rn-default';
+    const roleBadge=d.role?`<span class="role-badge rb-${d.role}">${d.role}</span>`:'';
+    const titleBadge=d.title?`<span class="title-badge tb-${d.title}">${d.title}</span>`:'';
+    const pct=Math.round(d.score/total*100*10)/10;
+    const barW=Math.round(d.score/maxScore*100);
+
+    // 較上期
+    let diffHtml='<span class="rd-same">—</span>';
+    if(prevRankMap[d.nickname]!==undefined){
+      const prevR=prevRankMap[d.nickname];const currR=i+1;const diff=prevR-currR;
+      if(diff>0)diffHtml=`<span class="rd-up">&#x2191; ${diff}</span>`;
+      else if(diff<0)diffHtml=`<span class="rd-down">&#x2193; ${Math.abs(diff)}</span>`;
+    }
+
+    // section divider
+    let divider='';
+    if(d.title&&d.title!==lastTitle){lastTitle=d.title;divider=`<tr><td colspan="6" class="section-divider" id="title-${d.title}">&#x1F3C5; ${d.title}</td></tr>`;}
+
+    return divider+`<tr>
+      <td><span class="rank-num ${rnCls}">${i+1}</span></td>
+      <td class="clickable-name" onclick="showMemberCard('${d.nickname.replace(/'/g,"\\'")}')">${d.nickname}${roleBadge}</td>
+      <td>${titleBadge}</td>
+      <td class="score-col">${d.score.toLocaleString()}</td>
+      <td>${pct}%<div class="contrib-bar"><div class="contrib-fill" style="width:${barW}%"></div></div></td>
+      <td class="rank-diff">${diffHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showAll(){
+  showAllMembers=true;
+  loadPeriod();
+}
+
+function scrollToTitle(title){const el=document.getElementById('title-'+title);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+
+// ═══ 個人戰績卡 ═══
+let mcChart=null;
+function showMemberCard(nickname){
+  const section=document.getElementById('memberSection');
+  section.style.display='';
+  document.getElementById('mcName').textContent=nickname;
+
+  // 取該成員所有期數資料
+  const memberData=allData.filter(d=>d.nickname===nickname).sort((a,b)=>new Date(a.period)-new Date(b.period));
+  if(!memberData.length){section.style.display='none';return;}
+
+  const scores=memberData.map(d=>d.score);
+  const highest=Math.max(...scores);
+  const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+  const latestTitle=memberData[memberData.length-1].title||'無稱號';
+
+  document.getElementById('mcPeriods').textContent=memberData.length+'期';
+  document.getElementById('mcHighest').textContent=highest.toLocaleString();
+  document.getElementById('mcAvg').textContent=avg.toLocaleString();
+  document.getElementById('mcTitle').textContent=latestTitle;
+
+  // 折線圖
+  if(mcChart)mcChart.destroy();
+  mcChart=new Chart(document.getElementById('mcChart'),{
+    type:'line',
+    data:{labels:memberData.map(d=>d.period.slice(5)||d.period),datasets:[{label:nickname,data:scores,borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.06)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#e96a1e',pointBorderColor:'#fff',pointBorderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>v.toLocaleString()},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}
+  });
+
+  // 歷史表格（倒序）
+  const reversed=[...memberData].reverse();
+  document.getElementById('mcTableBody').innerHTML=reversed.map(d=>{
+    // 計算該期排名
+    const periodData=allData.filter(x=>x.period===d.period).sort((a,b)=>b.score-a.score);
+    const rank=periodData.findIndex(x=>x.nickname===nickname)+1;
+    return `<tr><td>${d.period}</td><td style="font-weight:700;color:#e96a1e;">${d.score.toLocaleString()}</td><td>${rank}</td><td>${d.title||'-'}</td></tr>`;
+  }).join('');
+
+  // 滾動到卡片
+  setTimeout(()=>section.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function closeMemberCard(){
+  document.getElementById('memberSection').style.display='none';
+}
+
+// URL 參數支援 ?member=暱稱
+function checkMemberParam(){
+  const params=new URLSearchParams(location.search);
+  const member=params.get('member');
+  if(member)setTimeout(()=>showMemberCard(member),500);
+}
+
+// Back to top
+window.addEventListener('scroll',()=>{const btn=document.getElementById('backToTop');if(window.scrollY>400)btn.classList.add('show');else btn.classList.remove('show');});
+
+init();
+setTimeout(checkMemberParam,600);
+</script>
+<script src="header.js"></script>
+</body>
+</html>
