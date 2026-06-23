@@ -176,31 +176,6 @@
   </div>
 </section>
 
-<!-- 個人戰績卡 -->
-<section class="section" id="memberSection" style="display:none;padding-top:0;">
-  <div class="container">
-    <div class="member-card">
-      <div class="member-card-header">
-        <div class="member-card-name" id="mcName">-</div>
-        <button class="member-card-close" onclick="closeMemberCard()">&#x2715;</button>
-      </div>
-      <div class="member-kpi-row">
-        <div class="member-kpi"><div class="mk-label">參賽期數</div><div class="mk-value" id="mcPeriods">-</div></div>
-        <div class="member-kpi"><div class="mk-label">歷史最高</div><div class="mk-value" id="mcHighest">-</div></div>
-        <div class="member-kpi"><div class="mk-label">平均分數</div><div class="mk-value" id="mcAvg">-</div></div>
-        <div class="member-kpi"><div class="mk-label">最高稱號</div><div class="mk-value" id="mcTitle">-</div></div>
-      </div>
-      <div class="member-chart-wrap"><canvas id="mcChart"></canvas></div>
-      <div class="member-table-wrap">
-        <table class="member-hist-table">
-          <thead><tr><th>期數</th><th>分數</th><th>排名</th><th>稱號</th></tr></thead>
-          <tbody id="mcTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</section>
-
 <div class="loading" id="loadingState">載入中...</div>
 
 <div class="back-wrap">
@@ -347,47 +322,80 @@ function scrollToTitle(title){const el=document.getElementById('title-'+title);i
 // ═══ 個人戰績卡 ═══
 let mcChart=null;
 function showMemberCard(nickname){
-  const section=document.getElementById('memberSection');
-  section.style.display='';
-  document.getElementById('mcName').textContent=nickname;
+  // 移除之前插入的卡片
+  const old=document.getElementById('inlineMemberCard');
+  if(old)old.remove();
+
+  // 找到該成員在排名表中的 row
+  const rows=document.getElementById('rankBody').querySelectorAll('tr');
+  let targetRow=null;
+  for(const row of rows){
+    if(row.classList.contains('section-divider'))continue;
+    const nameCell=row.querySelector('.clickable-name');
+    if(nameCell&&nameCell.textContent.includes(nickname)){targetRow=row;break;}
+  }
 
   // 取該成員所有期數資料
   const memberData=allData.filter(d=>d.nickname===nickname).sort((a,b)=>new Date(a.period)-new Date(b.period));
-  if(!memberData.length){section.style.display='none';return;}
+  if(!memberData.length)return;
 
   const scores=memberData.map(d=>d.score);
   const highest=Math.max(...scores);
   const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
   const latestTitle=highest>=1400?'王者花匠':highest>=1300?'大師花匠':highest>=1000?'黃金花匠':highest>=700?'白銀花匠':highest>=500?'青銅花匠':'無稱號';
 
-  document.getElementById('mcPeriods').textContent=memberData.length+'期';
-  document.getElementById('mcHighest').textContent=highest.toLocaleString();
-  document.getElementById('mcAvg').textContent=avg.toLocaleString();
-  document.getElementById('mcTitle').textContent=latestTitle;
-
-  // 折線圖
-  if(mcChart)mcChart.destroy();
-  mcChart=new Chart(document.getElementById('mcChart'),{
-    type:'line',
-    data:{labels:memberData.map(d=>d.period.slice(5)||d.period),datasets:[{label:nickname,data:scores,borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.06)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#e96a1e',pointBorderColor:'#fff',pointBorderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>v.toLocaleString()},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}
-  });
-
   // 歷史表格（倒序）
   const reversed=[...memberData].reverse();
-  document.getElementById('mcTableBody').innerHTML=reversed.map(d=>{
-    // 計算該期排名
+  const histRows=reversed.map(d=>{
     const periodData=allData.filter(x=>x.period===d.period).sort((a,b)=>b.score-a.score);
     const rank=periodData.findIndex(x=>x.nickname===nickname)+1;
     return `<tr><td>${d.period}</td><td style="font-weight:700;color:#e96a1e;">${d.score.toLocaleString()}</td><td>${rank}</td><td>${d.title||'-'}</td></tr>`;
   }).join('');
 
-  // 滾動到卡片
-  setTimeout(()=>section.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  // 建立 inline 卡片 row
+  const cardRow=document.createElement('tr');
+  cardRow.id='inlineMemberCard';
+  cardRow.innerHTML=`<td colspan="6" style="padding:0;border:none;">
+    <div class="member-card" style="margin:12px 0;">
+      <div class="member-card-header">
+        <div class="member-card-name">${nickname}</div>
+        <button class="member-card-close" onclick="document.getElementById('inlineMemberCard').remove()">&#x2715;</button>
+      </div>
+      <div class="member-kpi-row">
+        <div class="member-kpi"><div class="mk-label">參賽期數</div><div class="mk-value">${memberData.length}期</div></div>
+        <div class="member-kpi"><div class="mk-label">歷史最高</div><div class="mk-value">${highest.toLocaleString()}</div></div>
+        <div class="member-kpi"><div class="mk-label">平均分數</div><div class="mk-value">${avg.toLocaleString()}</div></div>
+        <div class="member-kpi"><div class="mk-label">最高稱號</div><div class="mk-value">${latestTitle}</div></div>
+      </div>
+      <div class="member-chart-wrap"><canvas id="mcChart"></canvas></div>
+      <div class="member-table-wrap">
+        <table class="member-hist-table">
+          <thead><tr><th>期數</th><th>分數</th><th>排名</th><th>稱號</th></tr></thead>
+          <tbody>${histRows}</tbody>
+        </table>
+      </div>
+    </div>
+  </td>`;
+
+  // 插入到該成員 row 的後面
+  if(targetRow){targetRow.after(cardRow);}
+  else{document.getElementById('rankBody').appendChild(cardRow);}
+
+  // 渲染折線圖
+  setTimeout(()=>{
+    if(mcChart)mcChart.destroy();
+    mcChart=new Chart(document.getElementById('mcChart'),{
+      type:'line',
+      data:{labels:memberData.map(d=>d.period.slice(5)||d.period),datasets:[{label:nickname,data:scores,borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.06)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#e96a1e',pointBorderColor:'#fff',pointBorderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>v.toLocaleString()},grid:{color:'#f5ebe0'}},x:{grid:{display:false}}}}
+    });
+    cardRow.scrollIntoView({behavior:'smooth',block:'nearest'});
+  },50);
 }
 
 function closeMemberCard(){
-  document.getElementById('memberSection').style.display='none';
+  const el=document.getElementById('inlineMemberCard');
+  if(el)el.remove();
 }
 
 // URL 參數支援 ?member=暱稱
