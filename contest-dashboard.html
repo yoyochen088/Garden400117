@@ -79,6 +79,11 @@
     .hist-label{font-size:0.72rem;color:#a08050;font-weight:600;}
     .hist-value{font-size:1.2rem;font-weight:900;color:#4a3520;margin-top:4px;}
 
+    /* Badge row */
+    .badge-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+    .badge-item{text-align:center;padding:12px 8px;background:#fffbf5;border-radius:12px;border:1px solid #f5deb3;}
+    .badge-item img{width:100%;max-width:120px;height:auto;border-radius:8px;}
+
     /* Mini table */
     .mini-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
     .mini-table thead tr{background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;}
@@ -255,6 +260,7 @@
           <div class="hist-item"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg">-</div></div>
           <div class="hist-item"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods">-</div></div>
         </div>
+        <div class="badge-row" id="badgeRow" style="display:none;"></div>
       </div>
       <div class="card">
         <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 3</div>
@@ -279,14 +285,14 @@ async function init(){
   try{
     const [cRes,sRes,oRes]=await Promise.all([
       fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`),
-      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`),
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:H?key=${API_KEY}`),
       fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:E?key=${API_KEY}`)
     ]);
     const cData=await cRes.json();
     const allRecords=(cData.values||[]).slice(1).map(r=>({period:r[0]||'',nickname:r[2]||'',role:r[3]||'',score:Number(r[4])||0,title:r[5]||''}));
 
     let summaries=[];
-    if(sRes.ok){const d=await sRes.json();summaries=(d.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:r[2]||'',rank:r[3]||'',grade:r[4]||''}));}
+    if(sRes.ok){const d=await sRes.json();summaries=(d.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:r[2]||'',rank:r[3]||'',grade:r[4]||'',badges:r[6]||''}));}
 
     let oppData=[];
     if(oRes.ok){const d=await oRes.json();oppData=(d.values||[]).slice(1).map(r=>({period:r[0]||'',rank:Number(r[1])||0,name:r[2]||'',score:Number(r[3])||0}));}
@@ -416,6 +422,17 @@ async function init(){
       document.getElementById('hsPeriods').textContent=summaries.length+' 期';
       const rankNums=summaries.map(s=>extractRankNum(s.rank)).filter(n=>n!==null);
       if(rankNums.length){const bestRN=Math.min(...rankNums);const bestEntry=summaries.find(s=>extractRankNum(s.rank)===bestRN);document.getElementById('hsBestRank').textContent=bestEntry?bestEntry.rank:'第'+bestRN+'名';}
+
+      // 獲得稱號徽章（找最新有 badges 的那期）
+      const sortedByDate=summaries.slice().sort((a,b)=>new Date(b.period)-new Date(a.period));
+      const badgeEntry=sortedByDate.find(s=>s.badges&&s.badges.trim());
+      if(badgeEntry){
+        const files=badgeEntry.badges.split('|').map(f=>f.trim()).filter(Boolean);
+        if(files.length){
+          document.getElementById('badgeRow').style.display='';
+          document.getElementById('badgeRow').innerHTML=files.map(f=>`<div class="badge-item"><img src="images/${f}" alt="${f.replace('.png','')}" /></div>`).join('');
+        }
+      }
     }
 
     // 近期公會總分排名表格
