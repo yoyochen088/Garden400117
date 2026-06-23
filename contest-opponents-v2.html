@@ -200,14 +200,6 @@
         </div>
         <div class="hot-tags" id="hotTags"></div>
       </div>
-      <div class="card">
-        <div class="card-title">&#x1F3C5; 常見對手 TOP 5</div>
-        <div id="topList" class="top-list"><div class="loading">載入中...</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">&#x1F525; 宿敵公會</div>
-        <div id="rivalList" class="rival-list"><div class="loading">載入中...</div></div>
-      </div>
     </div>
     <!-- 期數排名模式 -->
     <div id="modePeriod" style="display:none;">
@@ -217,6 +209,15 @@
           <option value="">選擇期數...</option>
         </select>
       </div>
+    </div>
+    <!-- 常見對手 & 宿敵（始終顯示） -->
+    <div class="card">
+      <div class="card-title">&#x1F3C5; 常見對手 TOP 5</div>
+      <div id="topList" class="top-list"><div class="loading">載入中...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#x1F525; 宿敵公會</div>
+      <div id="rivalList" class="rival-list"><div class="loading">載入中...</div></div>
     </div>
   </aside>
 
@@ -655,13 +656,14 @@ function switchMode(mode){
   document.getElementById('modePeriod').style.display = mode==='period'?'':'none';
   document.getElementById('centerSearch').style.display = mode==='search'?'':'none';
   document.getElementById('centerPeriod').style.display = mode==='period'?'':'none';
+  if(mode==='period') loadPeriodRank();
 }
 
 // ═══ 期數排名 ═══
 function populatePeriodPicker(){
   const periods = [...new Set(oppData.map(d=>d.period))].sort((a,b)=>new Date(b)-new Date(a));
   const sel = document.getElementById('periodPicker');
-  sel.innerHTML = '<option value="">選擇期數...</option>' + periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  sel.innerHTML = periods.map(p=>`<option value="${p}">${p}</option>`).join('');
 }
 
 function loadPeriodRank(){
