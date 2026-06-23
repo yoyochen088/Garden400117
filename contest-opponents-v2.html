@@ -678,9 +678,11 @@ function loadPeriodRank(){
   
   document.getElementById('periodRankBody').innerHTML = unique.map(d=>{
     const isSelf = d.name==='璀璨';
-    return `<tr class="period-rank-row ${isSelf?'is-self':''}" onclick="${isSelf?'':'selectOppFromPeriod(\\\''+esc(d.name)+'\\\')'}">
+    const clickAttr = isSelf ? '' : `onclick="selectOppFromPeriod('${esc(d.name)}')"`;
+    const nameStyle = isSelf ? '' : 'style="color:var(--orange-dark);text-decoration:underline;cursor:pointer;"';
+    return `<tr class="period-rank-row ${isSelf?'is-self':''}" ${clickAttr}>
       <td>${d.rank}</td>
-      <td>${isSelf?'⭐ ':''}${d.name}</td>
+      <td ${nameStyle}>${isSelf?'⭐ ':''}${d.name}</td>
       <td style="font-weight:700;color:var(--orange);">${d.score.toLocaleString()}</td>
     </tr>`;
   }).join('');

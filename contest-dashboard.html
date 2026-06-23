@@ -254,18 +254,18 @@
     <div class="grid-2col" style="align-items:stretch;">
       <div class="card" style="display:flex;flex-direction:column;">
         <div class="card-title">&#x1F3F0; 公會傳奇紀錄</div>
+        <div class="badge-row" id="badgeRow" style="display:none;"></div>
         <div class="history-grid">
           <div class="hist-item"><div class="hist-label">歷史最高分</div><div class="hist-value" id="hsHighest">-</div></div>
           <div class="hist-item"><div class="hist-label">最佳排名</div><div class="hist-value" id="hsBestRank">-</div></div>
           <div class="hist-item"><div class="hist-label">平均總分</div><div class="hist-value" id="hsAvg">-</div></div>
           <div class="hist-item"><div class="hist-label">參賽期數</div><div class="hist-value" id="hsPeriods">-</div></div>
         </div>
-        <div class="badge-row" id="badgeRow" style="display:none;"></div>
       </div>
       <div class="card">
-        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 3</div>
+        <div class="card-title">&#x2694;&#xFE0F; 本期對戰對手 TOP 5</div>
         <div id="oppTop5" class="opp-list"><div class="loading">載入中...</div></div>
-        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" class="btn-link" style="font-size:0.82rem;">查看對手詳細分析</a></div>
+        <div style="text-align:center;margin-top:14px;"><a href="contest-opponents.html" id="oppLink" class="btn-link" style="font-size:0.82rem;">查看本期對戰資料 &#x00BB;</a></div>
       </div>
     </div>
   </div>
@@ -397,15 +397,16 @@ async function init(){
     const latestOpp=[];
     for(const d of latestOppAll){if(!seenOpp.has(d.name)){seenOpp.add(d.name);latestOpp.push(d);}}
     latestOpp.sort((a,b)=>a.rank-b.rank);
-    const oppTop3=latestOpp.slice(0,3);
+    const oppTop3=latestOpp.slice(0,5);
     if(oppTop3.length){
       document.getElementById('oppTop5').innerHTML=oppTop3.map((d,i)=>{
         const numCls=i<3?'opp-num-'+(i+1):'opp-num-def';
-        return `<div class="opp-item"><span class="opp-rank ${numCls}">${d.rank}</span><span class="opp-name">${d.name}</span><span class="opp-score">${d.score.toLocaleString()}</span></div>`;
+        return `<a href="contest-opponents.html?opp=${encodeURIComponent(d.name)}" class="opp-item" style="text-decoration:none;"><span class="opp-rank ${numCls}">${d.rank}</span><span class="opp-name">${d.name}</span><span class="opp-score">${d.score.toLocaleString()}</span></a>`;
       }).join('');
     } else {
       document.getElementById('oppTop5').innerHTML='<div class="loading">本期無對手資料</div>';
     }
+    document.getElementById('oppLink').href='contest-opponents.html?period='+encodeURIComponent(latestPeriod);
 
     // 稱號分布
     const tc={};TITLES.forEach(t=>tc[t]=0);
