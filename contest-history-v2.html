@@ -322,10 +322,20 @@ function scrollToTitle(title){const el=document.getElementById('title-'+title);i
 
 // ═══ 個人戰績卡 ═══
 let mcChart=null;
+let currentMemberOpen=null;
 function showMemberCard(nickname){
+  // 如果點的是同一個人，關閉卡片
+  if(currentMemberOpen===nickname){
+    const old=document.getElementById('inlineMemberCard');
+    if(old)old.remove();
+    currentMemberOpen=null;
+    return;
+  }
+
   // 移除之前插入的卡片
   const old=document.getElementById('inlineMemberCard');
   if(old)old.remove();
+  currentMemberOpen=nickname;
 
   // 找到該成員在排名表中的 row
   const rows=document.getElementById('rankBody').querySelectorAll('tr');
