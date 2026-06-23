@@ -113,6 +113,21 @@
 
     .loading{text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;}
 
+    /* Mode tabs */
+    .mode-tabs{display:flex;gap:4px;margin-bottom:12px;background:var(--card-bg);border-radius:12px;padding:4px;border:1px solid var(--border);}
+    .mode-tab{flex:1;padding:10px 8px;border:none;background:transparent;border-radius:10px;font-size:0.8rem;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .mode-tab.active{background:var(--orange);color:#fff;box-shadow:0 2px 8px rgba(233,106,30,.3);}
+    .mode-tab:hover:not(.active){background:var(--orange-light);}
+
+    /* Period select */
+    .period-select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;outline:none;background:#fff;color:var(--text);cursor:pointer;}
+    .period-select:focus{border-color:var(--orange);}
+
+    /* Period rank table row clickable */
+    .period-rank-row{cursor:pointer;transition:background .15s;}
+    .period-rank-row:hover{background:var(--orange-light);}
+    .period-rank-row.is-self{background:var(--orange-light);font-weight:700;}
+
     /* Responsive */
     @media(max-width:1100px){.main-grid{grid-template-columns:1fr;padding:20px 16px;max-width:100%;}}
     @media(max-width:768px){
@@ -170,43 +185,73 @@
 <main class="main-grid">
   <!-- 左欄 -->
   <aside class="col-left">
-    <div class="card">
-      <div class="card-title">&#x1F50D; 搜尋對手公會</div>
-      <div class="search-row">
-        <input type="text" id="searchInput" placeholder="輸入公會名稱..." />
-        <button class="btn-search" onclick="doSearch()">&#x1F50D;</button>
+    <!-- Tab 切換 -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabSearch" onclick="switchMode('search')">&#x1F50D; 搜尋對手</button>
+      <button class="mode-tab" id="tabPeriod" onclick="switchMode('period')">&#x1F4C5; 期數排名</button>
+    </div>
+    <!-- 搜尋模式 -->
+    <div id="modeSearch">
+      <div class="card">
+        <div class="card-title">&#x1F50D; 搜尋對手公會</div>
+        <div class="search-row">
+          <input type="text" id="searchInput" placeholder="輸入公會名稱..." />
+          <button class="btn-search" onclick="doSearch()">&#x1F50D;</button>
+        </div>
+        <div class="hot-tags" id="hotTags"></div>
       </div>
-      <div class="hot-tags" id="hotTags"></div>
+      <div class="card">
+        <div class="card-title">&#x1F3C5; 常見對手 TOP 5</div>
+        <div id="topList" class="top-list"><div class="loading">載入中...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">&#x1F525; 宿敵公會</div>
+        <div id="rivalList" class="rival-list"><div class="loading">載入中...</div></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-title">&#x1F3C5; 常見對手 TOP 5</div>
-      <div id="topList" class="top-list"><div class="loading">載入中...</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">&#x1F525; 宿敵公會</div>
-      <div id="rivalList" class="rival-list"><div class="loading">載入中...</div></div>
+    <!-- 期數排名模式 -->
+    <div id="modePeriod" style="display:none;">
+      <div class="card">
+        <div class="card-title">&#x1F4C5; 選擇期數</div>
+        <select id="periodPicker" class="period-select" onchange="loadPeriodRank()">
+          <option value="">選擇期數...</option>
+        </select>
+      </div>
     </div>
   </aside>
 
   <!-- 中欄 -->
   <section class="col-center">
-    <div class="card" id="battleCard" style="display:none;">
-      <div class="card-title" id="battleTitle">&#x2694;&#xFE0F; 對戰情報卡</div>
-      <div class="battle-header" id="battleHeader"></div>
-      <div class="battle-stats" id="battleStats"></div>
-      <div class="battle-extra" id="battleExtra"></div>
+    <!-- 搜尋模式的內容 -->
+    <div id="centerSearch">
+      <div class="card" id="battleCard" style="display:none;">
+        <div class="card-title" id="battleTitle">&#x2694;&#xFE0F; 對戰情報卡</div>
+        <div class="battle-header" id="battleHeader"></div>
+        <div class="battle-stats" id="battleStats"></div>
+        <div class="battle-extra" id="battleExtra"></div>
+      </div>
+      <div class="card" id="historyCard" style="display:none;">
+        <div class="card-title">&#x1F4DC; 歷史交手紀錄</div>
+        <table class="history-table">
+          <thead><tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>我方分數</th><th>對方分數</th><th>分數差</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+      </div>
+      <div class="card" id="emptyCenter" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">&#x2694;&#xFE0F;</div>
+        <p>選擇或搜尋一個對手公會<br/>查看對戰情報</p>
+      </div>
     </div>
-    <div class="card" id="historyCard" style="display:none;">
-      <div class="card-title">&#x1F4DC; 歷史交手紀錄</div>
-      <table class="history-table">
-        <thead><tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>我方分數</th><th>對方分數</th><th>分數差</th></tr></thead>
-        <tbody id="historyBody"></tbody>
-      </table>
-      <div class="pagination" id="pagination"></div>
-    </div>
-    <div class="card" id="emptyCenter" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
-      <div style="font-size:2.5rem;margin-bottom:12px;">&#x2694;&#xFE0F;</div>
-      <p>選擇或搜尋一個對手公會<br/>查看對戰情報</p>
+    <!-- 期數排名模式的內容 -->
+    <div id="centerPeriod" style="display:none;">
+      <div class="card">
+        <div class="card-title" id="periodRankTitle">&#x1F4CB; 期數排名</div>
+        <table class="history-table">
+          <thead><tr><th>名次</th><th>公會名稱</th><th>分數</th></tr></thead>
+          <tbody id="periodRankBody"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -260,11 +305,17 @@ async function init() {
     renderRivalList();
     renderHotTags();
     populateTrendSelect();
+    populatePeriodPicker();
 
-    // 預設選擇常見對手第一名
-    const counts = getOppCounts();
-    const topOpp = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
-    if (topOpp) selectOpp(topOpp[0]);
+    // URL 參數優先，否則預設選擇常見對手第一名
+    const params = new URLSearchParams(location.search);
+    if(params.get('period') || params.get('opp')){
+      handleUrlParams();
+    } else {
+      const counts = getOppCounts();
+      const topOpp = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+      if (topOpp) selectOpp(topOpp[0]);
+    }
   } catch(e) {
     document.getElementById('topList').innerHTML = '<div class="loading">&#x26A0;&#xFE0F; '+e.message+'</div>';
   }
@@ -593,6 +644,67 @@ function renderTip(name){
 }
 
 function esc(s){return s.replace(/'/g,"\\'");}
+
+// ═══ Tab 切換 ═══
+let currentMode = 'search';
+function switchMode(mode){
+  currentMode = mode;
+  document.getElementById('tabSearch').classList.toggle('active', mode==='search');
+  document.getElementById('tabPeriod').classList.toggle('active', mode==='period');
+  document.getElementById('modeSearch').style.display = mode==='search'?'':'none';
+  document.getElementById('modePeriod').style.display = mode==='period'?'':'none';
+  document.getElementById('centerSearch').style.display = mode==='search'?'':'none';
+  document.getElementById('centerPeriod').style.display = mode==='period'?'':'none';
+}
+
+// ═══ 期數排名 ═══
+function populatePeriodPicker(){
+  const periods = [...new Set(oppData.map(d=>d.period))].sort((a,b)=>new Date(b)-new Date(a));
+  const sel = document.getElementById('periodPicker');
+  sel.innerHTML = '<option value="">選擇期數...</option>' + periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+}
+
+function loadPeriodRank(){
+  const period = document.getElementById('periodPicker').value;
+  if(!period){document.getElementById('periodRankBody').innerHTML='';document.getElementById('periodRankTitle').textContent='📋 期數排名';return;}
+  document.getElementById('periodRankTitle').textContent = `📋 ${period} 排名`;
+  const data = oppData.filter(d=>d.period===period).sort((a,b)=>a.rank-b.rank);
+  // 去重
+  const seen = new Set();
+  const unique = [];
+  for(const d of data){if(!seen.has(d.name)){seen.add(d.name);unique.push(d);}}
+  
+  document.getElementById('periodRankBody').innerHTML = unique.map(d=>{
+    const isSelf = d.name==='璀璨';
+    return `<tr class="period-rank-row ${isSelf?'is-self':''}" onclick="${isSelf?'':'selectOppFromPeriod(\\\''+esc(d.name)+'\\\')'}">
+      <td>${d.rank}</td>
+      <td>${isSelf?'⭐ ':''}${d.name}</td>
+      <td style="font-weight:700;color:var(--orange);">${d.score.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+function selectOppFromPeriod(name){
+  switchMode('search');
+  selectOpp(name);
+}
+
+// ═══ URL 參數處理 ═══
+function handleUrlParams(){
+  const params = new URLSearchParams(location.search);
+  const period = params.get('period');
+  const opp = params.get('opp');
+  
+  if(period){
+    switchMode('period');
+    document.getElementById('periodPicker').value = period;
+    loadPeriodRank();
+  }
+  if(opp){
+    switchMode('search');
+    selectOpp(opp);
+  }
+}
 
 document.getElementById('searchInput').addEventListener('keydown',function(e){if(e.key==='Enter')doSearch();});
 
