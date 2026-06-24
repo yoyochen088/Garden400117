@@ -775,6 +775,11 @@ function applyFilters() {
   const obtain = document.getElementById('filterObtain').value;
   const sort   = document.getElementById('sortBy').value;
 
+  // 同步 URL 參數
+  const url = new URL(location.href);
+  if(q) url.searchParams.set('search', q); else url.searchParams.delete('search');
+  history.replaceState(null, '', url);
+
   let list = FLOWERS.filter(f => {
     const ownerNames = f.owners.map(ownerDisplay).filter(Boolean);
     const matchQ = !q || f.name.toLowerCase().includes(q) || ownerNames.some(o => o.toLowerCase().includes(q));
@@ -1208,11 +1213,11 @@ document.addEventListener('keydown', e => {
   if (ok) {
     document.getElementById('flowerContent').style.display = 'block';
     applyFilters();
-    // URL 參數支援：?member=暱稱 自動帶入搜尋
+    // URL 參數支援：?search=關鍵字 自動帶入搜尋
     const urlParams = new URLSearchParams(location.search);
-    const memberParam = urlParams.get('member');
-    if (memberParam) {
-      document.getElementById('searchInput').value = memberParam;
+    const searchParam = urlParams.get('search');
+    if (searchParam) {
+      document.getElementById('searchInput').value = searchParam;
       document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
       document.querySelector('.qtab[data-q=""]').classList.add('active');
       activeQTab = '';
