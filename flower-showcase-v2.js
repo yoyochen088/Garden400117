@@ -497,24 +497,9 @@ async function downloadImage() {
       // 彈出提示
       alert('✅ 圖片已生成！\n請長按圖片儲存至相片。');
     } else {
-      // 非 iOS：html2canvas 下載
-      const card = document.getElementById('showcase-card');
-      const canvas = await html2canvas(card, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#fff8f5',
-        logging: false,
-        imageTimeout: 15000,
-        onclone: (doc) => {
-          doc.querySelectorAll('.flower-circle img').forEach(img => {
-            img.style.objectFit = 'cover';
-            img.style.objectPosition = '50% 60%';
-            img.style.width = '100%';
-            img.style.height = '100%';
-          });
-        }
-      });
+      // 非 iOS：也用 Canvas 繪製下載（避免 html2canvas 的 object-fit 問題）
+      const cardWidth = Math.min(window.innerWidth - 32, 680);
+      const canvas = await drawShowcaseToCanvas(currentMember, currentFlowers, cardWidth);
       const link = document.createElement('a');
       link.download = `${name}_花展.png`;
       link.href = canvas.toDataURL('image/png');
