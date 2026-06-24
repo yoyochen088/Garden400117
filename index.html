@@ -1208,6 +1208,16 @@ document.addEventListener('keydown', e => {
   if (ok) {
     document.getElementById('flowerContent').style.display = 'block';
     applyFilters();
+    // URL 參數支援：?member=暱稱 自動帶入搜尋
+    const urlParams = new URLSearchParams(location.search);
+    const memberParam = urlParams.get('member');
+    if (memberParam) {
+      document.getElementById('searchInput').value = memberParam;
+      document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
+      document.querySelector('.qtab[data-q=""]').classList.add('active');
+      activeQTab = '';
+      applyFilters();
+    }
   } else {
     document.getElementById('flowerContent').style.display = 'block';
     document.getElementById('flowerGrid').innerHTML =
