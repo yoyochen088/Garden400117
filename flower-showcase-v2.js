@@ -428,6 +428,12 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
     y += sectionH + PAD;
   }
 
+  // 版本浮水印（確認緩存是否更新）
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.textAlign = 'right';
+  ctx.fillText('v2-' + new Date().toISOString().slice(0,16), canvas.width - 10, canvas.height - 8);
+
   return canvas;
 }
 
