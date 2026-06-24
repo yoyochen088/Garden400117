@@ -394,14 +394,15 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
 
       const bitmap = await loadImageBitmap(items[i].img);
       if (bitmap) {
-        // 從中心裁切正方形（跳過上方文字區域）
+        // 模擬 object-fit:cover + object-position:center 60%
         const bw = bitmap.width, bh = bitmap.height;
-        const cropTop = bh * 0.15; // 跳過上方 15%
-        const cropH = bh * 0.7;   // 取高度 70%
-        const side = Math.min(bw, cropH); // 正方形邊長
-        const sx = (bw - side) / 2;       // 水平置中
-        const sy = cropTop + (cropH - side) / 2; // 垂直置中於裁切區域
-        ctx.drawImage(bitmap, sx, sy, side, side, ix, itemY, CIRCLE, CIRCLE);
+        // cover 邏輯：讓圖片填滿正方形（CIRCLE x CIRCLE）
+        const ratio = Math.max(CIRCLE / bw, CIRCLE / bh);
+        const sw = CIRCLE / ratio; // 從原圖裁取的寬度
+        const sh = CIRCLE / ratio; // 從原圖裁取的高度
+        const sx = (bw - sw) / 2;  // 水平置中
+        const sy = (bh - sh) * 0.6; // 垂直偏下 60%（跳過花名文字）
+        ctx.drawImage(bitmap, sx, sy, sw, sh, ix, itemY, CIRCLE, CIRCLE);
       } else {
         ctx.fillStyle = '#fef0e7';
         ctx.fillRect(ix, itemY, CIRCLE, CIRCLE);
