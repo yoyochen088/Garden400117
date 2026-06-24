@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>個人花展 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+  <style>
+    /* 成員快速按鈕 */
+    .member-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--pink-mid);
+      background: #fff;
+      color: var(--pink-dark);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 1px 4px rgba(233,106,30,0.1);
+    }
+    .member-btn:hover, .member-btn.active {
+      background: #c2510b;
+      color: #fff;
+      border-color: #c2510b;
+      box-shadow: 0 2px 8px rgba(233,106,30,0.35);
+    }
+
+    /* 模糊搜尋下拉 */
+    .search-wrapper { position: relative; }
+    .suggest-list {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #fff;
+      border: 1.5px solid var(--pink-mid);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(233,106,30,0.12);
+      z-index: 100;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .suggest-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--pink-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .suggest-item:last-child { border-bottom: none; }
+    .suggest-item:hover { background: var(--pink-light); }
+    .suggest-nick { font-weight: 600; color: var(--pink-dark); }
+    .suggest-id { font-size: 0.75rem; color: var(--text-muted); }
+    .suggest-role { font-size: 0.72rem; background: var(--pink-light); color: var(--pink-dark); padding: 1px 6px; border-radius: 8px; }
+
+    /* nav-dropdown 由 header.js 統一注入 */
+  </style>
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<main style="max-width:800px;margin:0 auto;padding:0 16px 80px;">
+
+  <!-- 載入中 -->
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div><br>載入資料中...
+  </div>
+
+  <!-- 頁面標題 -->
+  <h1 style="text-align:center;color:#c2510b;font-size:1.3rem;margin-bottom:4px;padding-top:20px;">🖼️ 個人花展</h1>
+  <p style="text-align:center;color:#9e6b7e;font-size:0.85rem;margin-bottom:20px;">選擇成員查看其擁有的花卉，並可下載為圖片</p>
+
+  <!-- 搜尋列 -->
+  <div id="search-area" style="display:none;margin-bottom:24px;padding-top:20px;">
+    <div class="search-bar">
+      <select id="memberPicker" onchange="onMemberSelect()" style="padding:10px 16px;border:2px solid #f4a46a;border-radius:24px;font-size:1rem;outline:none;background:#fff;color:#3d1a2e;min-width:200px;">
+        <option value="">── 請選擇成員 ──</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 花展卡片（截圖區域）-->
+  <div id="showcase-card" style="display:none;">
+    <div class="user-header">
+      <div class="user-avatar" id="user-initial">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name"></div>
+        <div class="user-stats">
+          <div id="user-gameid" style="color:var(--text-muted);font-size:0.78rem;"></div>
+          <div id="user-total" style="font-size:0.85rem;color:var(--pink-dark);font-weight:600;margin-top:2px;"></div>
+        </div>
+      </div>
+      <div class="guild-badge">
+        璀璨<br>
+        <span style="font-size:0.7rem;opacity:0.85;">400117</span>
+      </div>
+    </div>
+    <div id="quality-sections"></div>
+  </div>
+
+</main>
+
+<!-- 底部浮動按鈕 -->
+<div class="fab-bar">
+  <button class="btn btn-primary" id="downloadBtn" style="display:none;" onclick="downloadImage()">📥 下載圖片</button>
+</div>
+
+<script src="flower-showcase-v2.js"></script>
+<script src="header.js"></script>
+</body>
+</html>
