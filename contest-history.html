@@ -420,7 +420,18 @@ function closeMemberCard(){
 function checkMemberParam(){
   const params=new URLSearchParams(location.search);
   const member=params.get('member');
-  if(member)setTimeout(()=>showMemberCard(member),500);
+  if(member)setTimeout(()=>{
+    showMemberCard(member);
+    // 滾到該成員在排名表的位置
+    const rows=document.getElementById('rankBody').querySelectorAll('tr');
+    for(const row of rows){
+      const nameCell=row.querySelector('.clickable-name');
+      if(nameCell&&nameCell.textContent.includes(member)){
+        row.scrollIntoView({behavior:'smooth',block:'start'});
+        break;
+      }
+    }
+  },600);
 }
 
 // Back to top
