@@ -394,13 +394,17 @@ async function drawShowcaseToCanvas(member, flowers, cardWidth) {
 
       const bitmap = await loadImageBitmap(items[i].img);
       if (bitmap) {
-        // 擷取中心區域（跳過上方文字）
+        // 模擬 CSS: object-fit:cover + object-position:50% 60% + scale(1.35)
         const bw = bitmap.width, bh = bitmap.height;
-        const sy = bh * 0.2; // 跳過上方 20%
-        const sh = bh * 0.6;
-        const sw = Math.min(bw, sh);
-        const sx = (bw - sw) / 2;
-        ctx.drawImage(bitmap, sx, sy, sw, sh, ix, itemY, CIRCLE, CIRCLE);
+        const scale = 1.35;
+        // cover: 算出剛好覆蓋 CIRCLE 的裁取尺寸，再除以 scale 模擬放大
+        const ratio = Math.max(CIRCLE / bw, CIRCLE / bh);
+        const cropW = (CIRCLE / ratio) / scale;
+        const cropH = (CIRCLE / ratio) / scale;
+        // 定位：以 50% 60% 為中心
+        const sx = (bw - cropW) * 0.5;
+        const sy = (bh - cropH) * 0.6;
+        ctx.drawImage(bitmap, sx, sy, cropW, cropH, ix, itemY, CIRCLE, CIRCLE);
       } else {
         ctx.fillStyle = '#fef0e7';
         ctx.fillRect(ix, itemY, CIRCLE, CIRCLE);
@@ -489,24 +493,9 @@ async function downloadImage() {
       // 彈出提示
       alert('✅ 圖片已生成！\n請長按圖片儲存至相片。');
     } else {
-      // 非 iOS：html2canvas 下載
-      const card = document.getElementById('showcase-card');
-      const canvas = await html2canvas(card, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#fff8f5',
-        logging: false,
-        imageTimeout: 15000,
-        onclone: (doc) => {
-          doc.querySelectorAll('.flower-circle img').forEach(img => {
-            img.style.objectFit = 'cover';
-            img.style.objectPosition = '50% 60%';
-            img.style.width = '100%';
-            img.style.height = '100%';
-          });
-        }
-      });
+      // 非 iOS：也用 Canvas 繪製下載（避免 html2canvas 的 object-fit 問題）
+      const cardWidth = Math.min(window.innerWidth - 32, 680);
+      const canvas = await drawShowcaseToCanvas(currentMember, currentFlowers, cardWidth);
       const link = document.createElement('a');
       link.download = `${name}_花展.png`;
       link.href = canvas.toDataURL('image/png');
