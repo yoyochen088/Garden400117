@@ -68,7 +68,7 @@
     .cso.q-普{background:linear-gradient(135deg,#4a90d9,#74b9ff);color:#fff;}
     .cso.q-凡{background:linear-gradient(135deg,#7f8c6e,#a8b89a);color:#fff;}
     .loading{text-align:center;padding:40px;color:#9e6b7e;}
-    .bbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;box-shadow:0 -2px 10px rgba(233,106,30,.08);z-index:90;}
+    .bbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center;flex-wrap:wrap;box-shadow:0 -2px 10px rgba(233,106,30,.08);z-index:999;}
     .btn{padding:9px 18px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:opacity .2s;}
     .btn:hover{opacity:.85;}.btn:disabled{opacity:.5;cursor:not-allowed;}
     .btn-sec{background:var(--pink-light);color:var(--pink-dark);border:1.5px solid var(--pink-mid);}
