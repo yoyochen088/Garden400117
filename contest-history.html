@@ -80,7 +80,7 @@
     .rd-same{color:#888;}
 
     /* Section divider */
-    .section-divider{padding:10px 24px;background:linear-gradient(90deg,#fff3e0,#ffefd4);font-size:0.9rem;font-weight:800;color:#a35d00;border-bottom:2px solid #f0c866;border-top:2px solid #f0c866;}
+    .section-divider{padding:10px 24px;background:linear-gradient(90deg,#fff3e0,#ffefd4);font-size:0.9rem;font-weight:800;color:#a35d00;border-bottom:2px solid #f0c866;border-top:2px solid #f0c866;scroll-margin-top:70px;}
 
     /* Show more button */
     .show-more-wrap{text-align:center;padding:20px;}
@@ -107,6 +107,7 @@
     .member-hist-table tbody tr:hover{background:#fffbf5;}
     .rank-table td.clickable-name{cursor:pointer;color:#a35d00;transition:color .15s;}
     .rank-table td.clickable-name:hover{color:#e96a1e;}
+    .rank-table tr{scroll-margin-top:70px;}
 
     /* Back link */
     .back-wrap{text-align:center;padding:32px 0 48px;}
@@ -422,15 +423,16 @@ function checkMemberParam(){
   const member=params.get('member');
   if(member)setTimeout(()=>{
     showMemberCard(member);
-    // 滾到該成員在排名表的位置
-    const rows=document.getElementById('rankBody').querySelectorAll('tr');
-    for(const row of rows){
-      const nameCell=row.querySelector('.clickable-name');
-      if(nameCell&&nameCell.textContent.includes(member)){
-        row.scrollIntoView({behavior:'smooth',block:'start'});
-        break;
+    setTimeout(()=>{
+      const rows=document.getElementById('rankBody').querySelectorAll('tr');
+      for(const row of rows){
+        const nameCell=row.querySelector('.clickable-name');
+        if(nameCell&&nameCell.textContent.includes(member)){
+          row.scrollIntoView({behavior:'smooth',block:'start'});
+          break;
+        }
       }
-    }
+    },300);
   },600);
 }
 
