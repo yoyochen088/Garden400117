@@ -665,6 +665,8 @@ function switchMode(mode){
   document.getElementById('modePeriod').style.display = mode==='period'?'':'none';
   document.getElementById('centerSearch').style.display = mode==='search'?'':'none';
   document.getElementById('centerPeriod').style.display = mode==='period'?'':'none';
+  // 期數模式時隱藏右欄（趨勢圖/甜甜圈），搜尋模式時恢復
+  document.querySelector('.col-right').style.display = mode==='search'?'':'none';
   if(mode==='period') loadPeriodRank();
 }
 
@@ -712,21 +714,6 @@ function handleUrlParams(){
     switchMode('period');
     document.getElementById('periodPicker').value = period;
     loadPeriodRank();
-    // 預設選該期排名第一的對手顯示右欄圖表
-    const periodOpps = oppData.filter(d=>d.period===period&&d.name!=='璀璨').sort((a,b)=>a.rank-b.rank);
-    if(periodOpps.length){
-      const defaultOpp = periodOpps[0].name;
-      currentOpp = defaultOpp;
-      // 確保趨勢下拉有這個選項
-      const sel = document.getElementById('trendSelect');
-      if(![...sel.options].some(o=>o.value===defaultOpp)){
-        sel.insertAdjacentHTML('afterbegin',`<option value="${defaultOpp}">${defaultOpp}</option>`);
-      }
-      sel.value = defaultOpp;
-      renderTrendChart();
-      renderDonutChart(defaultOpp);
-      renderTip(defaultOpp);
-    }
   }
   if(opp){
     switchMode('search');
