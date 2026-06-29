@@ -274,7 +274,7 @@
       <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">&#x1F369; 對手名次分布</div>
+      <div class="card-title" id="donutTitle">&#x1F369; 對手名次分布</div>
       <div class="chart-wrap-donut"><canvas id="chartDonut"></canvas></div>
       <div id="donutLegend" class="donut-legend"></div>
     </div>
@@ -586,6 +586,7 @@ function renderTrendChart(){
 // ═══ 甜甜圈（名次分布） ═══
 let donutChart = null;
 function renderDonutChart(name){
+  document.getElementById('donutTitle').innerHTML = `&#x1F369; 對手名次分布 <span style="font-size:0.78rem;color:#a08050;font-weight:500;">(${name})</span>`;
   const ranks = oppData.filter(d=>d.name===name).map(d=>d.rank);
   const buckets = {'第1名':0,'第2名':0,'第3名':0,'第4名':0,'第5名':0,'第6名':0};
   ranks.forEach(r=>{if(r>=1&&r<=6) buckets['第'+r+'名']++;});
@@ -711,6 +712,21 @@ function handleUrlParams(){
     switchMode('period');
     document.getElementById('periodPicker').value = period;
     loadPeriodRank();
+    // 預設選該期排名第一的對手顯示右欄圖表
+    const periodOpps = oppData.filter(d=>d.period===period&&d.name!=='璀璨').sort((a,b)=>a.rank-b.rank);
+    if(periodOpps.length){
+      const defaultOpp = periodOpps[0].name;
+      currentOpp = defaultOpp;
+      // 確保趨勢下拉有這個選項
+      const sel = document.getElementById('trendSelect');
+      if(![...sel.options].some(o=>o.value===defaultOpp)){
+        sel.insertAdjacentHTML('afterbegin',`<option value="${defaultOpp}">${defaultOpp}</option>`);
+      }
+      sel.value = defaultOpp;
+      renderTrendChart();
+      renderDonutChart(defaultOpp);
+      renderTip(defaultOpp);
+    }
   }
   if(opp){
     switchMode('search');
