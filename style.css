@@ -266,7 +266,7 @@ nav a:hover, nav a.active { background: rgba(255,255,255,0.25); }
 .flower-items {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -354,8 +354,8 @@ nav a:hover, nav a.active { background: rgba(255,255,255,0.25); }
 @media (min-width: 768px) {
   main { padding-top: 32px; padding-left: 24px; padding-right: 24px; }
   #showcase-card { padding: 32px 28px 36px; }
-  .flower-items { grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .flower-circle { width: 88px; height: 88px; }
+  .flower-items { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .flower-circle { width: 88px; height: 88px; max-width:100%; }
   .flower-label { font-size: 0.78rem; max-width: 84px; }
   .user-name { font-size: 1.5rem; }
 }
