@@ -258,7 +258,7 @@
 
   <!-- 上傳 -->
   <div class="card">
-    <div class="card-title">📷 上傳成員截圖</div>
+    <div class="card-title">📷 上傳成員截圖<button class="help-btn" onclick="showHelp('images/contest/成員截圖示意圖.jpg')" title="查看示意圖">?</button></div>
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('file-input').click()">
       <div class="dz-icon">📂</div>
       <div class="dz-text">點擊或拖曳截圖到這裡</div>
@@ -296,7 +296,7 @@
     </div>
     <div class="btn-row">
       <button class="btn btn-sec" onclick="addManualRow()">＋ 手動新增</button>
-      <button class="btn" style="background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;" id="saveBtn" onclick="saveToSheet()">💾 儲存到 Sheet</button>
+      <button class="btn" style="background:linear-gradient(135deg,#c2510b,#e96a1e);color:#fff;" id="saveBtn" onclick="saveToSheet()">💾 儲存分數紀錄</button>
     </div>
     <div class="progress-wrap" id="saveProgressWrap" style="display:none;">
       <div class="progress-bar"><div class="progress-fill" id="saveProgressFill"></div></div>
