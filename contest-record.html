@@ -34,6 +34,11 @@
     .drop-zone .dz-sub { font-size:0.8rem; color:var(--text-muted); }
     #file-input { display:none; }
 
+    /* Format tabs */
+    .format-tabs { display:flex; gap:4px; margin-bottom:12px; background:var(--orange-light); border-radius:10px; padding:3px; }
+    .format-tab { flex:1; padding:8px 12px; border:none; background:transparent; border-radius:8px; font-size:0.85rem; font-weight:700; color:var(--text-muted); cursor:pointer; transition:all .2s; }
+    .format-tab.active { background:var(--orange); color:#fff; box-shadow:0 2px 8px rgba(233,106,30,.3); }
+
     /* 進度 */
     .progress-wrap { margin:12px 0; display:none; }
     .progress-bar { background:#f0e0d0; border-radius:8px; height:10px; overflow:hidden; }
@@ -159,6 +164,10 @@
   <!-- 上傳 -->
   <div class="card">
     <div class="card-title">📷 成員分數<button class="help-btn" onclick="showHelp('images/contest/成員截圖示意圖.jpg')" title="查看示意圖">?</button></div>
+    <div class="format-tabs">
+      <button class="format-tab active" onclick="setOcrFormat('contest',this)">競賽成績</button>
+      <button class="format-tab" onclick="setOcrFormat('task',this)">任務排名</button>
+    </div>
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('file-input').click()">
       <div class="dz-icon">📂</div>
       <div class="dz-text">點擊或拖曳截圖到這裡</div>

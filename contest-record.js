@@ -7,6 +7,14 @@ let uploadedFiles = [];
 let parsedData = [];
 let opponentData = [];
 let membersCache = null;
+let ocrFormat = 'contest'; // 'contest' or 'task'
+
+// ── 切換辨識格式 ──
+function setOcrFormat(format, btn) {
+  ocrFormat = format;
+  document.querySelectorAll('.format-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
 
 // ── 預設日期為最近的週日 ──
 function setDefaultPeriod() {
@@ -230,7 +238,7 @@ async function startOCR() {
   pf.style.width = '95%';
   pt.textContent = '解析結果中...';
 
-  parsedData = parseOCRText(allText);
+  parsedData = ocrFormat === 'task' ? parseTaskRankText(allText) : parseOCRText(allText);
   await matchWithMembers(parsedData);
 
   parsedData.forEach(d => {
@@ -387,6 +395,94 @@ function parseOCRText(text) {
     if (!nickname || score < 100) continue;
 
     results.push({ server, nickname, role, score, title: currentTitle });
+  }
+
+  return results;
+}
+
+// ── 解析任務排名格式 ──
+// 格式：每人一區塊，含 職稱、伺服器、暱稱、任務數(無視)、分數
+function parseTaskRankText(text) {
+  const results = [];
+  const ROLES = ['副會長', '會長', '理事', '菁英', '成員', '分會成員'];
+
+  const cleaned = text
+    .replace(/副\s*會\s*長/g, '副會長')
+    .replace(/會\s*長/g, '會長')
+    .replace(/理\s*事/g, '理事')
+    .replace(/菁\s*英/g, '菁英')
+    .replace(/成\s*員/g, '成員')
+    .replace(/分\s*會\s*成\s*員/g, '分會成員');
+
+  const lines = cleaned.split('\n').map(l => l.trim()).filter(l => l);
+
+  // 找所有分數（3~4位數字，出現在每人資料的最後）
+  // 任務排名格式：每人有兩個數字，第一個是任務數(1~2位)，第二個是分數(3~4位)
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // 嘗試找 伺服器 格式 sXX 或 SXX
+    const serverMatch = line.match(/^[sS](\d+)$/);
+    if (serverMatch) {
+      const server = 's' + serverMatch[1];
+
+      // 上一行可能是職稱
+      let role = '';
+      if (i > 0) {
+        const prevLine = lines[i - 1];
+        const roleMatch = ROLES.find(r => prevLine.includes(r));
+        if (roleMatch) role = roleMatch;
+      }
+
+      // 下一行是暱稱
+      let nickname = '';
+      if (i + 1 < lines.length) {
+        nickname = lines[i + 1].replace(/[🌸🌺🌷💕❤️♥️☆★✿✨🎀👑💎]/gu, '').trim();
+      }
+
+      // 往後找分數（3~4位數字）
+      let score = 0;
+      for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
+        const nums = lines[j].match(/\d{3,4}/g);
+        if (nums) {
+          // 取最後一個3~4位數字（分數通常在後面）
+          score = parseInt(nums[nums.length - 1]);
+          break;
+        }
+      }
+
+      if (nickname && score >= 100) {
+        results.push({ server, nickname, role, score, title: '' });
+      }
+
+      i += 2; // 跳過暱稱行
+      continue;
+    }
+
+    // 備用方案：直接找 sXX.暱稱 + 分數 的組合（有些 OCR 會合併行）
+    const combined = line.match(/[sS](\d+)[.\s·．、]*(.+?)(\d{3,4})\s*$/);
+    if (combined) {
+      const server = 's' + combined[1];
+      let middle = combined[2].trim();
+      const score = parseInt(combined[3]);
+
+      let role = '';
+      for (const r of ROLES) {
+        if (middle.includes(r)) {
+          role = r;
+          middle = middle.replace(r, '').trim();
+          break;
+        }
+      }
+
+      const nickname = middle.replace(/[🌸🌺🌷💕❤️♥️☆★✿✨🎀👑💎]/gu, '').replace(/\s+/g, '').trim();
+      if (nickname && score >= 100) {
+        results.push({ server, nickname, role, score, title: '' });
+      }
+    }
+
+    i++;
   }
 
   return results;
