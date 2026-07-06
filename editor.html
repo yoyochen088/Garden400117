@@ -71,6 +71,8 @@
     .bbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center;flex-wrap:wrap;box-shadow:0 -2px 10px rgba(233,106,30,.08);z-index:999;}
     .btn{padding:9px 18px;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;border:none;transition:opacity .2s;}
     .btn:hover{opacity:.85;}.btn:disabled{opacity:.5;cursor:not-allowed;}
+    .help-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--pink-mid);color:#fff;font-size:0.75rem;font-weight:700;cursor:pointer;margin-left:6px;border:none;vertical-align:middle;}
+    .help-btn:hover{background:var(--pink);}
     .btn-sec{background:var(--pink-light);color:var(--pink-dark);border:1.5px solid var(--pink-mid);}
     @media(max-width:600px){
       .guild-name{font-size:1rem;}
@@ -235,7 +237,7 @@
 
   <!-- 總結截圖 -->
   <div class="card">
-    <div class="card-title">📊 公會總結</div>
+    <div class="card-title">📊 公會總結<button class="help-btn" onclick="showHelp('images/contest/總結截圖示意圖.jpg')" title="查看示意圖">?</button></div>
     <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
       <div class="drop-zone" id="summaryDropZone" onclick="document.getElementById('summary-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
         <div class="dz-icon" style="font-size:1.6rem;">📊</div>
@@ -304,7 +306,7 @@
 
   <!-- 對手排名截圖 -->
   <div class="card">
-    <div class="card-title">⚔️ 對手排名</div>
+    <div class="card-title">⚔️ 對手排名<button class="help-btn" onclick="showHelp('images/contest/對手排名示意圖.jpg')" title="查看示意圖">?</button></div>
     <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
       <div class="drop-zone" id="opponentDropZone" onclick="document.getElementById('opponent-file').click()" style="flex:1;min-width:200px;padding:20px 16px;margin-bottom:0;">
         <div class="dz-icon" style="font-size:1.6rem;">⚔️</div>
