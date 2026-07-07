@@ -417,73 +417,44 @@ function parseTaskRankText(text) {
 
   const lines = cleaned.split('\n').map(l => l.trim()).filter(l => l);
 
-  // 找所有分數（3~4位數字，出現在每人資料的最後）
-  // 任務排名格式：每人有兩個數字，第一個是任務數(1~2位)，第二個是分數(3~4位)
-  let i = 0;
-  while (i < lines.length) {
+  for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // 嘗試找 伺服器 格式 sXX 或 SXX
-    const serverMatch = line.match(/^[sS](\d+)$/);
-    if (serverMatch) {
-      const server = 's' + serverMatch[1];
+    // 找包含 sXX + 數字(任務數) + 分數(3~4位) 的行
+    // 格式範例：「s10 24 1418」「星 2 s25 24 1400」「3 s10 24 1374」
+    const match = line.match(/s(\d+)\s+\d{1,2}\s+(\d{3,4})/);
+    if (!match) continue;
 
-      // 上一行可能是職稱
-      let role = '';
-      if (i > 0) {
-        const prevLine = lines[i - 1];
-        const roleMatch = ROLES.find(r => prevLine.includes(r));
-        if (roleMatch) role = roleMatch;
-      }
+    const server = 's' + match[1];
+    const score = parseInt(match[2]);
 
-      // 下一行是暱稱
-      let nickname = '';
-      if (i + 1 < lines.length) {
-        nickname = lines[i + 1].replace(/[🌸🌺🌷💕❤️♥️☆★✿✨🎀👑💎]/gu, '').trim();
-      }
-
-      // 往後找分數（3~4位數字）
-      let score = 0;
-      for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
-        const nums = lines[j].match(/\d{3,4}/g);
-        if (nums) {
-          // 取最後一個3~4位數字（分數通常在後面）
-          score = parseInt(nums[nums.length - 1]);
-          break;
-        }
-      }
-
-      if (nickname && score >= 100) {
-        results.push({ server, nickname, role, score, title: '' });
-      }
-
-      i += 2; // 跳過暱稱行
-      continue;
+    // 職稱：往上找（上一行或上兩行）
+    let role = '';
+    for (let j = i - 1; j >= Math.max(0, i - 2); j--) {
+      const roleMatch = ROLES.find(r => lines[j].includes(r));
+      if (roleMatch) { role = roleMatch; break; }
     }
 
-    // 備用方案：直接找 sXX.暱稱 + 分數 的組合（有些 OCR 會合併行）
-    const combined = line.match(/[sS](\d+)[.\s·．、]*(.+?)(\d{3,4})\s*$/);
-    if (combined) {
-      const server = 's' + combined[1];
-      let middle = combined[2].trim();
-      const score = parseInt(combined[3]);
-
-      let role = '';
-      for (const r of ROLES) {
-        if (middle.includes(r)) {
-          role = r;
-          middle = middle.replace(r, '').trim();
-          break;
-        }
-      }
-
-      const nickname = middle.replace(/[🌸🌺🌷💕❤️♥️☆★✿✨🎀👑💎]/gu, '').replace(/\s+/g, '').trim();
-      if (nickname && score >= 100) {
-        results.push({ server, nickname, role, score, title: '' });
-      }
+    // 暱稱：下一行（跳過純數字行）
+    let nickname = '';
+    for (let j = i + 1; j < Math.min(i + 3, lines.length); j++) {
+      const candidate = lines[j].trim();
+      // 跳過純數字、職稱、或下一筆的伺服器行
+      if (/^\d+$/.test(candidate)) continue;
+      if (ROLES.includes(candidate)) continue;
+      if (/s\d+\s+\d/.test(candidate)) break;
+      // 這就是暱稱
+      nickname = candidate
+        .replace(/^[自星美味花\d\s]+(?=[^\d\s])/, '') // 移除前面的噪音字
+        .replace(/[Bb][Yy]/g, '')
+        .replace(/\s+/g, '')
+        .trim();
+      if (nickname.length >= 1) break;
     }
 
-    i++;
+    if (nickname && score >= 100) {
+      results.push({ server, nickname, role, score, title: '' });
+    }
   }
 
   return results;
