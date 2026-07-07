@@ -421,12 +421,12 @@ function parseTaskRankText(text) {
     const line = lines[i];
 
     // 找包含 sXX + 數字(任務數) + 分數(3~4位) 的行
-    // 格式範例：「s10 24 1418」「星 2 s25 24 1400」「3 s10 24 1374」
-    const match = line.match(/s(\d+)\s+\d{1,2}\s+(\d{3,4})/);
+    // 格式範例：「s10 24 1418」「s10 241418」「3 s10 24 1374」
+    const match = line.match(/s(\d+)\s+(\d{1,2})\s*(\d{3,4})/);
     if (!match) continue;
 
     const server = 's' + match[1];
-    const score = parseInt(match[2]);
+    const score = parseInt(match[3]);
 
     // 職稱：往上找（上一行或上兩行）
     let role = '';
