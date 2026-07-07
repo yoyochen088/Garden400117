@@ -403,6 +403,7 @@ function parseOCRText(text) {
 // ── 解析任務排名格式 ──
 // 格式：每人一區塊，含 職稱、伺服器、暱稱、任務數(無視)、分數
 function parseTaskRankText(text) {
+  console.log('📋 任務排名 OCR 原始文字：\n' + text);
   const results = [];
   const ROLES = ['副會長', '會長', '理事', '菁英', '成員', '分會成員'];
 
