@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 競賽分析師 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F338;</text></svg>" />
+  <script src="config.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:#fffaf3;color:#4a3520;min-height:100vh;display:flex;flex-direction:column;}
+
+    /* Container */
+    .page-wrap{max-width:860px;margin:0 auto;padding:20px 16px;flex:1;display:flex;flex-direction:column;width:100%;}
+
+    /* Hero */
+    .ai-hero{text-align:center;padding:28px 16px 18px;}
+    .ai-hero h1{font-size:1.6rem;font-weight:900;color:#a35d00;margin-bottom:6px;}
+    .ai-hero p{font-size:0.88rem;color:#9e7040;}
+
+    /* Usage bar */
+    .usage-bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 16px;margin-bottom:12px;font-size:0.8rem;color:#a08050;}
+    .usage-badge{background:#fff3e0;border:1px solid #f5deb3;border-radius:20px;padding:4px 14px;font-weight:700;font-size:0.78rem;}
+    .usage-badge.warn{background:#fff0f0;border-color:#ffcdd2;color:#c62828;}
+
+    /* Chat area */
+    .chat-area{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:10px 0;min-height:300px;}
+    .msg{max-width:85%;padding:14px 18px;border-radius:18px;font-size:0.9rem;line-height:1.7;word-break:break-word;animation:fadeIn 0.25s ease;}
+    .msg-user{align-self:flex-end;background:linear-gradient(135deg,#e96a1e,#f4a46a);color:#fff;border-bottom-right-radius:6px;}
+    .msg-ai{align-self:flex-start;background:#fff;border:1px solid #f5deb3;color:#4a3520;border-bottom-left-radius:6px;box-shadow:0 2px 10px rgba(180,120,40,.06);}
+    .msg-ai pre{background:#fffbf5;border:1px solid #f5deb3;border-radius:8px;padding:10px 12px;overflow-x:auto;font-size:0.82rem;margin:8px 0 4px;white-space:pre-wrap;}
+    .msg-system{align-self:center;background:#fff3e0;border:1px solid #f5deb3;color:#a08050;font-size:0.82rem;padding:10px 18px;border-radius:12px;text-align:center;}
+    .msg-error{align-self:center;background:#fff0f0;border:1px solid #ffcdd2;color:#c62828;font-size:0.82rem;padding:10px 18px;border-radius:12px;text-align:center;}
+
+    /* Typing indicator */
+    .typing{align-self:flex-start;display:flex;gap:5px;padding:14px 20px;}
+    .typing span{width:8px;height:8px;background:#e96a1e;border-radius:50%;animation:bounce 1.2s infinite;}
+    .typing span:nth-child(2){animation-delay:0.2s;}
+    .typing span:nth-child(3){animation-delay:0.4s;}
+
+    /* Input area */
+    .input-area{display:flex;gap:10px;padding:14px 0;border-top:1px solid #f5deb3;margin-top:auto;}
+    .input-area textarea{flex:1;border:1.5px solid #f5deb3;border-radius:14px;padding:12px 16px;font-size:0.9rem;font-family:inherit;resize:none;outline:none;transition:border-color .2s;min-height:48px;max-height:120px;}
+    .input-area textarea:focus{border-color:#e96a1e;}
+    .input-area textarea:disabled{background:#f9f3ec;cursor:not-allowed;}
+    .send-btn{width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#e96a1e,#f4a46a);color:#fff;font-size:1.2rem;cursor:pointer;transition:transform .15s,opacity .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-end;}
+    .send-btn:hover:not(:disabled){transform:scale(1.08);}
+    .send-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+    /* Suggestion chips */
+    .suggestions{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0;}
+    .sug-chip{background:#fff;border:1.5px solid #f5deb3;border-radius:20px;padding:8px 16px;font-size:0.82rem;color:#a35d00;font-weight:600;cursor:pointer;transition:all .2s;}
+    .sug-chip:hover{background:#fef0e7;border-color:#e96a1e;transform:translateY(-1px);}
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+
+    @media(max-width:600px){
+      .ai-hero h1{font-size:1.3rem;}
+      .msg{max-width:92%;}
+      .suggestions{gap:6px;}
+      .sug-chip{font-size:0.78rem;padding:6px 12px;}
+    }
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<div class="page-wrap">
+  <div class="ai-hero">
+    <h1>🤖 AI 競賽分析師</h1>
+    <p>根據公會競賽數據，為你提供智慧分析與建議</p>
+  </div>
+
+  <div class="usage-bar">
+    <span>今日額度：</span>
+    <span class="usage-badge" id="usageBadge">載入中...</span>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="msg msg-system">歡迎使用 AI 競賽分析師！你可以詢問任何關於公會競賽的問題。</div>
+  </div>
+
+  <div class="suggestions" id="suggestions">
+    <button class="sug-chip" data-q="分析本期競賽成績，誰是MVP？">本期成績分析</button>
+    <button class="sug-chip" data-q="最近三期的公會成績趨勢如何？">趨勢分析</button>
+    <button class="sug-chip" data-q="哪些成員進步最多？哪些退步了？">成員進退步</button>
+    <button class="sug-chip" data-q="分析我們公會的優勢和劣勢">優勢劣勢</button>
+    <button class="sug-chip" data-q="推薦下期可以改善的策略">策略建議</button>
+  </div>
+
+  <div class="input-area">
+    <textarea id="userInput" placeholder="輸入你的問題..." rows="1"></textarea>
+    <button class="send-btn" id="sendBtn" title="送出">➤</button>
+  </div>
+</div>
+
+<script src="header.js"></script>
+<script>
+(function() {
+  const chatArea = document.getElementById('chatArea');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const usageBadge = document.getElementById('usageBadge');
+  const suggestions = document.getElementById('suggestions');
+
+  let isLoading = false;
+  let dailyLimit = 30;
+  let todayUsed = 0;
+
+  // ── 初始化：取得今日用量 ──
+  async function loadUsage() {
+    try {
+      const url = APPS_SCRIPT_URL + '?action=getAIUsage&t=' + Date.now();
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        todayUsed = data.used || 0;
+        dailyLimit = data.limit || 30;
+      }
+    } catch (e) {
+      // 如果取得失敗，使用預設值
+    }
+    updateUsageBadge();
+  }
+
+  function updateUsageBadge() {
+    const remaining = Math.max(0, dailyLimit - todayUsed);
+    usageBadge.textContent = `剩餘 ${remaining} / ${dailyLimit} 次`;
+    if (remaining <= 5) {
+      usageBadge.classList.add('warn');
+    } else {
+      usageBadge.classList.remove('warn');
+    }
+    if (remaining <= 0) {
+      userInput.disabled = true;
+      sendBtn.disabled = true;
+      userInput.placeholder = '今日額度已用完，明天再來吧！';
+    }
+  }
+
+  // ── 新增訊息 ──
+  function addMessage(text, type) {
+    const div = document.createElement('div');
+    div.className = 'msg msg-' + type;
+    if (type === 'ai') {
+      div.innerHTML = formatAIResponse(text);
+    } else {
+      div.textContent = text;
+    }
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    return div;
+  }
+
+  function formatAIResponse(text) {
+    // 簡單 markdown 轉換
+    return text
+      .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'typing';
+    div.id = 'typingIndicator';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function hideTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  // ── 送出問題 ──
+  async function sendQuestion(question) {
+    if (!question.trim() || isLoading) return;
+    if (todayUsed >= dailyLimit) {
+      addMessage('今日額度已用完，明天再來吧！', 'error');
+      return;
+    }
+
+    // 隱藏建議
+    suggestions.style.display = 'none';
+
+    // 顯示使用者訊息
+    addMessage(question, 'user');
+    userInput.value = '';
+    autoResize();
+
+    isLoading = true;
+    sendBtn.disabled = true;
+    userInput.disabled = true;
+    showTyping();
+
+    try {
+      const url = APPS_SCRIPT_URL + '?action=askAI&question=' + encodeURIComponent(question) + '&t=' + Date.now();
+      const res = await fetch(url);
+      const data = await res.json();
+
+      hideTyping();
+
+      if (data.error === 'limit_reached') {
+        addMessage('目前使用次數超量，請稍後再試', 'error');
+        todayUsed = dailyLimit;
+        updateUsageBadge();
+      } else if (data.error === 'rate_limited') {
+        addMessage('目前使用次數超量，請稍後再試', 'error');
+      } else if (data.error) {
+        addMessage('發生錯誤：' + data.message, 'error');
+      } else {
+        addMessage(data.answer, 'ai');
+        todayUsed = data.used || (todayUsed + 1);
+        updateUsageBadge();
+      }
+    } catch (e) {
+      hideTyping();
+      if (e.message && e.message.includes('429')) {
+        addMessage('目前使用次數超量，請稍後再試', 'error');
+      } else {
+        addMessage('網路錯誤，請檢查連線後再試', 'error');
+      }
+    }
+
+    isLoading = false;
+    sendBtn.disabled = false;
+    if (todayUsed < dailyLimit) {
+      userInput.disabled = false;
+      userInput.focus();
+    }
+  }
+
+  // ── 事件綁定 ──
+  sendBtn.addEventListener('click', () => sendQuestion(userInput.value));
+
+  userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendQuestion(userInput.value);
+    }
+  });
+
+  // 自動調高 textarea
+  function autoResize() {
+    userInput.style.height = 'auto';
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+  }
+  userInput.addEventListener('input', autoResize);
+
+  // 建議 chips
+  suggestions.addEventListener('click', (e) => {
+    const chip = e.target.closest('.sug-chip');
+    if (chip) sendQuestion(chip.dataset.q);
+  });
+
+  // 啟動
+  loadUsage();
+})();
+</script>
+</body>
+</html>
