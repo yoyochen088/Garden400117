@@ -214,11 +214,34 @@
     div.innerHTML = '<span></span><span></span><span></span>';
     chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
+
+    // 等待時顯示階段提示
+    clearTimeout(window._typingHintTimer1);
+    clearTimeout(window._typingHintTimer2);
+    const hint = document.createElement('div');
+    hint.className = 'msg msg-system';
+    hint.id = 'typingHint';
+    hint.style.fontSize = '0.78rem';
+    hint.style.opacity = '0.8';
+    hint.textContent = '正在讀取競賽資料...';
+    chatArea.appendChild(hint);
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    window._typingHintTimer1 = setTimeout(() => {
+      if (hint.parentNode) hint.textContent = '資料已送出，AI 分析中...';
+    }, 3000);
+    window._typingHintTimer2 = setTimeout(() => {
+      if (hint.parentNode) hint.textContent = '分析內容較多，請稍候...';
+    }, 8000);
   }
 
   function hideTyping() {
     const el = document.getElementById('typingIndicator');
     if (el) el.remove();
+    const hint = document.getElementById('typingHint');
+    if (hint) hint.remove();
+    clearTimeout(window._typingHintTimer1);
+    clearTimeout(window._typingHintTimer2);
   }
 
   // ── 送出問題 ──
@@ -230,7 +253,7 @@
     }
 
     // 隱藏建議
-    suggestions.style.display = 'none';
+    // suggestions.style.display = 'none';
 
     // 顯示使用者訊息
     addMessage(question, 'user');
