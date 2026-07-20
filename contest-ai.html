@@ -144,13 +144,59 @@
     const div = document.createElement('div');
     div.className = 'msg msg-' + type;
     if (type === 'ai') {
-      div.innerHTML = formatAIResponse(text);
+      // 逐段打字效果
+      div.innerHTML = '';
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      typeWriter(div, text);
     } else {
       div.textContent = text;
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
     }
-    chatArea.appendChild(div);
-    chatArea.scrollTop = chatArea.scrollHeight;
     return div;
+  }
+
+  // ── 打字動畫 ──
+  function typeWriter(el, text) {
+    const formatted = formatAIResponse(text);
+    // 將 HTML 拆成片段（標籤完整保留，文字逐字）
+    const segments = [];
+    const tagRegex = /(<[^>]+>)/g;
+    let lastIdx = 0;
+    let match;
+    while ((match = tagRegex.exec(formatted)) !== null) {
+      if (match.index > lastIdx) {
+        // 純文字部分，逐字拆
+        const chunk = formatted.slice(lastIdx, match.index);
+        for (let i = 0; i < chunk.length; i++) segments.push(chunk[i]);
+      }
+      segments.push(match[1]); // HTML 標籤整塊
+      lastIdx = tagRegex.lastIndex;
+    }
+    if (lastIdx < formatted.length) {
+      const rest = formatted.slice(lastIdx);
+      for (let i = 0; i < rest.length; i++) segments.push(rest[i]);
+    }
+
+    let idx = 0;
+    const speed = 15; // 每字間隔 ms
+    let buffer = '';
+
+    function tick() {
+      if (idx >= segments.length) return;
+      // 一次處理多個字符避免太慢
+      const batch = Math.min(3, segments.length - idx);
+      for (let i = 0; i < batch; i++) {
+        buffer += segments[idx++];
+      }
+      el.innerHTML = buffer;
+      chatArea.scrollTop = chatArea.scrollHeight;
+      if (idx < segments.length) {
+        requestAnimationFrame(() => setTimeout(tick, speed));
+      }
+    }
+    tick();
   }
 
   function formatAIResponse(text) {
