@@ -160,40 +160,20 @@
   // ── 打字動畫 ──
   function typeWriter(el, text) {
     const formatted = formatAIResponse(text);
-    // 將 HTML 拆成片段（標籤完整保留，文字逐字）
-    const segments = [];
-    const tagRegex = /(<[^>]+>)/g;
-    let lastIdx = 0;
-    let match;
-    while ((match = tagRegex.exec(formatted)) !== null) {
-      if (match.index > lastIdx) {
-        // 純文字部分，逐字拆
-        const chunk = formatted.slice(lastIdx, match.index);
-        for (let i = 0; i < chunk.length; i++) segments.push(chunk[i]);
-      }
-      segments.push(match[1]); // HTML 標籤整塊
-      lastIdx = tagRegex.lastIndex;
-    }
-    if (lastIdx < formatted.length) {
-      const rest = formatted.slice(lastIdx);
-      for (let i = 0; i < rest.length; i++) segments.push(rest[i]);
-    }
-
-    let idx = 0;
-    const speed = 15; // 每字間隔 ms
-    let buffer = '';
+    // 以段落為單位逐段顯示，避免逐字太慢
+    const paragraphs = formatted.split('<br>');
+    let pIdx = 0;
+    let displayed = '';
 
     function tick() {
-      if (idx >= segments.length) return;
-      // 一次處理多個字符避免太慢
-      const batch = Math.min(3, segments.length - idx);
-      for (let i = 0; i < batch; i++) {
-        buffer += segments[idx++];
-      }
-      el.innerHTML = buffer;
+      if (pIdx >= paragraphs.length) return;
+      // 每次加一段
+      displayed += (pIdx > 0 ? '<br>' : '') + paragraphs[pIdx];
+      pIdx++;
+      el.innerHTML = displayed;
       chatArea.scrollTop = chatArea.scrollHeight;
-      if (idx < segments.length) {
-        requestAnimationFrame(() => setTimeout(tick, speed));
+      if (pIdx < paragraphs.length) {
+        setTimeout(tick, 40);
       }
     }
     tick();
@@ -279,7 +259,12 @@
       } else if (data.error === 'rate_limited') {
         addMessage('目前使用次數超量，請稍後再試', 'error');
       } else if (data.error) {
-        addMessage('發生錯誤：' + data.message, 'error');
+        const msg = data.message || '';
+        if (msg.includes('503') || msg.includes('高需求') || msg.includes('重試')) {
+          addMessage('AI 服務暫時忙碌中，請稍候 30 秒再試一次 🙏', 'error');
+        } else {
+          addMessage('發生錯誤：' + msg, 'error');
+        }
       } else {
         addMessage(data.answer, 'ai');
         todayUsed = data.used || (todayUsed + 1);
