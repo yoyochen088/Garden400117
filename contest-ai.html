@@ -55,6 +55,15 @@
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
     @keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
 
+    /* AI 回覆圖片 */
+    .ai-img{max-width:100%;border-radius:8px;margin:8px 0;cursor:pointer;transition:transform .15s;}
+    .ai-img:hover{transform:scale(1.02);}
+
+    /* 圖片 Lightbox */
+    #imgLightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;cursor:pointer;}
+    #imgLightbox.open{display:flex;}
+    #imgLightbox img{max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+
     @media(max-width:600px){
       .ai-hero h1{font-size:1.3rem;}
       .msg{max-width:92%;}
@@ -186,6 +195,7 @@
     return text
       .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/IMG\[(https?:\/\/[^\]]+)\]/g, '<img src="$1" class="ai-img" onclick="showImgLightbox(this.src)" />')
       .replace(/\n/g, '<br>');
   }
 
@@ -315,6 +325,12 @@
   // 啟動
   loadUsage();
 })();
+</script>
+<div id="imgLightbox" onclick="closeImgLightbox()"><img id="imgLightboxImg" src="" alt="放大圖片" /></div>
+<script>
+function showImgLightbox(src){document.getElementById('imgLightboxImg').src=src;document.getElementById('imgLightbox').classList.add('open');}
+function closeImgLightbox(){document.getElementById('imgLightbox').classList.remove('open');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImgLightbox();});
 </script>
 </body>
 </html>
