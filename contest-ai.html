@@ -192,12 +192,16 @@
 
   function formatAIResponse(text) {
     // 簡單 markdown 轉換
-    return text
+    let html = text
       .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/IMG\[(https?:\/\/[^\]]+)\]/g, '<img src="$1" class="ai-img" onclick="showImgLightbox(this.src)" />')
-      .replace(/\n/g, '<br>')
-      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#e96a1e;word-break:break-all;">$1</a>');
+      .replace(/IMG\[(https?:\/\/[^\]]+)\]/g, '%%IMG_PLACEHOLDER_$1%%')
+      .replace(/\n/g, '<br>');
+    // URL 連結化（排除已在標籤內的）
+    html = html.replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#e96a1e;word-break:break-all;">$1</a>');
+    // 還原圖片
+    html = html.replace(/%%IMG_PLACEHOLDER_(https?:\/\/[^%]+)%%/g, '<img src="$1" class="ai-img" onclick="showImgLightbox(this.src)" />');
+    return html;
   }
 
   function showTyping() {
