@@ -196,7 +196,8 @@
       .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/IMG\[(https?:\/\/[^\]]+)\]/g, '<img src="$1" class="ai-img" onclick="showImgLightbox(this.src)" />')
-      .replace(/\n/g, '<br>');
+      .replace(/\n/g, '<br>')
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#e96a1e;word-break:break-all;">$1</a>');
   }
 
   function showTyping() {
