@@ -56,13 +56,13 @@
     @keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
 
     /* AI 回覆圖片 */
-    .ai-img{max-width:100%;border-radius:8px;margin:8px 0;cursor:pointer;transition:transform .15s;}
+    .ai-img{max-width:280px;border-radius:8px;margin:8px 0;cursor:pointer;transition:transform .15s;}
     .ai-img:hover{transform:scale(1.02);}
 
     /* 圖片 Lightbox */
-    #imgLightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;cursor:pointer;}
+    #imgLightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;cursor:pointer;overflow:auto;padding:20px;}
     #imgLightbox.open{display:flex;}
-    #imgLightbox img{max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+    #imgLightbox img{max-width:95vw;max-height:95vh;object-fit:contain;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
 
     @media(max-width:600px){
       .ai-hero h1{font-size:1.3rem;}
