@@ -1,34 +1,34 @@
-﻿(function () {
-  // ?? 撠汗?摰儔 ??
+(function () {
+  // ── 導覽項目定義 ──
   const NAV_ITEMS = [
-    { label: '擐?',     href: 'home.html',           icon: '??', match: ['home.html'] },
-    { label: '?勗???', href: 'index.html',           icon: '?', match: ['index.html'] },
-    { label: '蝡嗉魚?餌', href: 'guide.html',           icon: '??', match: ['guide.html'] },
-    { label: '?祆??', href: 'index.html#id-page',   icon: '?', match: [] },
+    { label: '首頁',     href: 'home.html',           icon: '🏠', match: ['home.html'] },
+    { label: '花卉圖鑑', href: 'index.html',           icon: '🌸', match: ['index.html'] },
+    { label: '競賽攻略', href: 'guide.html',           icon: '📖', match: ['guide.html'] },
+    { label: '公會成員', href: 'index.html#id-page',   icon: '👥', match: [] },
     {
-      label: '?犖', icon: '?', dropdown: true,
+      label: '個人', icon: '👤', dropdown: true,
       match: ['member-editor.html', 'flower-showcase.html'],
       children: [
-        { label: '???勗???', href: 'member-editor.html' },
-        { label: '?儭??犖?勗?', href: 'flower-showcase.html' },
+        { label: '✅ 花卉擁有', href: 'member-editor.html' },
+        { label: '🖼️ 個人花展', href: 'flower-showcase.html' },
       ]
     },
     {
-      label: '??撠?', icon: '??', dropdown: true, authOnly: true,
+      label: '限定專區', icon: '🔐', dropdown: true, authOnly: true,
       match: ['contest.html', 'contest-dashboard.html', 'contest-history.html', 'contest-opponents.html', 'contest-ai.html'],
       children: [
-        { label: '?妙 蝡嗉魚閮?璈?, href: 'contest.html' },
-        { label: '?? 蝡嗉魚?勗', href: 'contest-dashboard.html' },
-        { label: '?? 甇瑕?蜀', href: 'contest-history.html' },
-        { label: '?? 撠?銝剖?', href: 'contest-opponents.html' },
-        { label: '?? AI ?拇?', href: 'contest-ai.html' },
+        { label: '🧮 競賽計算機', href: 'contest.html' },
+        { label: '📊 競賽週報', href: 'contest-dashboard.html' },
+        { label: '📈 歷史成績', href: 'contest-history.html' },
+        { label: '⚔️ 對戰情報中心', href: 'contest-opponents.html' },
+        { label: '🤖 AI 助手', href: 'contest-ai.html' },
       ]
     },
-    { label: '蝷曄黎 Line', href: '#line-qr', icon: '?', match: [], mobileOnly: true },
-    { label: '蝞∠?', href: 'editor.html', icon: '??', match: ['editor.html'] },
+    { label: '社群 Line', href: '#line-qr', icon: '📱', match: [], mobileOnly: true },
+    { label: '管理', href: 'editor.html', icon: '⚙️', match: ['editor.html'] },
   ];
 
-  // ?? CSS ??
+  // ── CSS ──
   const CSS = `
     #site-header header {
       background: linear-gradient(135deg,#c2510b 0%,#e96a1e 60%,#f4a46a 100%);
@@ -36,7 +36,7 @@
       justify-content: space-between; height: 60px; position: fixed;
       top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 8px rgba(194,81,11,.3);
     }
-    #site-header { height: 60px; /* 雿?嚗?摰寡◤ fixed header ?? */ }
+    #site-header { height: 60px; /* 佔位，避免內容被 fixed header 蓋住 */ }
     #site-header .sh-guild {
       font-size: 1.25rem; font-weight: 700; letter-spacing: 2px;
       white-space: nowrap; text-decoration: none; color: inherit;
@@ -51,7 +51,7 @@
     }
     #site-header nav a:hover,
     #site-header nav a.sh-active { background: rgba(255,255,255,.25); }
-    /* 銝??詨 */
+    /* 下拉選單 */
     #site-header .sh-dropdown { position: relative; }
     #site-header .sh-drop-btn {
       color: #fff; padding: 6px 14px; border-radius: 20px; font-size: .9rem;
@@ -81,7 +81,7 @@
     }
     #site-header .sh-drop-inner a:hover { background: #fef0e7 !important; }
     #site-header .sh-drop-inner a + a { border-top: 1px solid #f8d5b0 !important; }
-    /* 瞍Ｗ */
+    /* 漢堡 */
     #site-header .sh-hamburger {
       display: none; flex-direction: column; gap: 5px;
       cursor: pointer; padding: 6px; background: none; border: none;
@@ -119,7 +119,7 @@
       position: absolute; top: 16px; right: 16px;
       background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;
     }
-    /* mobile 摮??*/
+    /* mobile 子選單 */
     #sh-mobile-nav .sh-mnav-group { display: flex; flex-direction: column; gap: 0; }
     #sh-mobile-nav .sh-mnav-parent {
       color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 1rem;
@@ -183,48 +183,48 @@
     #sh-line-lightbox .sh-line-open-btn:hover { transform: translateY(-2px); }
   `;
 
-  // ?? ?斗?桀?? ??
+  // ── 判斷目前頁面 ──
   const page = location.pathname.split('/').pop() || 'index.html';
   const hash = location.hash; // e.g. '#id-page'
 
   function isActive(item) {
-    // ?祆??嚗ref 撣?hash嚗???瘥? page + hash
+    // 公會成員：href 帶 hash，需同時比對 page + hash
     if (item.href && item.href.includes('#')) {
       const [hPage, hHash] = item.href.split('#');
       return page === hPage && hash === '#' + hHash;
     }
-    // ?勗???嚗ndex.html嚗???hash ??鈭殷?hash ??勗???∟???
+    // 花卉圖鑑（index.html）：有 hash 時不亮（hash 頁面由公會成員處理）
     if (item.match && item.match.includes('index.html') && hash) {
       return false;
     }
     return item.match && item.match.includes(page);
   }
 
-  // ?? 撱箇?獢 nav ??
+  // ── 建立桌面 nav ──
   function buildNav() {
     const items = NAV_ITEMS.filter(item => !item.mobileOnly).filter(item => {
       if (item.authOnly) return typeof isBound === 'function' && isBound();
       return true;
     });
-    // ?恣??箔??暹?敺?auth ???蝞∠???
+    // 把管理抽出來放最後，auth 按鈕插在管理前
     const mgmtIdx = items.findIndex(i => i.href === 'editor.html');
     const beforeMgmt = mgmtIdx >= 0 ? items.slice(0, mgmtIdx) : items;
     const mgmtItem = mgmtIdx >= 0 ? items[mgmtIdx] : null;
 
     let html = beforeMgmt.map(item => renderNavItem(item)).join('');
-    // Desktop auth ??
+    // Desktop auth 按鈕
     let authHtml = '';
     if (typeof getAuthUser === 'function') {
       const user = getAuthUser();
       if (!user) {
-        authHtml = '<button class="sh-desk-login" onclick="doLogin()">?餃</button>';
+        authHtml = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
       } else if (!user.gameId) {
-        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">?? ${user.fbName}</span><span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">蝬?</span><button class="sh-desk-logout" onclick="doLogout()">?餃</button></div>`;
+        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">👋 ${user.fbName}</span><span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">綁定</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
       } else {
-        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">? ${user.nickname}</span><button class="sh-desk-logout" onclick="doLogout()">?餃</button></div>`;
+        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">🌸 ${user.nickname}</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
       }
     } else {
-      authHtml = '<button class="sh-desk-login" onclick="doLogin()">?餃</button>';
+      authHtml = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
     }
     html += '<span id="sh-auth-desktop" class="sh-auth-desktop">' + authHtml + '</span>';
     if (mgmtItem) html += renderNavItem(mgmtItem);
@@ -240,7 +240,7 @@
       return `
         <div class="sh-dropdown">
           <button class="sh-drop-btn ${active}">
-            ${item.icon} ${item.label} <span class="sh-arrow">??/span>
+            ${item.icon} ${item.label} <span class="sh-arrow">▼</span>
           </button>
           <div class="sh-drop-menu">
             <div class="sh-drop-inner">${children}</div>
@@ -251,7 +251,7 @@
     return `<a href="${item.href}" class="${active}">${item.label}</a>`;
   }
 
-  // ?? 撱箇? mobile-nav ??
+  // ── 建立 mobile-nav ──
   function buildMobileNav() {
     return NAV_ITEMS.filter(item => {
       if (item.authOnly) return typeof isBound === 'function' && isBound();
@@ -265,12 +265,12 @@
         return `
           <div class="sh-mnav-group">
             <button class="sh-mnav-parent ${active}" onclick="shToggleMnav(this)">
-              ${item.icon} ${item.label} <span class="sh-arrow">??/span>
+              ${item.icon} ${item.label} <span class="sh-arrow">▼</span>
             </button>
             <div class="sh-mnav-children ${active}">${children}</div>
           </div>`;
       }
-      // 蝷曄黎 Line ?冽??孛??lightbox
+      // 社群 Line 用按鈕觸發 lightbox
       if (item.href === '#line-qr') {
         return `<button class="sh-mnav-line-btn" onclick="shShowLineQR(event)">${item.icon} ${item.label}</button>`;
       }
@@ -279,39 +279,39 @@
     }).join('');
   }
 
-  // ?? 瘜典 HTML ??
+  // ── 注入 HTML ──
   const container = document.getElementById('site-header');
   if (!container) return;
 
-  // 瘜典 CSS
+  // 注入 CSS
   const style = document.createElement('style');
   style.textContent = CSS;
   document.head.appendChild(style);
 
   container.innerHTML = `
     <header>
-      <a href="home.html" class="sh-guild">???<small>[400117]</small></a>
+      <a href="home.html" class="sh-guild">璀璨 <small>[400117]</small></a>
       <nav>${buildNav()}</nav>
-      <button class="sh-hamburger" id="sh-hamburger" onclick="shToggleNav()" aria-label="?詨">
+      <button class="sh-hamburger" id="sh-hamburger" onclick="shToggleNav()" aria-label="選單">
         <span></span><span></span><span></span>
       </button>
     </header>
     <div id="sh-nav-overlay" onclick="shCloseNav()"></div>
     <div id="sh-mobile-nav">
-      <button class="sh-nav-close" onclick="shCloseNav()">??/button>
+      <button class="sh-nav-close" onclick="shCloseNav()">✕</button>
       ${buildMobileNav()}
       <div id="sh-auth-mobile" class="sh-auth-area"></div>
     </div>
     <div id="sh-line-lightbox" onclick="shCloseLineQR()">
-      <button class="sh-line-close" onclick="shCloseLineQR()">??/button>
+      <button class="sh-line-close" onclick="shCloseLineQR()">✕</button>
       <img src="Context/line.jpg" alt="Line QR Code" onclick="event.stopPropagation()" />
-      <div class="sh-line-label">?? QR ??銝?</div>
+      <div class="sh-line-label">掃描 QR 或點下方加入</div>
       <a href="https://line.me/ti/g2/xf0Od6Moys9dfgxL4hN-AkKZMIFvRxeJLQIrjA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
-         target="_blank" rel="noopener" class="sh-line-open-btn" onclick="event.stopPropagation()">? Line 蝢?/a>
+         target="_blank" rel="noopener" class="sh-line-open-btn" onclick="event.stopPropagation()">加入 Line 群</a>
     </div>
   `;
 
-  // ?? ?湧 active ?湔?賢?靘??典????
+  // ── 暴露 active 更新函式供外部呼叫 ──
   window.shSetActive = function(pageFile, pageHash) {
     const allNavLinks = document.querySelectorAll('#site-header nav a, #sh-mobile-nav a');
     allNavLinks.forEach(a => a.classList.remove('sh-active'));
@@ -321,27 +321,27 @@
         const aFile = url.pathname.split('/').pop();
         const aHash = url.hash; // e.g. '#id-page'
         if (pageHash) {
-          // ??hash嚗移蝣箸?撠?file + hash
+          // 有 hash：精確比對 file + hash
           if (aFile === pageFile && aHash === pageHash) a.classList.add('sh-active');
         } else {
-          // ??hash嚗?撠?file嚗?????祈澈銝葆 hash
+          // 無 hash：比對 file，且連結本身不帶 hash
           if (aFile === pageFile && !aHash) a.classList.add('sh-active');
         }
       } catch(e) {}
     });
   };
 
-  // ?? ??????嚗???啗?????
-  // 瘜典敺?摰???隞塚??亦???Ｚ?????格??臬?銝??html 瑼??寧 JS ??
+  // ── 攔截同頁連結，避免重新載入 ──
+  // 注入後綁定點擊事件：若目前頁面與連結目標是同一個 html 檔，改用 JS 切換
   container.addEventListener('click', function(e) {
     const a = e.target.closest('a');
     if (!a || !a.href) return;
     try {
       const url = new URL(a.href, location.href);
       const targetFile = url.pathname.split('/').pop();
-      // ?芣??芥?銝??html 瑼????
+      // 只攔截「同一個 html 檔」的連結
       if (targetFile !== page) return;
-      // ???典?蝢拍? shNavClick hook 撠曹漱蝯血???
+      // 有外部定義的 shNavClick hook 就交給它處理
       if (typeof window.shNavClick === 'function') {
         e.preventDefault();
         window.shNavClick(url.hash || '');
@@ -349,7 +349,7 @@
     } catch(e) {}
   });
 
-  // ?? ?賢? ??
+  // ── 函式 ──
   window.shToggleNav = function () {
     document.getElementById('sh-mobile-nav').classList.toggle('open');
     document.getElementById('sh-nav-overlay').classList.toggle('open');
@@ -379,12 +379,12 @@
     if (e.key === 'Escape') shCloseLineQR();
   });
 
-  // ?? Auth UI ??
+  // ── Auth UI ──
   const authCSS = `
     .sh-auth-area{margin-top:auto;padding-top:12px;padding-bottom:60px;border-top:1px solid rgba(255,255,255,0.2);}
     .sh-auth-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
-    .sh-fb-login{background:#1877f2;border:none;color:#fff;border-radius:10px;}
-    .sh-fb-login:hover{background:#166bdb;}
+    .sh-fb-login{background:rgba(24,119,242,0.85);border:none;color:#fff;}
+    .sh-fb-login:hover{background:rgba(24,119,242,1);}
     .sh-auth-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.12);border-radius:12px;border:1px solid rgba(255,255,255,0.2);}
     .sh-auth-name{color:#fff;font-size:0.88rem;font-weight:700;flex:1;}
     .sh-auth-role{color:rgba(255,255,255,0.7);font-size:0.75rem;}
@@ -394,8 +394,8 @@
     .sh-auth-bind-hint:hover{color:#fff;}
     /* Desktop auth */
     .sh-auth-desktop{display:flex;align-items:center;margin-left:8px;}
-    .sh-auth-desktop .sh-desk-login{width:32px;height:32px;border-radius:50%;font-size:0.9rem;font-weight:900;background:#1877f2;color:#fff;border:none;cursor:pointer;transition:transform 0.15s;display:flex;align-items:center;justify-content:center;}
-    .sh-auth-desktop .sh-desk-login:hover{transform:scale(1.1);}
+    .sh-auth-desktop .sh-desk-login{padding:6px 14px;border-radius:20px;font-size:0.82rem;font-weight:700;background:rgba(24,119,242,0.9);color:#fff;border:none;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+    .sh-auth-desktop .sh-desk-login:hover{background:rgba(24,119,242,1);}
     .sh-auth-desktop .sh-desk-user{display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);}
     .sh-auth-desktop .sh-desk-name{color:#fff;font-size:0.82rem;font-weight:700;white-space:nowrap;}
     .sh-auth-desktop .sh-desk-logout{background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.7rem;cursor:pointer;white-space:nowrap;}
@@ -420,20 +420,20 @@
     // Mobile
     if (el) {
       if (!user) {
-        el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">? Facebook ?餃</button>';
+        el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">📱 Facebook 登入</button>';
       } else if (!user.gameId) {
         el.innerHTML = `
           <div class="sh-auth-info">
-            <span class="sh-auth-name">?? ${user.fbName}</span>
-            <button class="sh-auth-logout" onclick="doLogout()">?餃</button>
+            <span class="sh-auth-name">👋 ${user.fbName}</span>
+            <button class="sh-auth-logout" onclick="doLogout()">登出</button>
           </div>
-          <div class="sh-auth-bind-hint" onclick="showBindDialog('${user.fbId}')">?? 撠蝬?閫嚗?甇斤?摰?/div>`;
+          <div class="sh-auth-bind-hint" onclick="showBindDialog('${user.fbId}')">⚠️ 尚未綁定角色，點此綁定</div>`;
       } else {
         el.innerHTML = `
           <div class="sh-auth-info">
-            <span class="sh-auth-name">? ${user.nickname}</span>
+            <span class="sh-auth-name">🌸 ${user.nickname}</span>
             <span class="sh-auth-role">${user.role || ''}</span>
-            <button class="sh-auth-logout" onclick="doLogout()">?餃</button>
+            <button class="sh-auth-logout" onclick="doLogout()">登出</button>
           </div>`;
       }
     }
@@ -441,19 +441,19 @@
     // Desktop
     if (desk) {
       if (!user) {
-        desk.innerHTML = '<button class="sh-desk-login" onclick="doLogin()">?餃</button>';
+        desk.innerHTML = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
       } else if (!user.gameId) {
         desk.innerHTML = `
           <div class="sh-desk-user">
-            <span class="sh-desk-name">?? ${user.fbName}</span>
-            <span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">蝬?</span>
-            <button class="sh-desk-logout" onclick="doLogout()">?餃</button>
+            <span class="sh-desk-name">👋 ${user.fbName}</span>
+            <span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">綁定</span>
+            <button class="sh-desk-logout" onclick="doLogout()">登出</button>
           </div>`;
       } else {
         desk.innerHTML = `
           <div class="sh-desk-user">
-            <span class="sh-desk-name">? ${user.nickname}</span>
-            <button class="sh-desk-logout" onclick="doLogout()">?餃</button>
+            <span class="sh-desk-name">🌸 ${user.nickname}</span>
+            <button class="sh-desk-logout" onclick="doLogout()">登出</button>
           </div>`;
       }
     }
@@ -461,20 +461,20 @@
 
   window._onAuthChanged = function() {
     updateAuthUI();
-    // ?皜脫? nav嚗＊蝷??梯???撠?嚗?
+    // 重新渲染 nav（顯示/隱藏限定專區）
     const navEl = container.querySelector('nav');
     if (navEl) {
       navEl.innerHTML = buildNav();
     }
     const mobileNav = document.getElementById('sh-mobile-nav');
     if (mobileNav) {
-      const closeBtn = '<button class="sh-nav-close" onclick="shCloseNav()">??/button>';
+      const closeBtn = '<button class="sh-nav-close" onclick="shCloseNav()">✕</button>';
       const authArea = '<div id="sh-auth-mobile" class="sh-auth-area"></div>';
       mobileNav.innerHTML = closeBtn + buildMobileNav() + authArea;
     }
     updateAuthUI();
   };
-  // ??皜脫?
+  // 初始渲染
   setTimeout(updateAuthUI, 100);
 
 })();
