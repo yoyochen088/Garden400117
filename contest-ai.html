@@ -6,6 +6,7 @@
   <title>璀璨公會助手</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F338;</text></svg>" />
   <script src="config.js"></script>
+<script src="auth.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:#fffaf3;color:#4a3520;min-height:100vh;display:flex;flex-direction:column;}
@@ -109,6 +110,8 @@
 <script src="header.js"></script>
 <script>
 (function() {
+  // 權限檢查
+  if (!requireAuth()) return;
   const chatArea = document.getElementById('chatArea');
   const userInput = document.getElementById('userInput');
   const sendBtn = document.getElementById('sendBtn');

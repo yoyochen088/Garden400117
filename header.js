@@ -258,6 +258,7 @@
     <div id="sh-mobile-nav">
       <button class="sh-nav-close" onclick="shCloseNav()">✕</button>
       ${buildMobileNav()}
+      <div id="sh-auth-mobile" class="sh-auth-area"></div>
     </div>
     <div id="sh-line-lightbox" onclick="shCloseLineQR()">
       <button class="sh-line-close" onclick="shCloseLineQR()">✕</button>
@@ -335,4 +336,51 @@
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') shCloseLineQR();
   });
+
+  // ── Auth UI ──
+  const authCSS = `
+    .sh-auth-area{margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,0.2);}
+    .sh-auth-btn{width:100%;padding:12px 16px;border-radius:12px;font-size:0.92rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.2s;}
+    .sh-fb-login{background:rgba(24,119,242,0.9);border:none;color:#fff;}
+    .sh-fb-login:hover{background:rgba(24,119,242,1);}
+    .sh-auth-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.12);border-radius:12px;border:1px solid rgba(255,255,255,0.2);}
+    .sh-auth-name{color:#fff;font-size:0.88rem;font-weight:700;flex:1;}
+    .sh-auth-role{color:rgba(255,255,255,0.7);font-size:0.75rem;}
+    .sh-auth-logout{background:none;border:none;color:rgba(255,255,255,0.6);font-size:0.75rem;cursor:pointer;padding:4px 8px;}
+    .sh-auth-logout:hover{color:#fff;}
+    .sh-auth-bind-hint{color:#ffcc80;font-size:0.8rem;font-weight:600;margin-top:8px;text-align:center;cursor:pointer;}
+    .sh-auth-bind-hint:hover{color:#fff;}
+  `;
+  const authStyle = document.createElement('style');
+  authStyle.textContent = authCSS;
+  document.head.appendChild(authStyle);
+
+  function updateAuthUI() {
+    const el = document.getElementById('sh-auth-mobile');
+    if (!el) return;
+    if (typeof getAuthUser !== 'function') { el.innerHTML = ''; return; }
+    const user = getAuthUser();
+    if (!user) {
+      el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">📱 Facebook 登入</button>';
+    } else if (!user.gameId) {
+      el.innerHTML = `
+        <div class="sh-auth-info">
+          <span class="sh-auth-name">👋 ${user.fbName}</span>
+          <button class="sh-auth-logout" onclick="doLogout()">登出</button>
+        </div>
+        <div class="sh-auth-bind-hint" onclick="showBindDialog('${user.fbId}')">⚠️ 尚未綁定角色，點此綁定</div>`;
+    } else {
+      el.innerHTML = `
+        <div class="sh-auth-info">
+          <span class="sh-auth-name">🌸 ${user.nickname}</span>
+          <span class="sh-auth-role">${user.role || ''}</span>
+          <button class="sh-auth-logout" onclick="doLogout()">登出</button>
+        </div>`;
+    }
+  }
+
+  window._onAuthChanged = updateAuthUI;
+  // 初始渲染
+  setTimeout(updateAuthUI, 100);
+
 })();
