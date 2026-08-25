@@ -6,6 +6,7 @@
   <title>競賽計算機 - 璀璨</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
   <script src="config.js"></script>
+  <script src="auth.js"></script>
   <style>
     :root {
       --pink:#e96a1e; --pink-light:#fef0e7; --pink-mid:#f4a46a;
@@ -198,6 +199,7 @@
 </main>
 
 <script>
+if (!requireAuth()) throw new Error('auth');
 // ── 稱號資料 ──
 const TITLES = [
   { name:'無稱號',   min:0,    max:499  },

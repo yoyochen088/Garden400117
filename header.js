@@ -13,6 +13,17 @@
         { label: '🖼️ 個人花展', href: 'flower-showcase.html' },
       ]
     },
+    {
+      label: '限定專區', icon: '🔐', dropdown: true, authOnly: true,
+      match: ['contest.html', 'contest-dashboard.html', 'contest-history.html', 'contest-opponents.html', 'contest-ai.html'],
+      children: [
+        { label: '🧮 競賽計算機', href: 'contest.html' },
+        { label: '📊 競賽週報', href: 'contest-dashboard.html' },
+        { label: '📈 歷史成績', href: 'contest-history.html' },
+        { label: '⚔️ 對戰情報中心', href: 'contest-opponents.html' },
+        { label: '🤖 AI 助手', href: 'contest-ai.html' },
+      ]
+    },
     { label: '社群 Line', href: '#line-qr', icon: '📱', match: [], mobileOnly: true },
     { label: '管理', href: 'editor.html', icon: '⚙️', match: ['editor.html'] },
   ];
@@ -191,7 +202,10 @@
 
   // ── 建立桌面 nav ──
   function buildNav() {
-    return NAV_ITEMS.filter(item => !item.mobileOnly).map(item => {
+    return NAV_ITEMS.filter(item => !item.mobileOnly).filter(item => {
+      if (item.authOnly) return typeof isBound === 'function' && isBound();
+      return true;
+    }).map(item => {
       if (item.dropdown) {
         const active = isActive(item) ? 'sh-active' : '';
         const children = item.children.map(c =>
@@ -214,7 +228,10 @@
 
   // ── 建立 mobile-nav ──
   function buildMobileNav() {
-    return NAV_ITEMS.map(item => {
+    return NAV_ITEMS.filter(item => {
+      if (item.authOnly) return typeof isBound === 'function' && isBound();
+      return true;
+    }).map(item => {
       if (item.dropdown) {
         const active = isActive(item) ? 'open' : '';
         const children = item.children.map(c =>
@@ -417,7 +434,23 @@
     }
   }
 
-  window._onAuthChanged = updateAuthUI;
+  window._onAuthChanged = function() {
+    updateAuthUI();
+    // 重新渲染 nav（顯示/隱藏限定專區）
+    const navEl = container.querySelector('nav');
+    if (navEl) {
+      const deskAuth = navEl.querySelector('#sh-auth-desktop');
+      const deskAuthHTML = deskAuth ? deskAuth.outerHTML : '<span id="sh-auth-desktop" class="sh-auth-desktop"></span>';
+      navEl.innerHTML = buildNav() + deskAuthHTML;
+    }
+    const mobileNav = document.getElementById('sh-mobile-nav');
+    if (mobileNav) {
+      const closeBtn = '<button class="sh-nav-close" onclick="shCloseNav()">✕</button>';
+      const authArea = '<div id="sh-auth-mobile" class="sh-auth-area"></div>';
+      mobileNav.innerHTML = closeBtn + buildMobileNav() + authArea;
+    }
+    updateAuthUI();
+  };
   // 初始渲染
   setTimeout(updateAuthUI, 100);
 

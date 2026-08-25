@@ -6,6 +6,7 @@
   <title>公會對戰情報中心 - 璀璨</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F338;</text></svg>" />
   <script src="config.js"></script>
+  <script src="auth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     :root{--orange:#e96a1e;--orange-light:#fef0e7;--orange-mid:#f4a46a;--orange-dark:#c2510b;--bg:#fff8f5;--card-bg:#fff;--text:#3d1a2e;--text-muted:#9e6b7e;--border:#f8d5b0;--shadow:0 2px 12px rgba(233,106,30,.10);--radius:14px;}
@@ -287,6 +288,7 @@
 
 <script src="header.js"></script>
 <script>
+if (!requireAuth()) throw new Error('auth');
 // ═══════════════════════════════════════════════
 //  Data
 // ═══════════════════════════════════════════════
