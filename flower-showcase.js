@@ -534,6 +534,16 @@ async function downloadImage() {
         sel.value = member.gameId || member.gameid;
         await onMemberSelect();
       }
+    } else if (typeof getAuthUser === 'function') {
+      // 自動預選綁定的角色
+      const user = getAuthUser();
+      if (user && user.gameId) {
+        const match = allMembers.find(m => (m.gameId || m.gameid) === user.gameId);
+        if (match) {
+          sel.value = match.gameId || match.gameid;
+          await onMemberSelect();
+        }
+      }
     }
   } catch(e) {
     loadingEl.innerHTML = `<div style="color:#c2185b;">⚠️ 資料載入失敗：${e.message}</div>`;

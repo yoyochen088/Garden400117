@@ -168,6 +168,19 @@ async function init() {
       `<option value="${i}">${m.nickname || m.gameId}</option>`
     ).join('');
 
+  // 自動預選綁定的角色
+  if (typeof getAuthUser === 'function') {
+    const user = getAuthUser();
+    if (user && user.gameId) {
+      const idx = members.findIndex(m => m.gameId === user.gameId);
+      if (idx >= 0) {
+        sel.value = idx;
+        loadOwned();
+        return;
+      }
+    }
+  }
+
   // 不自動載入，等使用者主動選擇
   document.getElementById('flowerGrid').innerHTML =
     '<div class="loading" style="color:#9e6b7e;">👆 請先選擇成員，再勾選花卉</div>';
