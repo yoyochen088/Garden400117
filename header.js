@@ -249,7 +249,7 @@
   container.innerHTML = `
     <header>
       <a href="home.html" class="sh-guild">璀璨 <small>[400117]</small></a>
-      <nav>${buildNav()}</nav>
+      <nav>${buildNav()}<span id="sh-auth-desktop" class="sh-auth-desktop"></span></nav>
       <button class="sh-hamburger" id="sh-hamburger" onclick="shToggleNav()" aria-label="選單">
         <span></span><span></span><span></span>
       </button>
@@ -339,9 +339,9 @@
 
   // ── Auth UI ──
   const authCSS = `
-    .sh-auth-area{margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,0.2);}
-    .sh-auth-btn{width:100%;padding:12px 16px;border-radius:12px;font-size:0.92rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.2s;}
-    .sh-fb-login{background:rgba(24,119,242,0.9);border:none;color:#fff;}
+    .sh-auth-area{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.2);}
+    .sh-auth-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
+    .sh-fb-login{background:rgba(24,119,242,0.85);border:none;color:#fff;}
     .sh-fb-login:hover{background:rgba(24,119,242,1);}
     .sh-auth-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.12);border-radius:12px;border:1px solid rgba(255,255,255,0.2);}
     .sh-auth-name{color:#fff;font-size:0.88rem;font-weight:700;flex:1;}
@@ -350,6 +350,16 @@
     .sh-auth-logout:hover{color:#fff;}
     .sh-auth-bind-hint{color:#ffcc80;font-size:0.8rem;font-weight:600;margin-top:8px;text-align:center;cursor:pointer;}
     .sh-auth-bind-hint:hover{color:#fff;}
+    /* Desktop auth */
+    .sh-auth-desktop{display:flex;align-items:center;margin-left:8px;}
+    .sh-auth-desktop .sh-desk-login{padding:6px 14px;border-radius:20px;font-size:0.82rem;font-weight:700;background:rgba(24,119,242,0.9);color:#fff;border:none;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+    .sh-auth-desktop .sh-desk-login:hover{background:rgba(24,119,242,1);}
+    .sh-auth-desktop .sh-desk-user{display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);}
+    .sh-auth-desktop .sh-desk-name{color:#fff;font-size:0.82rem;font-weight:700;white-space:nowrap;}
+    .sh-auth-desktop .sh-desk-logout{background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.7rem;cursor:pointer;white-space:nowrap;}
+    .sh-auth-desktop .sh-desk-logout:hover{color:#fff;}
+    .sh-auth-desktop .sh-desk-bind{color:#ffcc80;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+    @media(max-width:600px){.sh-auth-desktop{display:none;}}
   `;
   const authStyle = document.createElement('style');
   authStyle.textContent = authCSS;
@@ -357,25 +367,53 @@
 
   function updateAuthUI() {
     const el = document.getElementById('sh-auth-mobile');
-    if (!el) return;
-    if (typeof getAuthUser !== 'function') { el.innerHTML = ''; return; }
+    const desk = document.getElementById('sh-auth-desktop');
+    if (typeof getAuthUser !== 'function') {
+      if (el) el.innerHTML = '';
+      if (desk) desk.innerHTML = '';
+      return;
+    }
     const user = getAuthUser();
-    if (!user) {
-      el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">📱 Facebook 登入</button>';
-    } else if (!user.gameId) {
-      el.innerHTML = `
-        <div class="sh-auth-info">
-          <span class="sh-auth-name">👋 ${user.fbName}</span>
-          <button class="sh-auth-logout" onclick="doLogout()">登出</button>
-        </div>
-        <div class="sh-auth-bind-hint" onclick="showBindDialog('${user.fbId}')">⚠️ 尚未綁定角色，點此綁定</div>`;
-    } else {
-      el.innerHTML = `
-        <div class="sh-auth-info">
-          <span class="sh-auth-name">🌸 ${user.nickname}</span>
-          <span class="sh-auth-role">${user.role || ''}</span>
-          <button class="sh-auth-logout" onclick="doLogout()">登出</button>
-        </div>`;
+
+    // Mobile
+    if (el) {
+      if (!user) {
+        el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">📱 Facebook 登入</button>';
+      } else if (!user.gameId) {
+        el.innerHTML = `
+          <div class="sh-auth-info">
+            <span class="sh-auth-name">👋 ${user.fbName}</span>
+            <button class="sh-auth-logout" onclick="doLogout()">登出</button>
+          </div>
+          <div class="sh-auth-bind-hint" onclick="showBindDialog('${user.fbId}')">⚠️ 尚未綁定角色，點此綁定</div>`;
+      } else {
+        el.innerHTML = `
+          <div class="sh-auth-info">
+            <span class="sh-auth-name">🌸 ${user.nickname}</span>
+            <span class="sh-auth-role">${user.role || ''}</span>
+            <button class="sh-auth-logout" onclick="doLogout()">登出</button>
+          </div>`;
+      }
+    }
+
+    // Desktop
+    if (desk) {
+      if (!user) {
+        desk.innerHTML = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
+      } else if (!user.gameId) {
+        desk.innerHTML = `
+          <div class="sh-desk-user">
+            <span class="sh-desk-name">👋 ${user.fbName}</span>
+            <span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">綁定</span>
+            <button class="sh-desk-logout" onclick="doLogout()">登出</button>
+          </div>`;
+      } else {
+        desk.innerHTML = `
+          <div class="sh-desk-user">
+            <span class="sh-desk-name">🌸 ${user.nickname}</span>
+            <button class="sh-desk-logout" onclick="doLogout()">登出</button>
+          </div>`;
+      }
     }
   }
 
