@@ -202,28 +202,39 @@
 
   // ── 建立桌面 nav ──
   function buildNav() {
-    return NAV_ITEMS.filter(item => !item.mobileOnly).filter(item => {
+    const items = NAV_ITEMS.filter(item => !item.mobileOnly).filter(item => {
       if (item.authOnly) return typeof isBound === 'function' && isBound();
       return true;
-    }).map(item => {
-      if (item.dropdown) {
-        const active = isActive(item) ? 'sh-active' : '';
-        const children = item.children.map(c =>
-          `<a href="${c.href}">${c.label}</a>`
-        ).join('');
-        return `
-          <div class="sh-dropdown">
-            <button class="sh-drop-btn ${active}">
-              ${item.icon} ${item.label} <span class="sh-arrow">▼</span>
-            </button>
-            <div class="sh-drop-menu">
-              <div class="sh-drop-inner">${children}</div>
-            </div>
-          </div>`;
-      }
+    });
+    // 把管理抽出來放最後，auth 按鈕插在管理前
+    const mgmtIdx = items.findIndex(i => i.href === 'editor.html');
+    const beforeMgmt = mgmtIdx >= 0 ? items.slice(0, mgmtIdx) : items;
+    const mgmtItem = mgmtIdx >= 0 ? items[mgmtIdx] : null;
+
+    let html = beforeMgmt.map(item => renderNavItem(item)).join('');
+    html += '<span id="sh-auth-desktop" class="sh-auth-desktop"></span>';
+    if (mgmtItem) html += renderNavItem(mgmtItem);
+    return html;
+  }
+
+  function renderNavItem(item) {
+    if (item.dropdown) {
       const active = isActive(item) ? 'sh-active' : '';
-      return `<a href="${item.href}" class="${active}">${item.label}</a>`;
-    }).join('');
+      const children = item.children.map(c =>
+        `<a href="${c.href}">${c.label}</a>`
+      ).join('');
+      return `
+        <div class="sh-dropdown">
+          <button class="sh-drop-btn ${active}">
+            ${item.icon} ${item.label} <span class="sh-arrow">▼</span>
+          </button>
+          <div class="sh-drop-menu">
+            <div class="sh-drop-inner">${children}</div>
+          </div>
+        </div>`;
+    }
+    const active = isActive(item) ? 'sh-active' : '';
+    return `<a href="${item.href}" class="${active}">${item.label}</a>`;
   }
 
   // ── 建立 mobile-nav ──
@@ -266,7 +277,7 @@
   container.innerHTML = `
     <header>
       <a href="home.html" class="sh-guild">璀璨 <small>[400117]</small></a>
-      <nav>${buildNav()}<span id="sh-auth-desktop" class="sh-auth-desktop"></span></nav>
+      <nav>${buildNav()}</nav>
       <button class="sh-hamburger" id="sh-hamburger" onclick="shToggleNav()" aria-label="選單">
         <span></span><span></span><span></span>
       </button>
@@ -356,7 +367,7 @@
 
   // ── Auth UI ──
   const authCSS = `
-    .sh-auth-area{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.2);}
+    .sh-auth-area{margin-top:auto;padding-top:12px;padding-bottom:60px;border-top:1px solid rgba(255,255,255,0.2);}
     .sh-auth-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
     .sh-fb-login{background:rgba(24,119,242,0.85);border:none;color:#fff;}
     .sh-fb-login:hover{background:rgba(24,119,242,1);}
@@ -439,9 +450,7 @@
     // 重新渲染 nav（顯示/隱藏限定專區）
     const navEl = container.querySelector('nav');
     if (navEl) {
-      const deskAuth = navEl.querySelector('#sh-auth-desktop');
-      const deskAuthHTML = deskAuth ? deskAuth.outerHTML : '<span id="sh-auth-desktop" class="sh-auth-desktop"></span>';
-      navEl.innerHTML = buildNav() + deskAuthHTML;
+      navEl.innerHTML = buildNav();
     }
     const mobileNav = document.getElementById('sh-mobile-nav');
     if (mobileNav) {
