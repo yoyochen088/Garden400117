@@ -194,11 +194,16 @@
   }
 
   function formatAIResponse(text) {
-    // 先提取 IMG[...] 保存起來
+    // 先提取 IMG[...] 和 VID[...] 保存起來
     const images = [];
+    const videos = [];
     let processed = text.replace(/IMG\[(https?:\/\/[^\]]+)\]/g, (match, url) => {
       images.push(url);
       return ':::IMG' + (images.length - 1) + ':::';
+    });
+    processed = processed.replace(/VID\[(https?:\/\/[^\]]+)\]/g, (match, url) => {
+      videos.push(url);
+      return ':::VID' + (videos.length - 1) + ':::';
     });
     // markdown 轉換
     processed = processed
@@ -210,6 +215,10 @@
     // 還原圖片
     processed = processed.replace(/:::IMG(\d+):::/g, (match, idx) => {
       return '<img src="' + images[Number(idx)] + '" class="ai-img" onclick="showImgLightbox(this.src)" />';
+    });
+    // 還原影片
+    processed = processed.replace(/:::VID(\d+):::/g, (match, idx) => {
+      return '<video src="' + videos[Number(idx)] + '" controls playsinline style="max-width:100%;border-radius:8px;margin:8px 0;"></video>';
     });
     return processed;
   }
