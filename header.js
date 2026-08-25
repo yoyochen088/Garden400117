@@ -212,7 +212,21 @@
     const mgmtItem = mgmtIdx >= 0 ? items[mgmtIdx] : null;
 
     let html = beforeMgmt.map(item => renderNavItem(item)).join('');
-    html += '<span id="sh-auth-desktop" class="sh-auth-desktop"></span>';
+    // Desktop auth 按鈕
+    let authHtml = '';
+    if (typeof getAuthUser === 'function') {
+      const user = getAuthUser();
+      if (!user) {
+        authHtml = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
+      } else if (!user.gameId) {
+        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">👋 ${user.fbName}</span><span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">綁定</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
+      } else {
+        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">🌸 ${user.nickname}</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
+      }
+    } else {
+      authHtml = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
+    }
+    html += '<span id="sh-auth-desktop" class="sh-auth-desktop">' + authHtml + '</span>';
     if (mgmtItem) html += renderNavItem(mgmtItem);
     return html;
   }
