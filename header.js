@@ -354,11 +354,16 @@
     document.getElementById('sh-mobile-nav').classList.toggle('open');
     document.getElementById('sh-nav-overlay').classList.toggle('open');
     document.getElementById('sh-hamburger').classList.toggle('open');
+    // 隱藏回頂部按鈕避免遮擋
+    const btt = document.getElementById('back-to-top');
+    if (btt) btt.style.display = document.getElementById('sh-mobile-nav').classList.contains('open') ? 'none' : '';
   };
   window.shCloseNav = function () {
     document.getElementById('sh-mobile-nav').classList.remove('open');
     document.getElementById('sh-nav-overlay').classList.remove('open');
     document.getElementById('sh-hamburger').classList.remove('open');
+    const btt = document.getElementById('back-to-top');
+    if (btt) btt.style.display = '';
   };
   window.shToggleMnav = function (btn) {
     btn.classList.toggle('open');
@@ -381,7 +386,7 @@
 
   // ── Auth UI ──
   const authCSS = `
-    .sh-auth-area{margin-top:auto;padding-top:12px;padding-bottom:60px;border-top:1px solid rgba(255,255,255,0.2);}
+    .sh-auth-area{margin-top:auto;padding-top:12px;padding-bottom:100px;border-top:1px solid rgba(255,255,255,0.2);}
     .sh-auth-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
     .sh-fb-login{background:#fff;border:1.5px solid rgba(255,255,255,0.4);color:#444;border-radius:10px;}
     .sh-fb-login:hover{background:rgba(255,255,255,0.95);}

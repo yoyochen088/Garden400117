@@ -5,7 +5,7 @@
 //  - Google Sheets API     → Network First（優先用網路，失敗才用快取）
 // ════════════════════════════════════════════
 
-const CACHE_NAME = 'cuican-v24';
+const CACHE_NAME = 'cuican-v25';
 const STATIC_ASSETS = [
   '/index.html',
   '/home.html',
