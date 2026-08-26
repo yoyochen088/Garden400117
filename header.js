@@ -388,8 +388,8 @@
   const authCSS = `
     .sh-auth-area{margin-top:auto;padding-top:12px;padding-bottom:100px;border-top:1px solid rgba(255,255,255,0.2);}
     .sh-auth-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
-    .sh-fb-login{background:#fff;border:1.5px solid rgba(255,255,255,0.4);color:#444;border-radius:10px;}
-    .sh-fb-login:hover{background:rgba(255,255,255,0.95);}
+    .sh-fb-login,.sh-google-login{background:#fff;border:1px solid #ddd;color:#444;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+    .sh-fb-login:hover,.sh-google-login:hover{background:#f8f8f8;box-shadow:0 2px 10px rgba(0,0,0,0.12);}
     .sh-auth-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.12);border-radius:12px;border:1px solid rgba(255,255,255,0.2);}
     .sh-auth-name{color:#fff;font-size:0.88rem;font-weight:700;flex:1;}
     .sh-auth-role{color:rgba(255,255,255,0.7);font-size:0.75rem;}
@@ -425,7 +425,7 @@
     // Mobile
     if (el) {
       if (!user) {
-        el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">🔑 Google 登入</button>';
+        el.innerHTML = '<button class="sh-auth-btn sh-google-login" onclick="doLogin()"><img src="https://developers.google.com/identity/images/g-logo.png" style="width:18px;height:18px;" alt="G"/>使用 Google 登入</button>';
       } else if (!user.gameId) {
         el.innerHTML = `
           <div class="sh-auth-info">
