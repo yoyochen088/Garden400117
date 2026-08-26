@@ -42,7 +42,7 @@ function isBound() {
 // ── Google Identity Services 載入 ──
 function loadGoogleSDK() {
   return new Promise((resolve) => {
-    if (window.google && window.google.accounts) { resolve(); return; }
+    if (window.google && window.google.accounts && window.google.accounts.oauth2) { resolve(); return; }
     const s = document.createElement('script');
     s.src = 'https://accounts.google.com/gsi/client';
     s.async = true;
@@ -55,27 +55,24 @@ function loadGoogleSDK() {
 // ── Google 登入流程 ──
 async function doLogin() {
   await loadGoogleSDK();
-  google.accounts.id.initialize({
+  const client = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleResponse,
-    auto_select: false
-  });
-  google.accounts.id.prompt((notification) => {
-    // 如果 One Tap 被關閉或不支援，用彈窗
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      google.accounts.id.prompt();
+    scope: 'profile email',
+    callback: async (tokenResponse) => {
+      if (tokenResponse.error) return;
+      // 用 access token 取得使用者資料
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+      });
+      const info = await res.json();
+      await handleGoogleLogin(info.sub, info.name || '', info.email || '');
     }
   });
+  client.requestAccessToken();
 }
 
-// ── Google 回應處理 ──
-async function handleGoogleResponse(response) {
-  // 解析 JWT token（不需要後端驗證，前端解碼即可取得基本資料）
-  const payload = parseJwt(response.credential);
-  const googleId = payload.sub;
-  const gName = payload.name || '';
-  const gEmail = payload.email || '';
-
+// ── Google 登入處理 ──
+async function handleGoogleLogin(googleId, gName, gEmail) {
   // 檢查是否已綁定
   const check = await checkBinding(googleId);
   if (check.bound) {
@@ -88,16 +85,6 @@ async function handleGoogleResponse(response) {
   setAuthUser({ googleId, gName, gEmail, gameId: null, nickname: null, role: null });
   onAuthChanged();
   showBindDialog(googleId);
-}
-
-// ── 解析 JWT ──
-function parseJwt(token) {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
-    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-  ).join(''));
-  return JSON.parse(jsonPayload);
 }
 
 // ── 檢查 Google ID 是否已綁定成員 ──
