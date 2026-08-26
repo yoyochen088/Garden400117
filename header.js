@@ -217,14 +217,14 @@
     if (typeof getAuthUser === 'function') {
       const user = getAuthUser();
       if (!user) {
-        authHtml = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
+        authHtml = '<button class="sh-desk-login" onclick="doLogin()"><img src="https://developers.google.com/identity/images/g-logo.png" style="width:16px;height:16px;" alt="G"/>登入</button>';
       } else if (!user.gameId) {
         authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">👋 ${user.gName}</span><span class="sh-desk-bind" onclick="showBindDialog('${user.googleId}')">綁定</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
       } else {
         authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">🌸 ${user.nickname}</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
       }
     } else {
-      authHtml = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
+      authHtml = '<button class="sh-desk-login" onclick="doLogin()"><img src="https://developers.google.com/identity/images/g-logo.png" style="width:16px;height:16px;" alt="G"/>登入</button>';
     }
     html += '<span id="sh-auth-desktop" class="sh-auth-desktop">' + authHtml + '</span>';
     if (mgmtItem) html += renderNavItem(mgmtItem);
@@ -383,8 +383,8 @@
   const authCSS = `
     .sh-auth-area{margin-top:auto;padding-top:12px;padding-bottom:60px;border-top:1px solid rgba(255,255,255,0.2);}
     .sh-auth-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
-    .sh-fb-login{background:rgba(24,119,242,0.85);border:none;color:#fff;}
-    .sh-fb-login:hover{background:rgba(24,119,242,1);}
+    .sh-fb-login{background:#fff;border:1.5px solid rgba(255,255,255,0.4);color:#444;border-radius:10px;}
+    .sh-fb-login:hover{background:rgba(255,255,255,0.95);}
     .sh-auth-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.12);border-radius:12px;border:1px solid rgba(255,255,255,0.2);}
     .sh-auth-name{color:#fff;font-size:0.88rem;font-weight:700;flex:1;}
     .sh-auth-role{color:rgba(255,255,255,0.7);font-size:0.75rem;}
@@ -394,8 +394,8 @@
     .sh-auth-bind-hint:hover{color:#fff;}
     /* Desktop auth */
     .sh-auth-desktop{display:flex;align-items:center;margin-left:8px;}
-    .sh-auth-desktop .sh-desk-login{padding:6px 14px;border-radius:20px;font-size:0.82rem;font-weight:700;background:rgba(24,119,242,0.9);color:#fff;border:none;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
-    .sh-auth-desktop .sh-desk-login:hover{background:rgba(24,119,242,1);}
+    .sh-auth-desktop .sh-desk-login{padding:6px 14px;border-radius:20px;font-size:0.82rem;font-weight:700;background:#fff;color:#444;border:1.5px solid rgba(255,255,255,0.6);cursor:pointer;transition:background 0.2s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
+    .sh-auth-desktop .sh-desk-login:hover{background:rgba(255,255,255,0.95);}
     .sh-auth-desktop .sh-desk-user{display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);}
     .sh-auth-desktop .sh-desk-name{color:#fff;font-size:0.82rem;font-weight:700;white-space:nowrap;}
     .sh-auth-desktop .sh-desk-logout{background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.7rem;cursor:pointer;white-space:nowrap;}
@@ -441,7 +441,7 @@
     // Desktop
     if (desk) {
       if (!user) {
-        desk.innerHTML = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
+        desk.innerHTML = '<button class="sh-desk-login" onclick="doLogin()"><img src="https://developers.google.com/identity/images/g-logo.png" style="width:16px;height:16px;" alt="G"/>登入</button>';
       } else if (!user.gameId) {
         desk.innerHTML = `
           <div class="sh-desk-user">
