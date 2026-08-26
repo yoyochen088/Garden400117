@@ -1,12 +1,12 @@
 // ════════════════════════════════════════════════════════════════
-//  auth.js — FB 登入 + 成員綁定（共用模組）
-//  需要全域變數：APPS_SCRIPT_URL（來自 config.js）
+//  auth.js — Google 登入 + 成員綁定（共用模組）
+//  需要全域變數：APPS_SCRIPT_URL, SHEET_ID, API_KEY（來自 config.js 或 inline）
 // ════════════════════════════════════════════════════════════════
 
-const FB_APP_ID = '1745044093359619';
+const GOOGLE_CLIENT_ID = '274674752247-pj9980era0e5r6bsn8bvrh88tqp2r59k.apps.googleusercontent.com';
 
 // ── 登入狀態 ──
-let authUser = null; // { fbId, fbName, gameId, nickname, role }
+let authUser = null; // { odI, gName, gEmail, gameId, nickname, role }
 
 function getAuthUser() {
   if (authUser) return authUser;
@@ -39,87 +39,92 @@ function isBound() {
   return u && u.gameId;
 }
 
-// ── FB SDK 載入 ──
-function loadFBSDK() {
+// ── Google Identity Services 載入 ──
+function loadGoogleSDK() {
   return new Promise((resolve) => {
-    if (window.FB) { resolve(); return; }
-    window.fbAsyncInit = function () {
-      FB.init({ appId: FB_APP_ID, cookie: true, xfbml: false, version: 'v21.0' });
-      resolve();
-    };
+    if (window.google && window.google.accounts) { resolve(); return; }
     const s = document.createElement('script');
-    s.src = 'https://connect.facebook.net/zh_TW/sdk.js';
+    s.src = 'https://accounts.google.com/gsi/client';
     s.async = true;
     s.defer = true;
+    s.onload = resolve;
     document.head.appendChild(s);
   });
 }
 
-// ── FB 登入流程 ──
-async function fbLogin() {
-  await loadFBSDK();
-  return new Promise((resolve, reject) => {
-    FB.login(function (response) {
-      if (response.authResponse) {
-        FB.api('/me', { fields: 'id,name' }, function (me) {
-          resolve({ fbId: me.id, fbName: me.name });
-        });
-      } else {
-        reject(new Error('使用者取消登入'));
-      }
-    }, { scope: 'public_profile' });
+// ── Google 登入流程 ──
+async function doLogin() {
+  await loadGoogleSDK();
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleResponse,
+    auto_select: false
+  });
+  google.accounts.id.prompt((notification) => {
+    // 如果 One Tap 被關閉或不支援，用彈窗
+    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      google.accounts.id.prompt();
+    }
   });
 }
 
-// ── 檢查 FB ID 是否已綁定成員 ──
-async function checkBinding(fbId) {
-  const params = encodeURIComponent(JSON.stringify({ action: 'checkFbId', fbId }));
+// ── Google 回應處理 ──
+async function handleGoogleResponse(response) {
+  // 解析 JWT token（不需要後端驗證，前端解碼即可取得基本資料）
+  const payload = parseJwt(response.credential);
+  const googleId = payload.sub;
+  const gName = payload.name || '';
+  const gEmail = payload.email || '';
+
+  // 檢查是否已綁定
+  const check = await checkBinding(googleId);
+  if (check.bound) {
+    setAuthUser({ googleId, gName, gEmail, gameId: check.gameId, nickname: check.nickname, role: check.role });
+    onAuthChanged();
+    return;
+  }
+
+  // 未綁定 → 顯示成員選擇
+  setAuthUser({ googleId, gName, gEmail, gameId: null, nickname: null, role: null });
+  onAuthChanged();
+  showBindDialog(googleId);
+}
+
+// ── 解析 JWT ──
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+  ).join(''));
+  return JSON.parse(jsonPayload);
+}
+
+// ── 檢查 Google ID 是否已綁定成員 ──
+async function checkBinding(googleId) {
+  const params = encodeURIComponent(JSON.stringify({ action: 'checkGoogleId', googleId }));
   const res = await fetch(APPS_SCRIPT_URL + '?data=' + params);
   const text = await res.text();
   try { return JSON.parse(text); } catch (e) { return { bound: false }; }
 }
 
-// ── 綁定 FB ID 到成員 ──
-async function bindMember(fbId, gameId) {
-  const params = encodeURIComponent(JSON.stringify({ action: 'bindFbId', fbId, gameId }));
+// ── 綁定 Google ID 到成員 ──
+async function bindMember(googleId, gameId) {
+  const params = encodeURIComponent(JSON.stringify({ action: 'bindGoogleId', googleId, gameId }));
   const res = await fetch(APPS_SCRIPT_URL + '?data=' + params);
   const text = await res.text();
   try { return JSON.parse(text); } catch (e) { return { success: false }; }
-}
-
-// ── 完整登入流程（登入 + 檢查綁定） ──
-async function doLogin() {
-  try {
-    const { fbId, fbName } = await fbLogin();
-
-    // 檢查是否已綁定
-    const check = await checkBinding(fbId);
-    if (check.bound) {
-      setAuthUser({ fbId, fbName, gameId: check.gameId, nickname: check.nickname, role: check.role });
-      onAuthChanged();
-      return;
-    }
-
-    // 未綁定 → 顯示成員選擇
-    setAuthUser({ fbId, fbName, gameId: null, nickname: null, role: null });
-    onAuthChanged();
-    showBindDialog(fbId);
-  } catch (e) {
-    alert('登入失敗：' + e.message);
-  }
 }
 
 // ── 登出 ──
 function doLogout() {
   clearAuth();
   onAuthChanged();
-  if (window.FB) {
-    try { FB.logout(); } catch (e) {}
-  }
+  // Google 不需要呼叫 logout API
 }
 
 // ── 顯示綁定對話框 ──
-async function showBindDialog(fbId) {
+async function showBindDialog(googleId) {
   // 取得成員清單
   const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/members!A1:E?key=${API_KEY}`);
   const data = await res.json();
@@ -150,7 +155,7 @@ async function showBindDialog(fbId) {
   document.getElementById('bind-confirm').onclick = async () => {
     const gameId = document.getElementById('bind-select').value;
     if (!gameId) { alert('請選擇角色'); return; }
-    const result = await bindMember(fbId, gameId);
+    const result = await bindMember(googleId, gameId);
     if (result.success) {
       const user = getAuthUser();
       user.gameId = result.gameId;
@@ -159,6 +164,8 @@ async function showBindDialog(fbId) {
       setAuthUser(user);
       overlay.remove();
       onAuthChanged();
+    } else if (result.error === 'already_bound') {
+      alert('此角色已被其他帳號綁定');
     } else {
       alert('綁定失敗：' + (result.error || '未知錯誤'));
     }
@@ -171,7 +178,6 @@ async function showBindDialog(fbId) {
 
 // ── 狀態變更 callback（由 header.js 覆寫） ──
 function onAuthChanged() {
-  // header.js 會覆寫此函式來更新 UI
   if (typeof window._onAuthChanged === 'function') window._onAuthChanged();
 }
 
@@ -183,8 +189,11 @@ function requireAuth() {
         <div style="text-align:center;max-width:400px;">
           <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
           <h2 style="color:#a35d00;margin-bottom:8px;">需要登入才能使用</h2>
-          <p style="color:#9e7040;font-size:0.9rem;margin-bottom:20px;">請先使用 Facebook 登入並綁定公會成員身份。</p>
-          <button onclick="doLogin()" style="padding:12px 28px;border-radius:20px;border:none;background:linear-gradient(135deg,#1877f2,#42a5f5);color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(24,119,242,0.3);">📱 Facebook 登入</button>
+          <p style="color:#9e7040;font-size:0.9rem;margin-bottom:20px;">請先使用 Google 登入並綁定公會成員身份。</p>
+          <button onclick="doLogin()" style="padding:12px 28px;border-radius:20px;border:none;background:#fff;color:#444;font-size:0.95rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);border:1px solid #ddd;display:inline-flex;align-items:center;gap:10px;">
+            <img src="https://developers.google.com/identity/images/g-logo.png" style="width:20px;height:20px;" alt="G" />
+            使用 Google 登入
+          </button>
           <div style="margin-top:16px;"><a href="home.html" style="color:#e96a1e;font-size:0.85rem;">← 返回首頁</a></div>
         </div>
       </div>

@@ -219,7 +219,7 @@
       if (!user) {
         authHtml = '<button class="sh-desk-login" onclick="doLogin()">登入</button>';
       } else if (!user.gameId) {
-        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">👋 ${user.fbName}</span><span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">綁定</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
+        authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">👋 ${user.gName}</span><span class="sh-desk-bind" onclick="showBindDialog('${user.googleId}')">綁定</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
       } else {
         authHtml = `<div class="sh-desk-user"><span class="sh-desk-name">🌸 ${user.nickname}</span><button class="sh-desk-logout" onclick="doLogout()">登出</button></div>`;
       }
@@ -420,14 +420,14 @@
     // Mobile
     if (el) {
       if (!user) {
-        el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">📱 Facebook 登入</button>';
+        el.innerHTML = '<button class="sh-auth-btn sh-fb-login" onclick="doLogin()">🔑 Google 登入</button>';
       } else if (!user.gameId) {
         el.innerHTML = `
           <div class="sh-auth-info">
-            <span class="sh-auth-name">👋 ${user.fbName}</span>
+            <span class="sh-auth-name">👋 ${user.gName}</span>
             <button class="sh-auth-logout" onclick="doLogout()">登出</button>
           </div>
-          <div class="sh-auth-bind-hint" onclick="showBindDialog('${user.fbId}')">⚠️ 尚未綁定角色，點此綁定</div>`;
+          <div class="sh-auth-bind-hint" onclick="showBindDialog('${user.googleId}')">⚠️ 尚未綁定角色，點此綁定</div>`;
       } else {
         el.innerHTML = `
           <div class="sh-auth-info">
@@ -445,8 +445,8 @@
       } else if (!user.gameId) {
         desk.innerHTML = `
           <div class="sh-desk-user">
-            <span class="sh-desk-name">👋 ${user.fbName}</span>
-            <span class="sh-desk-bind" onclick="showBindDialog('${user.fbId}')">綁定</span>
+            <span class="sh-desk-name">👋 ${user.gName}</span>
+            <span class="sh-desk-bind" onclick="showBindDialog('${user.googleId}')">綁定</span>
             <button class="sh-desk-logout" onclick="doLogout()">登出</button>
           </div>`;
       } else {
