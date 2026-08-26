@@ -386,7 +386,7 @@
 
   // ── Auth UI ──
   const authCSS = `
-    .sh-auth-area{margin-top:auto;padding-top:12px;padding-bottom:100px;border-top:1px solid rgba(255,255,255,0.2);}
+    .sh-auth-area{padding-top:12px;padding-bottom:20px;border-top:1px solid rgba(255,255,255,0.2);}
     .sh-auth-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s;}
     .sh-fb-login,.sh-google-login{background:#fff;border:1px solid #ddd;color:#444;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
     .sh-fb-login:hover,.sh-google-login:hover{background:#f8f8f8;box-shadow:0 2px 10px rgba(0,0,0,0.12);}
