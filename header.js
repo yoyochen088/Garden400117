@@ -102,9 +102,10 @@
     #sh-mobile-nav {
       position: fixed; top: 0; right: -260px; width: 240px; height: 100vh;
       background: linear-gradient(160deg,#c2510b,#e96a1e); z-index: 200;
-      padding: 70px 20px 30px; display: flex; flex-direction: column; gap: 8px;
+      padding: 70px 20px 80px; display: flex; flex-direction: column; gap: 8px;
       transition: right .3s cubic-bezier(.4,0,.2,1);
       box-shadow: -4px 0 20px rgba(0,0,0,.2); overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     #sh-mobile-nav.open { right: 0; }
     #sh-mobile-nav a {
