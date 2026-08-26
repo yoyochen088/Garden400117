@@ -3,7 +3,7 @@
 //  需要全域變數：APPS_SCRIPT_URL, SHEET_ID, API_KEY（來自 config.js 或 inline）
 // ════════════════════════════════════════════════════════════════
 
-const GOOGLE_CLIENT_ID = '274674752247-pj9980era0e5r6bsn8bvrh88tqp2r59k.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '89533965407-s9ouku6mua1sdmvemsh5u3s40rms6pvv.apps.googleusercontent.com';
 
 // ── 登入狀態 ──
 let authUser = null; // { odI, gName, gEmail, gameId, nickname, role }
