@@ -1212,17 +1212,17 @@ document.addEventListener('keydown', e => {
   document.getElementById('flowerLoading').style.display = 'none';
   if (ok) {
     document.getElementById('flowerContent').style.display = 'block';
-    applyFilters();
-    // URL 參數支援：?search=關鍵字 自動帶入搜尋
+    // URL 參數支援：?search=關鍵字 自動帶入搜尋（要在第一次 applyFilters 前讀取，避免被清空）
     const urlParams = new URLSearchParams(location.search);
     const searchParam = urlParams.get('search');
     if (searchParam) {
       document.getElementById('searchInput').value = searchParam;
       document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
-      document.querySelector('.qtab[data-q=""]').classList.add('active');
+      const allTab = document.querySelector('.qtab[data-q=""]');
+      if (allTab) allTab.classList.add('active');
       activeQTab = '';
-      applyFilters();
     }
+    applyFilters();
   } else {
     document.getElementById('flowerContent').style.display = 'block';
     document.getElementById('flowerGrid').innerHTML =
