@@ -67,7 +67,8 @@
     }
 
     /* ── Sticky 區塊導覽 ── */
-    .section-nav { position: sticky; top: 60px; z-index: 90; background: rgba(255,248,245,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+    .section-nav { position: sticky; top: 60px; z-index: 90; background: rgba(255,248,245,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; justify-content: center; flex-wrap: wrap; }
+    @media(max-width:600px){ .section-nav { justify-content: flex-start; } }
     .section-nav::-webkit-scrollbar { display: none; }
     .snav-btn { white-space: nowrap; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: var(--card-bg); color: var(--orange-dark); transition: all 0.2s; flex-shrink: 0; }
     .snav-btn:hover, .snav-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; }

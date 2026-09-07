@@ -3,7 +3,14 @@
   const NAV_ITEMS = [
     { label: '首頁',     href: 'home.html',           icon: '🏠', match: ['home.html'] },
     { label: '花卉圖鑑', href: 'index.html',           icon: '🌸', match: ['index.html'] },
-    { label: '競賽攻略', href: 'guide.html',           icon: '📖', match: ['guide.html'] },
+    {
+      label: '攻略', icon: '📖', dropdown: true,
+      match: ['guide.html', 'flowerelf-guide.html'],
+      children: [
+        { label: '⚔️ 競賽攻略', href: 'guide.html' },
+        { label: '🧚 花靈攻略', href: 'flowerelf-guide.html' },
+      ]
+    },
     { label: '公會成員', href: 'index.html#id-page',   icon: '👥', match: [] },
     {
       label: '個人', icon: '👤', dropdown: true,

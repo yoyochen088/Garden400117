@@ -194,9 +194,10 @@
       </div>
       <img id="af-preview" style="display:none;width:52px;height:52px;object-fit:cover;border-radius:8px;border:2px solid var(--pink-mid);" />
       <div style="flex:1;min-width:200px;">
-        <div class="lbl">token（上傳圖片用）</div>
+        <div class="lbl">token（上傳圖片用）<span id="af-token-hint" style="font-size:.72rem;color:#2e7d32;"></span></div>
         <input type="password" id="af-token" placeholder="token"
           style="padding:7px 10px;border:1.5px solid var(--pink-mid);border-radius:7px;font-size:.88rem;background:var(--bg);color:#3d1a2e;outline:none;width:100%;" />
+        <button type="button" id="af-token-clear" onclick="clearToken()" style="display:none;margin-top:4px;font-size:.72rem;color:#c62828;background:none;border:none;cursor:pointer;padding:0;">清除已儲存的 token</button>
       </div>
       <button class="btn" style="background:#9b59b6;color:#fff;align-self:flex-end;" onclick="uploadAndAddFlower()">&#128190; 上傳並新增</button>
     </div>
@@ -529,7 +530,13 @@ function onFlowerImgSelect(input) {
 
 async function uploadAndAddFlower() {
   const file = document.getElementById('af-img').files[0];
-  const token = document.getElementById('af-token').value.trim();
+  // Token 優先從輸入框取，沒有就用 localStorage
+  let token = document.getElementById('af-token').value.trim();
+  if (!token) token = localStorage.getItem('gh_token') || '';
+  // 若有輸入新 token，存到 localStorage
+  if (document.getElementById('af-token').value.trim()) {
+    localStorage.setItem('gh_token', document.getElementById('af-token').value.trim());
+  }
   const status = document.getElementById('af-status');
 
   if (!file) { showStatus(status, '請選擇圖片', 'err'); return; }
@@ -610,11 +617,40 @@ async function uploadAndAddFlower() {
     // 清空上傳區
     document.getElementById('af-img').value = '';
     document.getElementById('af-preview').style.display = 'none';
-    document.getElementById('af-token').value = '';
+    // 不清空 token 欄位（保留 localStorage 的記憶狀態）
+    initTokenField();
 
   } catch(e) {
     showStatus(status, '❌ 失敗：' + e.message, 'err');
   }
+}
+
+// ── Token localStorage 記憶 ──
+function initTokenField() {
+  const input = document.getElementById('af-token');
+  const hint = document.getElementById('af-token-hint');
+  const clearBtn = document.getElementById('af-token-clear');
+  if (!input) return;
+  const saved = localStorage.getItem('gh_token');
+  if (saved) {
+    input.value = '';
+    input.placeholder = '已儲存，免填即可上傳';
+    input.disabled = true;
+    input.style.background = '#eee';
+    if (hint) hint.textContent = ' ✓ 已記住';
+    if (clearBtn) clearBtn.style.display = '';
+  } else {
+    input.disabled = false;
+    input.style.background = 'var(--bg)';
+    input.placeholder = 'token';
+    if (hint) hint.textContent = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+  }
+}
+
+function clearToken() {
+  localStorage.removeItem('gh_token');
+  initTokenField();
 }
 
 function showStatus(el, msg, type) {
@@ -775,6 +811,9 @@ async function saveCoupons() {
 
   // 初始化競賽紀錄功能
   initContestRecord();
+
+  // 初始化 token 欄位（若已儲存則反灰）
+  initTokenField();
 })();
 </script>
 

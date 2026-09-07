@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>花靈攻略 - 璀璨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>" />
+  <style>
+    :root{
+      --orange:#e96a1e; --orange-light:#fef0e7; --orange-mid:#f4a46a;
+      --orange-dark:#c2510b; --bg:#fff8f5; --card-bg:#ffffff;
+      --text:#3d1a2e; --text-muted:#9e6b7e; --border:#f8d5b0;
+      --shadow:0 2px 12px rgba(233,106,30,0.10); --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* Hero */
+    .hero{position:relative;overflow:hidden;background:linear-gradient(to bottom,#fff4d6,#f7edd7);border-bottom:1px solid var(--border);}
+    .hero-inner{max-width:1000px;margin:0 auto;padding:40px 24px 28px;text-align:center;}
+    .hero .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:24px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.08);border:1px solid #f0d7a2;font-size:0.82rem;font-weight:700;margin-bottom:14px;}
+    .hero h1{font-size:2rem;font-weight:900;color:#5a371d;margin-bottom:8px;}
+    .hero p{font-size:0.92rem;color:#6d5847;line-height:1.6;}
+
+    /* Section nav */
+    .section-nav{position:sticky;top:60px;z-index:50;background:rgba(255,248,245,0.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);display:flex;gap:8px;padding:12px 16px;overflow-x:auto;justify-content:center;flex-wrap:wrap;}
+    .snav-btn{padding:8px 16px;border-radius:20px;font-size:0.85rem;font-weight:700;background:#fff;color:var(--orange-dark);border:1.5px solid var(--border);cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+    .snav-btn.active,.snav-btn:hover{background:var(--orange);color:#fff;border-color:var(--orange);}
+
+    /* Main */
+    main{max-width:1000px;margin:0 auto;padding:24px 16px 60px;}
+    .guide-section{margin-bottom:44px;scroll-margin-top:130px;}
+    .section-label{font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:4px;}
+    .section-title{font-size:1.3rem;font-weight:900;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+    /* Card grid */
+    .guide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start;}
+    .guide-card{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+    .guide-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(233,106,30,0.18);}
+    .guide-card-title{font-size:0.92rem;font-weight:800;color:var(--orange-dark);padding:12px 14px 8px;}
+    .guide-card img{width:100%;height:auto;display:block;cursor:pointer;transition:opacity 0.15s;}
+    .guide-card img:hover{opacity:0.92;}
+
+    /* Video */
+    .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+    .vid-wrap{position:relative;}
+    .guide-card video{width:100%;height:420px;object-fit:contain;display:block;background:#000;}
+    @media(max-width:600px){.guide-card video{height:60vh;}}
+    .vid-expand{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:8px;background:rgba(0,0,0,0.55);color:#fff;border:none;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;z-index:2;}
+    .vid-expand:hover{background:rgba(0,0,0,0.8);}
+
+    /* Lightbox */
+    #imgLightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:20px;cursor:pointer;}
+    #imgLightbox.open{display:flex;}
+    #imgLightbox img{max-width:95vw;max-height:95vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+    #imgLightbox .close{position:absolute;top:18px;right:22px;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;opacity:0.85;}
+
+    @media(max-width:600px){
+      .hero h1{font-size:1.6rem;}
+      .guide-grid,.video-grid{grid-template-columns:1fr;}
+      .section-nav{top:56px;justify-content:flex-start;}
+    }
+  </style>
+</head>
+<body>
+<div id="site-header"></div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">🧚 花靈養成指南</div>
+    <h1>花靈攻略</h1>
+    <p>從開花靈、摸花靈到派遣賺幣，完整教學一次看懂<br>點擊圖片或影片可放大觀看</p>
+  </div>
+</section>
+
+<nav class="section-nav">
+  <button class="snav-btn active" onclick="scrollToSection('s1')">🎬 影片教學</button>
+  <button class="snav-btn" onclick="scrollToSection('s2')">🌱 開花靈</button>
+  <button class="snav-btn" onclick="scrollToSection('s3')">💡 花靈常識</button>
+  <button class="snav-btn" onclick="scrollToSection('s4')">🧮 購買花靈計算</button>
+</nav>
+
+<main>
+  <!-- 影片教學 -->
+  <section class="guide-section" id="s1">
+    <div class="section-label">Video Tutorial</div>
+    <div class="section-title">🎬 影片教學</div>
+    <div class="video-grid">
+      <div class="guide-card">
+        <div class="guide-card-title">🌱 如何開花靈</div>
+        <div class="vid-wrap">
+          <video src="Context/flowerelf/開花靈.mp4" controls playsinline preload="metadata"></video>
+          <button class="vid-expand" onclick="openVideoLightbox('Context/flowerelf/開花靈.mp4')" title="放大播放">⛶</button>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-card-title">👐 如何摸花靈</div>
+        <div class="vid-wrap">
+          <video src="Context/flowerelf/摸花靈.mp4" controls playsinline preload="metadata"></video>
+          <button class="vid-expand" onclick="openVideoLightbox('Context/flowerelf/摸花靈.mp4')" title="放大播放">⛶</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 開花靈 -->
+  <section class="guide-section" id="s2">
+    <div class="section-label">Grow</div>
+    <div class="section-title">🌱 開花靈</div>
+    <div class="guide-grid" id="grid-grow"></div>
+  </section>
+
+  <!-- 花靈常識 -->
+  <section class="guide-section" id="s3">
+    <div class="section-label">Knowledge</div>
+    <div class="section-title">💡 花靈常識</div>
+    <div class="guide-grid" id="grid-knowledge"></div>
+  </section>
+
+  <!-- 購買花靈計算 -->
+  <section class="guide-section" id="s4">
+    <div class="section-label">Cost Calculation</div>
+    <div class="section-title">🧮 購買大暑的粗略計算公式</div>
+    <div class="guide-grid" id="grid-calc"></div>
+  </section>
+</main>
+
+<div id="imgLightbox" onclick="closeLightbox()">
+  <button class="close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="放大圖片" onclick="event.stopPropagation()" />
+  <video id="lightboxVideo" src="" controls playsinline onclick="event.stopPropagation()" style="display:none;max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);"></video>
+</div>
+
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="header.js"></script>
+<script>
+// 各分類圖片
+const CATEGORIES = {
+  'grid-grow': [
+    { title: '🌸 如何開花靈', file: '如何開花靈浮水印.jpg' },
+    { title: '📦 能開幾朵', file: '能開幾朵浮水印.jpg' },
+  ],
+  'grid-knowledge': [
+    { title: '📖 常識說明', file: '常識說明浮水印.jpg' },
+    { title: '🚀 派遣說明', file: '派遣說明浮水印.jpg' },
+    { title: '⏰ 加倍時程', file: '加倍時程浮水印.jpg' },
+    { title: '💰 花幣數量', file: '花幣數量浮水印.jpg' },
+  ],
+  'grid-calc': [
+    { title: '🆕 只買新花靈', file: 'X版本2新花靈浮水印.png' },
+    { title: '🌿 舊花靈種到底', file: 'X版本2浮水印舊花靈.jpg' },
+  ],
+};
+
+Object.keys(CATEGORIES).forEach(gridId => {
+  document.getElementById(gridId).innerHTML = CATEGORIES[gridId].map(g =>
+    `<div class="guide-card">
+      <div class="guide-card-title">${g.title}</div>
+      <img src="Context/flowerelf/${encodeURIComponent(g.file)}" alt="${g.title}" onclick="openLightbox(this.src)" loading="lazy" />
+    </div>`
+  ).join('');
+});
+
+// Section nav
+function scrollToSection(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+const sections = ['s1','s2','s3','s4'];
+const navBtns = document.querySelectorAll('.snav-btn');
+window.addEventListener('scroll', () => {
+  let current = sections[0];
+  sections.forEach(s => {
+    const el = document.getElementById(s);
+    if (el && el.getBoundingClientRect().top <= 140) current = s;
+  });
+  navBtns.forEach((b, i) => b.classList.toggle('active', sections[i] === current));
+}, {passive:true});
+
+// Lightbox
+function openLightbox(src){
+  const img = document.getElementById('lightboxImg');
+  const vid = document.getElementById('lightboxVideo');
+  img.style.display=''; img.src=src;
+  vid.style.display='none'; vid.pause(); vid.removeAttribute('src'); vid.load();
+  document.getElementById('imgLightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function openVideoLightbox(src){
+  const img = document.getElementById('lightboxImg');
+  const vid = document.getElementById('lightboxVideo');
+  img.style.display='none'; img.src='';
+  vid.style.display=''; vid.src=src;
+  document.getElementById('imgLightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+  vid.play().catch(()=>{});
+}
+function closeLightbox(){
+  document.getElementById('imgLightbox').classList.remove('open');
+  document.body.style.overflow='';
+  document.getElementById('lightboxVideo').pause();
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
+</script>
+</body>
+</html>
