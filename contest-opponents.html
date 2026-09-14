@@ -194,7 +194,7 @@
       <h1>公會對戰情報中心</h1>
       <p class="hero-sub">分析對手戰績，掌握勝利關鍵！</p>
       <div class="kpi-row" id="kpiRow">
-        <div class="kpi-box"><div class="kpi-icon">&#x1F4C5;</div><div class="kpi-val" id="kpiPeriods">-</div><div class="kpi-label">總期數</div></div>
+        <div class="kpi-box" style="cursor:pointer;" onclick="showAllPeriods()" title="點擊查看所有期數"><div class="kpi-icon">&#x1F4C5;</div><div class="kpi-val" id="kpiPeriods">-</div><div class="kpi-label">總期數 ▾</div></div>
         <div class="kpi-box" style="cursor:pointer;" onclick="showAllOpponents()" title="點擊查看所有對手"><div class="kpi-icon">&#x2694;&#xFE0F;</div><div class="kpi-val" id="kpiOpponents">-</div><div class="kpi-label">對手總數 ▾</div></div>
         <div class="kpi-box"><div class="kpi-icon">&#x1F3C6;</div><div class="kpi-val" id="kpiWinRate">-</div><div class="kpi-label">總勝率</div></div>
         <div class="kpi-box"><div class="kpi-icon">&#x1F525;</div><div class="kpi-val" id="kpiRivals">-</div><div class="kpi-label">宿敵公會數</div></div>
@@ -279,6 +279,11 @@
         <input type="text" class="opp-list-search" id="oppListSearchCenter" placeholder="篩選公會名稱..." oninput="filterOppListCenter()" />
         <div id="oppListCenter" style="max-height:500px;overflow-y:auto;margin-top:8px;"></div>
       </div>
+      <!-- 所有期數列表（點總期數 KPI 後顯示） -->
+      <div class="card" id="allPeriodCard" style="display:none;">
+        <div class="card-title">&#x1F4C5; 所有競賽期數</div>
+        <div id="periodListCenter" style="max-height:500px;overflow-y:auto;margin-top:8px;"></div>
+      </div>
     </div>
     <!-- 期數排名模式的內容 -->
     <div id="centerPeriod" style="display:none;">
@@ -346,14 +351,14 @@ async function init() {
     populateTrendSelect();
     populatePeriodPicker();
 
-    // URL 參數優先，否則預設選擇常見對手第一名
+    // URL 參數優先，否則隨機選一個對戰過的對手
     const params = new URLSearchParams(location.search);
     if(params.get('period') || params.get('opp')){
       handleUrlParams();
     } else {
-      const counts = getOppCounts();
-      const topOpp = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
-      if (topOpp) selectOpp(topOpp[0]);
+      const battledNames = Object.keys(getBattleCounts());
+      const pool = battledNames.length ? battledNames : [...new Set(oppData.filter(d=>d.name!=='璀璨').map(d=>d.name))];
+      if (pool.length) selectOpp(pool[Math.floor(Math.random()*pool.length)]);
     }
   } catch(e) {
     document.getElementById('topList').innerHTML = '<div class="loading">&#x26A0;&#xFE0F; '+e.message+'</div>';
@@ -440,12 +445,14 @@ function renderRivalList() {
   }).join('') || '<div class="loading">尚無宿敵</div>';
 }
 
-// ═══ 熱門標籤 ═══
+// ═══ 快捷標籤（隨機推薦對戰過的對手） ═══
 function renderHotTags() {
-  const counts = getOppCounts();
-  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,4);
-  document.getElementById('hotTags').innerHTML = '<span class="hot-label">熱門：</span>' +
-    top.map(([name])=>`<span class="hot-tag" onclick="selectOpp('${esc(name)}')">${name}</span>`).join('');
+  const battledNames = Object.keys(getBattleCounts());
+  const pool = battledNames.length ? battledNames : [...new Set(oppData.filter(d=>d.name!=='璀璨').map(d=>d.name))];
+  // 隨機洗牌取前 4 個
+  const shuffled = pool.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+  document.getElementById('hotTags').innerHTML = '<span class="hot-label">推薦：</span>' +
+    shuffled.map(name=>`<span class="hot-tag" onclick="selectOpp('${esc(name)}')">${name}</span>`).join('');
 }
 
 // ═══ 勝率計算 ═══
@@ -672,8 +679,9 @@ function pgGo(i){historyPage=i;renderHistoryTable(currentOpp);}
 // ═══ 趨勢折線圖 ═══
 let trendChart = null;
 function populateTrendSelect(){
+  // 列出全部對手（依出現次數排序），確保任何選到的對手都能在選單中
   const counts = getOppCounts();
-  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   const sel = document.getElementById('trendSelect');
   sel.innerHTML = sorted.map(([name])=>`<option value="${name}">${name}</option>`).join('');
 }
@@ -682,18 +690,30 @@ function renderTrendChart(){
   if(!name) return;
   document.getElementById('trendSelect').value = name;
 
+  const battled = hasBattled(name);
   const periods = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))].sort();
-  const myScores = periods.map(p=>{const d=oppData.find(x=>x.period===p&&x.name==='璀璨');return d?d.score:null;});
+  // 璀璨分數：只在該公會對戰期數（battle）取，情報期數不畫璀璨線
+  const battlePeriods = new Set(oppData.filter(d=>d.name===name && d.type!=='record').map(d=>d.period));
+  const myScores = periods.map(p=>{
+    if(!battlePeriods.has(p)) return null;
+    const d=oppData.find(x=>x.period===p && x.name==='璀璨' && x.type!=='record');
+    return d?d.score:null;
+  });
   const oppScores = periods.map(p=>{const d=oppData.find(x=>x.period===p&&x.name===name);return d?d.score:null;});
   const labels = periods.map(p=>p.replace(/[^0-9]/g,'')||p);
+
+  const datasets = [
+    {label:name,data:oppScores,borderColor:'#6b7280',backgroundColor:'rgba(107,114,128,0.1)',fill:false,tension:0.3,pointRadius:4,pointBackgroundColor:'#6b7280',borderDash:[5,3],spanGaps:true}
+  ];
+  // 有對戰過才畫璀璨線
+  if(battled){
+    datasets.unshift({label:'璀璨',data:myScores,borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.1)',fill:false,tension:0.3,pointRadius:4,pointBackgroundColor:'#e96a1e',spanGaps:true});
+  }
 
   if(trendChart) trendChart.destroy();
   trendChart = new Chart(document.getElementById('chartTrend'),{
     type:'line',
-    data:{labels, datasets:[
-      {label:'璀璨',data:myScores,borderColor:'#e96a1e',backgroundColor:'rgba(233,106,30,0.1)',fill:false,tension:0.3,pointRadius:4,pointBackgroundColor:'#e96a1e'},
-      {label:name,data:oppScores,borderColor:'#6b7280',backgroundColor:'rgba(107,114,128,0.1)',fill:false,tension:0.3,pointRadius:4,pointBackgroundColor:'#6b7280',borderDash:[5,3]}
-    ]},
+    data:{labels, datasets},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
       scales:{y:{beginAtZero:false,ticks:{callback:v=>v.toLocaleString()}},x:{grid:{display:false}}}
     }
@@ -796,7 +816,8 @@ function switchMode(mode){
 
 // ═══ 期數排名 ═══
 function populatePeriodPicker(){
-  const periods = [...new Set(oppData.map(d=>d.period))].sort((a,b)=>new Date(b)-new Date(a));
+  // 期數排名只列有對戰的期數（排除純情報期數）
+  const periods = [...new Set(oppData.filter(d=>d.type!=='record').map(d=>d.period))].sort((a,b)=>new Date(b)-new Date(a));
   const sel = document.getElementById('periodPicker');
   sel.innerHTML = periods.map(p=>`<option value="${p}">${p}</option>`).join('');
 }
@@ -805,7 +826,8 @@ function loadPeriodRank(){
   const period = document.getElementById('periodPicker').value;
   if(!period){document.getElementById('periodRankBody').innerHTML='';document.getElementById('periodRankTitle').textContent='📋 期數排名';return;}
   document.getElementById('periodRankTitle').textContent = `📋 ${period} 排名`;
-  const data = oppData.filter(d=>d.period===period).sort((a,b)=>a.rank-b.rank);
+  // 只顯示該期對戰排名（battle），排除情報收集資料
+  const data = oppData.filter(d=>d.period===period && d.type!=='record').sort((a,b)=>a.rank-b.rank);
   // 去重
   const seen = new Set();
   const unique = [];
@@ -893,6 +915,30 @@ function pickOpp(name) {
   document.getElementById('allOppCard').style.display = 'none';
   switchMode('search');
   selectOpp(name);
+}
+
+// ═══ 所有期數列表 ═══
+function showAllPeriods() {
+  // 只列有對戰的期數（跟期數排名一致）
+  const periods = [...new Set(oppData.filter(d=>d.type!=='record').map(d=>d.period))].sort((a,b)=>new Date(b)-new Date(a));
+  document.getElementById('periodListCenter').innerHTML = periods.map(p=>{
+    const summary = summaryData.find(s=>s.period===p);
+    const info = summary ? `第 ${summary.rank || '-'} · 總分 ${Number(summary.total).toLocaleString()}` : '';
+    return `<div class="opp-list-item" onclick="pickPeriod('${esc(p)}')">${p}<span class="opp-cnt">${info}</span></div>`;
+  }).join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px;">尚無期數資料</div>';
+  document.getElementById('battleCard').style.display = 'none';
+  document.getElementById('historyCard').style.display = 'none';
+  const rc = document.getElementById('recordCard'); if (rc) rc.style.display = 'none';
+  document.getElementById('emptyCenter').style.display = 'none';
+  document.getElementById('allOppCard').style.display = 'none';
+  document.getElementById('allPeriodCard').style.display = '';
+}
+
+function pickPeriod(period) {
+  document.getElementById('allPeriodCard').style.display = 'none';
+  document.getElementById('periodPicker').value = period;
+  switchMode('period');
+  loadPeriodRank();
 }
 
 init();
