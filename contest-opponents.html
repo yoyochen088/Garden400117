@@ -850,12 +850,19 @@ document.getElementById('searchInput').addEventListener('keydown',function(e){if
 // ═══ 所有對手列表（中間區塊） ═══
 let allOpponentsList = [];
 function showAllOpponents() {
-  const counts = getOppCounts();
-  allOpponentsList = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  const battleCounts = getBattleCounts();
+  const names = [...new Set(oppData.filter(d=>d.name!=='璀璨').map(d=>d.name))];
+  // 每個公會：對戰次數 + 是否有情報
+  allOpponentsList = names.map(name => {
+    const battles = battleCounts[name] || 0;
+    const hasRecord = oppData.some(d => d.name === name && d.type === 'record');
+    return { name, battles, hasRecord };
+  }).sort((a,b) => b.battles - a.battles || a.name.localeCompare(b.name,'zh-TW'));
   renderOppListCenter(allOpponentsList);
   // 隱藏其他中間內容，顯示列表
   document.getElementById('battleCard').style.display = 'none';
   document.getElementById('historyCard').style.display = 'none';
+  const rc = document.getElementById('recordCard'); if (rc) rc.style.display = 'none';
   document.getElementById('emptyCenter').style.display = 'none';
   document.getElementById('allOppCard').style.display = '';
   document.getElementById('oppListSearchCenter').value = '';
@@ -866,14 +873,20 @@ function closeOppList() {} // 不再需要 lightbox 關閉
 
 function filterOppListCenter() {
   const q = document.getElementById('oppListSearchCenter').value.trim().toLowerCase();
-  const filtered = q ? allOpponentsList.filter(([name]) => name.toLowerCase().includes(q)) : allOpponentsList;
+  const filtered = q ? allOpponentsList.filter(o => o.name.toLowerCase().includes(q)) : allOpponentsList;
   renderOppListCenter(filtered);
 }
 
 function renderOppListCenter(list) {
-  document.getElementById('oppListCenter').innerHTML = list.map(([name, count]) =>
-    `<div class="opp-list-item" onclick="pickOpp('${esc(name)}')">${name}<span class="opp-cnt">${count} 次</span></div>`
-  ).join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px;">找不到符合的公會</div>';
+  document.getElementById('oppListCenter').innerHTML = list.map(o => {
+    let label;
+    if (o.battles > 0) {
+      label = `對戰 ${o.battles} 次` + (o.hasRecord ? ' · 含情報' : '');
+    } else {
+      label = '僅情報';
+    }
+    return `<div class="opp-list-item" onclick="pickOpp('${esc(o.name)}')">${o.name}<span class="opp-cnt">${label}</span></div>`;
+  }).join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px;">找不到符合的公會</div>';
 }
 
 function pickOpp(name) {
