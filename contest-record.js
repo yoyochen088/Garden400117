@@ -753,7 +753,7 @@ function renderOpponentTable() {
   const tbody = document.getElementById('opponentBody');
   const btnRow = document.getElementById('opponentBtnRow');
   table.style.display = '';
-  btnRow.style.display = '';
+  btnRow.style.display = 'flex';
 
   tbody.innerHTML = opponentData.map((d, i) =>
     `<tr${d.name === '璀璨' ? ' style="background:#fef0e7;font-weight:700;"' : ''}>

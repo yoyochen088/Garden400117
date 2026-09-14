@@ -261,6 +261,14 @@
         </table>
         <div class="pagination" id="pagination"></div>
       </div>
+      <!-- 情報紀錄（非對戰的分數紀錄） -->
+      <div class="card" id="recordCard" style="display:none;">
+        <div class="card-title">&#x1F4CB; 情報紀錄（未對戰）</div>
+        <table class="history-table">
+          <thead><tr><th>期數</th><th>名次</th><th>分數</th></tr></thead>
+          <tbody id="recordBody"></tbody>
+        </table>
+      </div>
       <div class="card" id="emptyCenter" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
         <div style="font-size:2.5rem;margin-bottom:12px;">&#x2694;&#xFE0F;</div>
         <p>選擇或搜尋一個對手公會<br/>查看對戰情報</p>
@@ -466,6 +474,7 @@ function doSearch() {
     currentOpp = null;
     document.getElementById('battleCard').style.display = 'none';
     document.getElementById('historyCard').style.display = 'none';
+    const rc = document.getElementById('recordCard'); if (rc) rc.style.display = 'none';
     document.getElementById('emptyCenter').style.display = '';
     document.getElementById('emptyCenter').innerHTML = `
       <div style="font-size:2.5rem;margin-bottom:12px;">&#x2753;</div>
@@ -480,11 +489,31 @@ function selectOpp(name) {
   historyPage = 0;
   document.getElementById('searchInput').value = name;
   document.getElementById('emptyCenter').style.display = 'none';
+  document.getElementById('allOppCard').style.display = 'none';
   renderBattleCard(name);
   renderHistoryTable(name);
+  renderRecordTable(name);
   renderTrendChart();
   renderDonutChart(name);
   renderTip(name);
+}
+
+// ═══ 情報紀錄表（有對戰紀錄的公會，額外顯示其 record 資料） ═══
+function renderRecordTable(name) {
+  const card = document.getElementById('recordCard');
+  // 只在「有對戰過」時額外顯示 record 資料（沒對戰過的已由 historyCard 呈現分數紀錄）
+  const records = oppData.filter(d => d.name === name && d.type === 'record')
+    .sort((a,b) => b.period.localeCompare(a.period));
+  if (!hasBattled(name) || records.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  document.getElementById('recordBody').innerHTML = records.map(r =>
+    `<tr><td data-label="期數">${r.period}</td>
+      <td data-label="名次">第 ${r.rank} 名</td>
+      <td data-label="分數" style="font-weight:700;color:var(--orange);">${r.score.toLocaleString()} 分</td></tr>`
+  ).join('');
 }
 
 // ═══ 對戰情報卡 ═══
