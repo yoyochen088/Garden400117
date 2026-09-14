@@ -403,7 +403,6 @@ function parseOCRText(text) {
 // ── 解析任務排名格式 ──
 // 格式：每人一區塊，含 職稱、伺服器、暱稱、任務數(無視)、分數
 function parseTaskRankText(text) {
-  console.log('📋 任務排名 OCR 原始文字：\n' + text);
   const results = [];
   const ROLES = ['副會長', '會長', '理事', '菁英', '成員', '分會成員'];
 
@@ -776,18 +775,22 @@ async function saveOpponents() {
   if (!period) { alert('請填入競賽期數'); return; }
   if (!opponentData.length) { alert('沒有對手資料可儲存'); return; }
 
+  const isRecord = document.getElementById('opponentIsRecord') && document.getElementById('opponentIsRecord').checked;
+  const type = isRecord ? 'record' : 'battle';
+
   try {
     const records = opponentData.map(d => ([period, d.rank, d.name, d.score]));
     const params = encodeURIComponent(JSON.stringify({
       action: 'addContestOpponents',
-      records: records
+      records: records,
+      type: type
     }));
     await new Promise(resolve => {
       const img = new Image();
       img.onload = img.onerror = () => resolve();
       img.src = `${APPS_SCRIPT_URL}?data=${params}`;
     });
-    alert(`✅ 已儲存 ${opponentData.length} 筆對手排名！`);
+    alert(`✅ 已儲存 ${opponentData.length} 筆${isRecord ? '情報' : '對戰'}資料！`);
   } catch(e) {
     alert('❌ 儲存失敗：' + e.message);
   }

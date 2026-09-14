@@ -318,12 +318,13 @@ const PAGE_SIZE = 5;
 async function init() {
   try {
     const [oppRes, sumRes] = await Promise.all([
-      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:E?key=${API_KEY}`),
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:F?key=${API_KEY}`),
       fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:F?key=${API_KEY}`)
     ]);
     if (!oppRes.ok) throw new Error('讀取對手資料失敗');
     const oppJson = await oppRes.json();
-    oppData = (oppJson.values||[]).slice(1).map(r=>({period:r[0]||'',rank:Number(r[1])||0,name:r[2]||'',score:Number(r[3])||0}));
+    // r[5]=類型（battle/record），舊資料無此欄視為 battle
+    oppData = (oppJson.values||[]).slice(1).map(r=>({period:r[0]||'',rank:Number(r[1])||0,name:r[2]||'',score:Number(r[3])||0,type:(r[5]||'battle').trim()}));
 
     if (sumRes.ok) {
       const sumJson = await sumRes.json();
@@ -364,31 +365,46 @@ function renderKPI() {
 }
 
 function calcOverallWinRate() {
-  const periods = [...new Set(oppData.map(d=>d.period))];
+  // 只計算 battle 類型（真正與璀璨對戰）
+  const battleData = oppData.filter(d => d.type !== 'record');
+  const periods = [...new Set(battleData.map(d=>d.period))];
   let wins=0, total=0;
   periods.forEach(p=>{
-    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
+    const my = battleData.find(d=>d.period===p && d.name==='璀璨');
     if (!my) return;
-    const opps = oppData.filter(d=>d.period===p && d.name!=='璀璨');
+    const opps = battleData.filter(d=>d.period===p && d.name!=='璀璨');
     opps.forEach(o=>{total++; if(my.rank < o.rank) wins++;});
   });
   return total ? Math.round(wins/total*100) : 0;
 }
 
 function getRivals() {
-  const counts = getOppCounts();
+  const counts = getBattleCounts();
   return Object.entries(counts).filter(([,c])=>c>=5).sort((a,b)=>b[1]-a[1]).slice(0,12);
 }
 
+// 所有對手出現次數（含情報收集）— 用於「所有對手列表」
 function getOppCounts() {
   const c = {};
   oppData.filter(d=>d.name!=='璀璨').forEach(d=>{c[d.name]=(c[d.name]||0)+1;});
   return c;
 }
 
+// 只算真正對戰次數（battle）— 用於常見對手、宿敵
+function getBattleCounts() {
+  const c = {};
+  oppData.filter(d=>d.name!=='璀璨' && d.type !== 'record').forEach(d=>{c[d.name]=(c[d.name]||0)+1;});
+  return c;
+}
+
+// 判斷某對手是否曾與璀璨對戰過
+function hasBattled(name) {
+  return oppData.some(d => d.name === name && d.type !== 'record');
+}
+
 // ═══ 常見對手 TOP 5 ═══
 function renderTopList() {
-  const counts = getOppCounts();
+  const counts = getBattleCounts();
   const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
   document.getElementById('topList').innerHTML = sorted.map(([name,count],i)=>{
     const medal = i<3 ? ['&#x1F947;','&#x1F948;','&#x1F949;'][i] : `<span class="top-num">${i+1}</span>`;
@@ -402,7 +418,7 @@ function renderTopList() {
 
 // ═══ 宿敵公會 ═══
 function renderRivalList() {
-  const counts = getOppCounts();
+  const counts = getBattleCounts();
   const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,3);
   document.getElementById('rivalList').innerHTML = sorted.map(([name,count])=>{
     const wr = calcWinRate(name);
@@ -426,11 +442,13 @@ function renderHotTags() {
 
 // ═══ 勝率計算 ═══
 function calcWinRate(oppName) {
-  const periods = [...new Set(oppData.filter(d=>d.name===oppName).map(d=>d.period))];
+  // 只計算 battle 類型（與璀璨同期對戰）
+  const battleData = oppData.filter(d => d.type !== 'record');
+  const periods = [...new Set(battleData.filter(d=>d.name===oppName).map(d=>d.period))];
   let wins=0,losses=0,total=0;
   periods.forEach(p=>{
-    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
-    const opp = oppData.find(d=>d.period===p && d.name===oppName);
+    const my = battleData.find(d=>d.period===p && d.name==='璀璨');
+    const opp = battleData.find(d=>d.period===p && d.name===oppName);
     if(my && opp){total++; if(my.rank<opp.rank) wins++; else if(my.rank>opp.rank) losses++;}
   });
   return {wins, losses, total, rate: total?Math.round(wins/total*100):0};
@@ -473,6 +491,41 @@ function selectOpp(name) {
 function renderBattleCard(name) {
   const card = document.getElementById('battleCard');
   card.style.display = '';
+
+  const battled = hasBattled(name);
+  const oppScoresAll = oppData.filter(d=>d.name===name).map(d=>d.score).filter(s=>s>0);
+  const oppPeriodsAll = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))];
+
+  // ── 情報收集模式（從未與璀璨對戰） ──
+  if (!battled) {
+    document.getElementById('battleTitle').innerHTML = `&#x1F4CB; 公會情報卡`;
+    document.getElementById('battleHeader').innerHTML = `
+      <div class="battle-name-row">
+        <div class="battle-opp-avatar">&#x1F4CB;</div>
+        <div>
+          <div class="battle-opp-name">${name}</div>
+          <div class="battle-opp-badge" style="background:#e3f2fd;color:#1565c0;">情報收集 · 未曾對戰</div>
+        </div>
+      </div>`;
+    const maxScore = oppScoresAll.length ? Math.max(...oppScoresAll) : 0;
+    const avgScore = oppScoresAll.length ? Math.round(oppScoresAll.reduce((a,b)=>a+b,0)/oppScoresAll.length) : 0;
+    document.getElementById('battleStats').innerHTML = `
+      <div class="bs-grid">
+        <div class="bs-item"><div class="bs-val">${oppPeriodsAll.length}</div><div class="bs-label">紀錄期數</div></div>
+        <div class="bs-item"><div class="bs-val" style="color:var(--orange);">${maxScore.toLocaleString()}</div><div class="bs-label">歷史最高分</div></div>
+        <div class="bs-item"><div class="bs-val">${avgScore.toLocaleString()}</div><div class="bs-label">平均分數</div></div>
+        <div class="bs-item"><div class="bs-val" style="color:#1565c0;">情報</div><div class="bs-label">資料類型</div></div>
+      </div>`;
+    document.getElementById('battleExtra').innerHTML = `
+      <div class="be-grid">
+        <div class="be-item"><div class="be-label">最低分數</div><div class="be-val">${oppScoresAll.length ? Math.min(...oppScoresAll).toLocaleString() : '-'}分</div></div>
+        <div class="be-item"><div class="be-label">最近紀錄</div><div class="be-val">第 ${(oppPeriodsAll.sort().slice(-1)[0]||'').replace(/[^0-9]/g,'')||'-'} 期</div></div>
+      </div>
+      <div style="margin-top:10px;padding:10px 12px;background:#e3f2fd;border-radius:8px;font-size:0.82rem;color:#1565c0;">💡 此公會的資料為情報收集，璀璨尚未與其正式對戰，故無勝敗紀錄。</div>`;
+    return;
+  }
+
+  // ── 對戰模式（原邏輯，只算 battle 資料） ──
   document.getElementById('battleTitle').innerHTML = `&#x2694;&#xFE0F; 對戰情報卡`;
 
   const wr = calcWinRate(name);
@@ -528,14 +581,32 @@ function renderBattleCard(name) {
 // ═══ 歷史交手紀錄（分頁） ═══
 function renderHistoryTable(name) {
   const card = document.getElementById('historyCard');
+
+  // 情報收集（未對戰）→ 顯示該公會分數紀錄，不顯示勝敗
+  if (!hasBattled(name)) {
+    card.style.display = '';
+    document.querySelector('#historyCard .card-title').innerHTML = '&#x1F4CB; 該公會分數紀錄';
+    const recs = oppData.filter(d=>d.name===name).sort((a,b)=>b.period.localeCompare(a.period));
+    document.getElementById('historyBody').innerHTML = recs.map(r=>
+      `<tr><td data-label="期數" colspan="4">${r.period}</td>
+        <td data-label="名次">第 ${r.rank} 名</td>
+        <td data-label="分數" colspan="2" style="font-weight:700;color:var(--orange);">${r.score.toLocaleString()} 分</td></tr>`
+    ).join('');
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  document.querySelector('#historyCard .card-title').innerHTML = '&#x1F4DC; 歷史交手紀錄';
   card.style.display = '';
-  const periods = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))].sort().reverse();
+  // 只顯示 battle 類型的交手
+  const battleData = oppData.filter(d => d.type !== 'record');
+  const periods = [...new Set(battleData.filter(d=>d.name===name).map(d=>d.period))].sort().reverse();
   const totalPages = Math.ceil(periods.length / PAGE_SIZE);
   const page = periods.slice(historyPage*PAGE_SIZE, (historyPage+1)*PAGE_SIZE);
 
   document.getElementById('historyBody').innerHTML = page.map(p=>{
-    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
-    const opp = oppData.find(d=>d.period===p && d.name===name);
+    const my = battleData.find(d=>d.period===p && d.name==='璀璨');
+    const opp = battleData.find(d=>d.period===p && d.name===name);
     if(!my||!opp) return '';
     const won = my.rank<opp.rank, tied = my.rank===opp.rank;
     const result = won ? '<span class="badge-win">勝</span>' : tied ? '<span class="badge-tie">平</span>' : '<span class="badge-lose">敗</span>';
