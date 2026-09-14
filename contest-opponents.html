@@ -559,15 +559,18 @@ function renderBattleCard(name) {
 
   const wr = calcWinRate(name);
   const encounters = wr.total;
+  // 對手歷史最高分：含 record（刻意，情報也算歷史成績）
   const oppScores = oppData.filter(d=>d.name===name).map(d=>d.score);
-  const myScoresArr = oppData.filter(d=>d.name==='璀璨' && [...new Set(oppData.filter(x=>x.name===name).map(x=>x.period))].includes(d.period)).map(d=>d.score);
-  const myPeriodsWithOpp = [...new Set(oppData.filter(d=>d.name===name).map(d=>d.period))];
+  // 以下對戰統計只用 battle 資料
+  const battleData = oppData.filter(d => d.type !== 'record');
+  const battlePeriodsWithOpp = [...new Set(battleData.filter(d=>d.name===name).map(d=>d.period))];
+  const myScoresArr = battleData.filter(d=>d.name==='璀璨' && battlePeriodsWithOpp.includes(d.period)).map(d=>d.score);
 
-  // 平均名次差
+  // 平均名次差（只算對戰期數）
   let rankDiffs=[], scoreDiffs=[], bestMyRank=null, bestOppRank=null, lastPeriod='';
-  myPeriodsWithOpp.sort().forEach(p=>{
-    const my = oppData.find(d=>d.period===p && d.name==='璀璨');
-    const opp = oppData.find(d=>d.period===p && d.name===name);
+  battlePeriodsWithOpp.sort().forEach(p=>{
+    const my = battleData.find(d=>d.period===p && d.name==='璀璨');
+    const opp = battleData.find(d=>d.period===p && d.name===name);
     if(my && opp){
       rankDiffs.push(opp.rank - my.rank);
       scoreDiffs.push(my.score - opp.score);
