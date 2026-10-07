@@ -290,7 +290,7 @@ async function init(){
     const [cRes,sRes,oRes]=await Promise.all([
       fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest!A1:G?key=${API_KEY}`),
       fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_summary!A1:H?key=${API_KEY}`),
-      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:E?key=${API_KEY}`)
+      fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/contest_opponents!A1:F?key=${API_KEY}`)
     ]);
     const cData=await cRes.json();
     const allRecords=(cData.values||[]).slice(1).map(r=>({period:r[0]||'',nickname:r[2]||'',role:r[3]||'',score:Number(r[4])||0,title:r[5]||''}));
@@ -299,7 +299,7 @@ async function init(){
     if(sRes.ok){const d=await sRes.json();summaries=(d.values||[]).slice(1).map(r=>({period:r[0]||'',members:r[1]||'',total:r[2]||'',rank:r[3]||'',grade:r[4]||'',badges:r[6]||''}));}
 
     let oppData=[];
-    if(oRes.ok){const d=await oRes.json();oppData=(d.values||[]).slice(1).map(r=>({period:r[0]||'',rank:Number(r[1])||0,name:r[2]||'',score:Number(r[3])||0}));}
+    if(oRes.ok){const d=await oRes.json();oppData=(d.values||[]).slice(1).map(r=>({period:r[0]||'',rank:Number(r[1])||0,name:r[2]||'',score:Number(r[3])||0,type:(r[5]||'battle').trim()}));}
 
     if(!allRecords.length){document.getElementById('loadingState').textContent='尚無資料';return;}
     document.getElementById('loadingState').style.display='none';
@@ -395,8 +395,8 @@ async function init(){
     }).join('');
 
     // 對戰對手 TOP 5（本期）
-    // 對戰對手 TOP 3（本期，去重）
-    const latestOppAll=oppData.filter(d=>d.period===latestPeriod&&d.name!=='璀璨');
+    // 對戰對手 TOP 3（本期，去重；排除情報收集 record 類型）
+    const latestOppAll=oppData.filter(d=>d.period===latestPeriod&&d.name!=='璀璨'&&d.type!=='record');
     const seenOpp=new Set();
     const latestOpp=[];
     for(const d of latestOppAll){if(!seenOpp.has(d.name)){seenOpp.add(d.name);latestOpp.push(d);}}
