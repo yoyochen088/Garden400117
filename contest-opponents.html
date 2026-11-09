@@ -625,17 +625,23 @@ function renderHistoryTable(name) {
   if (!hasBattled(name)) {
     card.style.display = '';
     document.querySelector('#historyCard .card-title').innerHTML = '&#x1F4CB; 該公會分數紀錄';
+    // 沒有真實對戰：表頭只保留 期數 / 名次 / 分數，避免欄位錯位
+    document.querySelector('#historyCard .history-table thead').innerHTML =
+      '<tr><th>期數</th><th>名次</th><th>分數</th></tr>';
     const recs = oppData.filter(d=>d.name===name).sort((a,b)=>b.period.localeCompare(a.period));
     document.getElementById('historyBody').innerHTML = recs.map(r=>
-      `<tr><td data-label="期數" colspan="4">${r.period}</td>
+      `<tr><td data-label="期數">${r.period}</td>
         <td data-label="名次">第 ${r.rank} 名</td>
-        <td data-label="分數" colspan="2" style="font-weight:700;color:var(--orange);">${r.score.toLocaleString()} 分</td></tr>`
+        <td data-label="分數" style="font-weight:700;color:var(--orange);">${r.score.toLocaleString()} 分</td></tr>`
     ).join('');
     document.getElementById('pagination').innerHTML = '';
     return;
   }
 
   document.querySelector('#historyCard .card-title').innerHTML = '&#x1F4DC; 歷史交手紀錄';
+  // 還原對戰用的完整 7 欄表頭
+  document.querySelector('#historyCard .history-table thead').innerHTML =
+    '<tr><th>期數</th><th>我方名次</th><th>對方名次</th><th>結果</th><th>我方分數</th><th>對方分數</th><th>分數差</th></tr>';
   card.style.display = '';
   // 只顯示 battle 類型的交手
   const battleData = oppData.filter(d => d.type !== 'record');
